@@ -103,7 +103,6 @@
       box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
     }
 
-    /* ماژول ساده‌شده پرداخت */
     .payment-module {
       background: rgba(15, 23, 42, 0.5);
       border: 1px solid var(--card-border);
@@ -183,20 +182,70 @@
       transition: 0.2s;
     }
     .btn-action-sm:hover { background: var(--primary); color: #000; }
+    .btn-edit-sm {
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--primary);
+      border: 1px solid var(--primary);
+      padding: 3px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      margin-left: 4px;
+    }
     .btn-delete-c {
       background: rgba(239, 68, 68, 0.15);
       color: var(--danger);
       border: 1px solid var(--danger);
-      padding: 5px 10px;
+      padding: 3px 8px;
       border-radius: 6px;
       cursor: pointer;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
     }
 
     .table-wrapper { overflow-x: auto; margin-top: 10px; }
     table.data-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: right; }
     table.data-table th, table.data-table td { padding: 10px 8px; border-bottom: 1px solid var(--card-border); white-space: nowrap; }
     table.data-table th { color: var(--text-muted); background: rgba(15, 23, 42, 0.4); }
+
+    /* پاپ‌آپ ویرایش */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      padding: 15px;
+    }
+    .modal-content {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      max-width: 650px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 12px;
+    }
+    .modal-close-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.5rem;
+      cursor: pointer;
+      line-height: 1;
+    }
 
     #loading-indicator {
       display: none;
@@ -275,7 +324,7 @@
           </div>
         </div>
 
-        <!-- بخش تسویه و پرداخت ساده‌شده -->
+        <!-- بخش پرداخت ساده‌شده -->
         <div class="payment-module">
           <div class="deposit-toggle-bar">
             <label style="font-weight: 500; color: #fff; cursor: pointer; display: flex; align-items: center; gap: 8px;">
@@ -285,7 +334,6 @@
             <span id="remaining_badge" style="font-size: 0.85rem; color: var(--primary); font-weight: bold;"></span>
           </div>
 
-          <!-- فیلدهای بیعانه (در حالت عادی مخفی است) -->
           <div id="deposit_fields_wrapper" class="deposit-details-grid">
             <div class="form-group" style="margin-bottom: 0;">
               <label>مبلغ بیعانه دریافتی (تومان):</label>
@@ -300,7 +348,6 @@
             </div>
           </div>
 
-          <!-- محل تسویه مانده جلسه در مطب -->
           <div class="form-group" style="margin-bottom: 0;">
             <label id="balance_label">تسویه کل مبلغ جلسه از طریق:</label>
             <select id="balance_to">
@@ -423,13 +470,125 @@
 
 </div>
 
+<!-- پاپ‌آپ (مودال) ویرایش رکورد -->
+<div id="edit_modal" class="modal-backdrop">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 style="margin: 0; color: var(--primary); font-size: 1.15rem;">ویرایش جلسه مراجع</h3>
+      <button class="modal-close-btn" onclick="closeEditModal()">&times;</button>
+    </div>
+
+    <form id="edit_record_form">
+      <input type="hidden" id="edit_id">
+
+      <div class="grid-2">
+        <div class="form-group">
+          <label>نام و نام خانوادگی مراجع:</label>
+          <input type="text" id="edit_client_name" required>
+        </div>
+        <div class="form-group">
+          <label>شماره تماس مراجع:</label>
+          <input type="tel" id="edit_client_phone" dir="ltr">
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="form-group">
+          <label>مشاور:</label>
+          <select id="edit_counselor_select" required></select>
+        </div>
+        <div class="form-group">
+          <label>نوع جلسه:</label>
+          <select id="edit_session_type" required>
+            <option value="آزاد">آزاد</option>
+            <option value="سپه">سپه</option>
+            <option value="ورزش و بهزیستی">ورزش و بهزیستی</option>
+            <option value="طلاق">طلاق</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid-3">
+        <div class="form-group" id="edit_group_parts" style="display: none;">
+          <label>تعداد پارت:</label>
+          <input type="number" id="edit_parts_count" min="1" value="1">
+        </div>
+        <div class="form-group">
+          <label>مبلغ کل جلسه (تومان):</label>
+          <input type="number" id="edit_total_amount" required>
+        </div>
+        <div class="form-group">
+          <label>درصد سهم مشاور (٪):</label>
+          <input type="number" id="edit_counselor_percent" min="0" max="100" required>
+        </div>
+      </div>
+
+      <!-- بیعانه ویرایش -->
+      <div class="payment-module">
+        <div class="deposit-toggle-bar">
+          <label style="font-weight: 500; color: #fff; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+            <input type="checkbox" id="edit_has_deposit_toggle" style="width: 17px; height: 17px; accent-color: var(--primary); cursor: pointer;">
+            بیعانه پرداخت شده است
+          </label>
+          <span id="edit_remaining_badge" style="font-size: 0.85rem; color: var(--primary); font-weight: bold;"></span>
+        </div>
+
+        <div id="edit_deposit_fields_wrapper" class="deposit-details-grid">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label>مبلغ بیعانه (تومان):</label>
+            <input type="number" id="edit_deposit_amount" value="0">
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label>بیعانه به حساب کی رفت؟</label>
+            <select id="edit_deposit_to">
+              <option value="مشاور">مستقیم به کارت مشاور</option>
+              <option value="کلینیک">کارت‌خوان / کارت کلینیک</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label id="edit_balance_label">تسویه کل مبلغ از طریق:</label>
+          <select id="edit_balance_to">
+            <option value="کلینیک">کارت‌خوان کلینیک</option>
+            <option value="مشاور">کارت شخصی مشاور</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>توضیحات یا یادداشت:</label>
+        <input type="text" id="edit_record_notes">
+      </div>
+
+      <!-- محاسبات ویرایش -->
+      <div class="summary-box">
+        <div class="summary-item">
+          <span class="label">سهم مشاور</span>
+          <span class="val val-counselor" id="edit_box_counselor">۰ تومان</span>
+        </div>
+        <div class="summary-item">
+          <span class="label">سهم کلینیک</span>
+          <span class="val val-clinic" id="edit_box_clinic">۰ تومان</span>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 10px;">
+        <button type="submit" id="btn_edit_submit" class="btn-submit" style="flex: 2;">ذخیره تغییرات در شیت</button>
+        <button type="button" onclick="closeEditModal()" style="flex: 1; background: #334155; color: #fff; border: none; border-radius: 10px; cursor: pointer; font-weight: bold;">انصراف</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <script>
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwQNRp6anbyhNDlTXGnvHnSwHUHy7RTqQhQ6oNodgZVwCQiM8Lx9MOAVCZce2_NWUNZ/exec";
 
 let state = {
   settings: {},
   counselors: [],
-  shamsiDate: ""
+  shamsiDate: "",
+  recentList: []
 };
 
 function switchTab(tabName) {
@@ -461,10 +620,11 @@ async function fetchInitialData() {
     if (data.status === "success") {
       state.settings = data.settings;
       state.counselors = data.counselors;
+      state.recentList = data.recent || [];
       renderCounselorSelect();
       renderSessionRatesTable();
       renderCounselorsSettingsTable();
-      renderRecentTable(data.recent);
+      renderRecentTable(state.recentList);
     }
   } catch (err) {
     console.error("خطا در ارتباط با سرور:", err);
@@ -475,14 +635,22 @@ async function fetchInitialData() {
 
 function renderCounselorSelect() {
   const sel = document.getElementById("counselor_select");
+  const editSel = document.getElementById("edit_counselor_select");
+  
   const currentVal = sel.value;
   sel.innerHTML = '<option value="" disabled selected>انتخاب مشاور...</option>';
+  editSel.innerHTML = '';
   
   state.counselors.forEach(c => {
     const opt = document.createElement("option");
     opt.value = c.name;
     opt.innerText = c.name;
     sel.appendChild(opt);
+
+    const optEdit = document.createElement("option");
+    optEdit.value = c.name;
+    optEdit.innerText = c.name;
+    editSel.appendChild(optEdit);
   });
   
   if (currentVal) sel.value = currentVal;
@@ -552,28 +720,28 @@ function renderRecentTable(list) {
       <td style="color:var(--primary); font-weight:bold;">${Number(r.counselorShare).toLocaleString('fa-IR')}</td>
       <td style="color:var(--success); font-weight:bold;">${Number(r.clinicShare).toLocaleString('fa-IR')}</td>
       <td>${Number(r.deposit).toLocaleString('fa-IR')}</td>
-      <td><button class="btn-delete-c" style="padding:2px 6px;" onclick="deleteRecord('${r.id}')">حذف</button></td>
+      <td>
+        <button class="btn-edit-sm" onclick="openEditModal('${r.id}')">ویرایش</button>
+        <button class="btn-delete-c" onclick="deleteRecord('${r.id}')">حذف</button>
+      </td>
     `;
     tbody.appendChild(tr);
   });
 }
 
-function getEffectivePercent() {
-  const sType = document.getElementById("session_type").value;
+function getEffectivePercent(sType, cName) {
   if (sType !== "آزاد" && state.settings[sType]) {
     return state.settings[sType].percent;
   }
-  const selectedName = document.getElementById("counselor_select").value;
-  const counselor = state.counselors.find(c => c.name === selectedName);
+  const counselor = state.counselors.find(c => c.name === cName);
   return counselor ? counselor.percent : 70;
 }
 
+// عناصر فرم ثبت اصلی
 const sessionTypeInput = document.getElementById("session_type");
 const partsCountInput = document.getElementById("parts_count");
 const totalAmountInput = document.getElementById("total_amount");
 const counselorSelect = document.getElementById("counselor_select");
-
-// مدیریت بخش پرداخت و بیعانه تعاملی
 const depositToggle = document.getElementById("has_deposit_toggle");
 const depositWrapper = document.getElementById("deposit_fields_wrapper");
 const depositAmountInput = document.getElementById("deposit_amount");
@@ -640,7 +808,7 @@ totalAmountInput.addEventListener("input", function() {
 
 function updateSummaryBoxes() {
   const total = Number(totalAmountInput.value) || 0;
-  const percent = getEffectivePercent();
+  const percent = getEffectivePercent(sessionTypeInput.value, counselorSelect.value);
   const counselorShare = Math.round((total * percent) / 100);
   const clinicShare = total - counselorShare;
 
@@ -650,7 +818,7 @@ function updateSummaryBoxes() {
   document.getElementById("box_clinic").innerText = clinicShare.toLocaleString('fa-IR') + " تومان";
 }
 
-// ثبت جلسه در شیت
+// ثبت جلسه جدید
 document.getElementById("record_form").addEventListener("submit", async function(e) {
   e.preventDefault();
   const btn = document.getElementById("btn_submit");
@@ -658,7 +826,7 @@ document.getElementById("record_form").addEventListener("submit", async function
   btn.innerText = "در حال ثبت اطلاعات...";
 
   const total = Number(totalAmountInput.value) || 0;
-  const percent = getEffectivePercent();
+  const percent = getEffectivePercent(sessionTypeInput.value, counselorSelect.value);
   const cShare = Math.round((total * percent) / 100);
   const clShare = total - cShare;
   const hasDeposit = depositToggle.checked;
@@ -704,13 +872,193 @@ document.getElementById("record_form").addEventListener("submit", async function
   }
 });
 
-// ذخیره نرخ و درصد جلسات سازمانی
-async function saveSessionRate(type) {
-  const rateInput = document.getElementById(`rate_${type}`);
-  const pctInput = document.getElementById(`pct_${type}`);
-  const rate = Number(rateInput.value) || 0;
-  const percent = Number(pctInput.value) || 70;
+// ======================== منطق مودال پاپ‌آپ ویرایش ========================
+const editModal = document.getElementById("edit_modal");
+const editSessionType = document.getElementById("edit_session_type");
+const editPartsCount = document.getElementById("edit_parts_count");
+const editTotalAmount = document.getElementById("edit_total_amount");
+const editCounselorSelect = document.getElementById("edit_counselor_select");
+const editCounselorPercent = document.getElementById("edit_counselor_percent");
+const editDepositToggle = document.getElementById("edit_has_deposit_toggle");
+const editDepositWrapper = document.getElementById("edit_deposit_fields_wrapper");
+const editDepositAmount = document.getElementById("edit_deposit_amount");
+const editBalanceLabel = document.getElementById("edit_balance_label");
+const editRemainingBadge = document.getElementById("edit_remaining_badge");
 
+function openEditModal(recordId) {
+  const r = state.recentList.find(item => item.id == recordId);
+  if (!r) return;
+
+  document.getElementById("edit_id").value = r.id;
+  document.getElementById("edit_client_name").value = r.clientName;
+  document.getElementById("edit_client_phone").value = r.clientPhone || "";
+  editCounselorSelect.value = r.counselor;
+  editSessionType.value = r.sessionType;
+  editPartsCount.value = r.parts || 1;
+  editTotalAmount.value = r.totalAmount;
+  editCounselorPercent.value = r.counselorPercent || 70;
+  document.getElementById("edit_record_notes").value = r.notes || "";
+
+  if (r.sessionType === "آزاد") {
+    document.getElementById("edit_group_parts").style.display = "none";
+    editTotalAmount.readOnly = false;
+  } else {
+    document.getElementById("edit_group_parts").style.display = "flex";
+    editTotalAmount.readOnly = true;
+  }
+
+  // وضعیت بیعانه
+  if (Number(r.deposit) > 0) {
+    editDepositToggle.checked = true;
+    editDepositWrapper.style.display = "grid";
+    editDepositAmount.value = r.deposit;
+    document.getElementById("edit_deposit_to").value = (r.depositTo && r.depositTo !== "ندارد") ? r.depositTo : "مشاور";
+    editBalanceLabel.innerText = "مانده مبلغ در مطب به حساب کی رفت؟";
+  } else {
+    editDepositToggle.checked = false;
+    editDepositWrapper.style.display = "none";
+    editDepositAmount.value = 0;
+    editBalanceLabel.innerText = "تسویه کل مبلغ از طریق:";
+  }
+  document.getElementById("edit_balance_to").value = r.balanceTo || "کلینیک";
+
+  updateEditModalCalculations();
+  editModal.style.display = "flex";
+}
+
+function closeEditModal() {
+  editModal.style.display = "none";
+}
+
+editDepositToggle.addEventListener("change", function() {
+  if (this.checked) {
+    editDepositWrapper.style.display = "grid";
+    editBalanceLabel.innerText = "مانده مبلغ در مطب به حساب کی رفت؟";
+  } else {
+    editDepositWrapper.style.display = "none";
+    editDepositAmount.value = 0;
+    editBalanceLabel.innerText = "تسویه کل مبلغ از طریق:";
+  }
+  updateEditModalCalculations();
+});
+
+editCounselorSelect.addEventListener("change", function() {
+  if (editSessionType.value === "آزاد") {
+    editCounselorPercent.value = getEffectivePercent("آزاد", this.value);
+  }
+  updateEditModalCalculations();
+});
+
+editSessionType.addEventListener("change", function() {
+  const type = this.value;
+  const partsGroup = document.getElementById("edit_group_parts");
+  if (type === "آزاد") {
+    partsGroup.style.display = "none";
+    editTotalAmount.readOnly = false;
+    editCounselorPercent.value = getEffectivePercent("آزاد", editCounselorSelect.value);
+  } else {
+    partsGroup.style.display = "flex";
+    const conf = state.settings[type] || { defaultRate: 0, percent: 70 };
+    editTotalAmount.value = conf.defaultRate * Number(editPartsCount.value);
+    editTotalAmount.readOnly = true;
+    editCounselorPercent.value = conf.percent;
+  }
+  updateEditModalCalculations();
+});
+
+editPartsCount.addEventListener("input", function() {
+  const type = editSessionType.value;
+  if (type !== "آزاد") {
+    const conf = state.settings[type] || { defaultRate: 0 };
+    editTotalAmount.value = conf.defaultRate * Number(this.value);
+  }
+  updateEditModalCalculations();
+});
+
+editTotalAmount.addEventListener("input", updateEditModalCalculations);
+editCounselorPercent.addEventListener("input", updateEditModalCalculations);
+editDepositAmount.addEventListener("input", updateEditModalCalculations);
+
+function updateEditModalCalculations() {
+  const total = Number(editTotalAmount.value) || 0;
+  const pct = Number(editCounselorPercent.value) || 0;
+  const cShare = Math.round((total * pct) / 100);
+  const clShare = total - cShare;
+  const dep = editDepositToggle.checked ? (Number(editDepositAmount.value) || 0) : 0;
+  const rem = Math.max(0, total - dep);
+
+  document.getElementById("edit_box_counselor").innerText = cShare.toLocaleString('fa-IR') + " تومان";
+  document.getElementById("edit_box_clinic").innerText = clShare.toLocaleString('fa-IR') + " تومان";
+
+  if (editDepositToggle.checked && total > 0) {
+    editRemainingBadge.innerText = `مانده تسویه: ${rem.toLocaleString('fa-IR')} تومان`;
+  } else {
+    editRemainingBadge.innerText = "";
+  }
+}
+
+// ثبت ویرایش در شیت
+document.getElementById("edit_record_form").addEventListener("submit", async function(e) {
+  e.preventDefault();
+  const btn = document.getElementById("btn_edit_submit");
+  btn.disabled = true;
+  btn.innerText = "در حال ذخیره تغییرات...";
+
+  const total = Number(editTotalAmount.value) || 0;
+  const pct = Number(editCounselorPercent.value) || 0;
+  const cShare = Math.round((total * pct) / 100);
+  const clShare = total - cShare;
+  const hasDeposit = editDepositToggle.checked;
+  const depVal = hasDeposit ? (Number(editDepositAmount.value) || 0) : 0;
+
+  const payload = {
+    action: "updateTransaction",
+    id: document.getElementById("edit_id").value,
+    clientName: document.getElementById("edit_client_name").value,
+    clientPhone: document.getElementById("edit_client_phone").value,
+    counselor: editCounselorSelect.value,
+    sessionType: editSessionType.value,
+    parts: editSessionType.value === "آزاد" ? 1 : editPartsCount.value,
+    totalAmount: total,
+    counselorPercent: pct,
+    counselorShare: cShare,
+    clinicShare: clShare,
+    deposit: depVal,
+    depositTo: hasDeposit ? document.getElementById("edit_deposit_to").value : "ندارد",
+    balanceTo: document.getElementById("edit_balance_to").value,
+    notes: document.getElementById("edit_record_notes").value
+  };
+
+  try {
+    await fetch(SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    alert("تغییرات جلسه با موفقیت در شیت ذخیره شد.");
+    closeEditModal();
+    setTimeout(fetchInitialData, 1200);
+  } catch (err) {
+    alert("خطا در ذخیره تغییرات");
+  } finally {
+    btn.disabled = false;
+    btn.innerText = "ذخیره تغییرات در شیت";
+  }
+});
+
+// بستن مودال با کلیک بیرون از کادر
+window.onclick = function(event) {
+  if (event.target == editModal) {
+    closeEditModal();
+  }
+};
+
+// بقیه توابع تنظیمات
+async function saveSessionRate(type) {
+  const rate = Number(document.getElementById(`rate_${type}`).value) || 0;
+  const percent = Number(document.getElementById(`pct_${type}`).value) || 70;
   try {
     await fetch(SCRIPT_URL, {
       method: "POST",
@@ -725,7 +1073,6 @@ async function saveSessionRate(type) {
   }
 }
 
-// ذخیره درصد اختصاصی مشاور
 async function saveCounselorPercent(name) {
   const newPercent = document.getElementById(`pct_input_${name}`).value;
   try {
@@ -742,7 +1089,6 @@ async function saveCounselorPercent(name) {
   }
 }
 
-// افزودن مشاور جدید
 document.getElementById("btn_add_counselor").addEventListener("click", async function() {
   const nameInput = document.getElementById("new_counselor_name");
   const pctInput = document.getElementById("new_counselor_percent");
@@ -768,7 +1114,6 @@ document.getElementById("btn_add_counselor").addEventListener("click", async fun
   }
 });
 
-// حذف مشاور
 async function removeCounselor(name) {
   if (!confirm(`آیا از حذف مشاور "${name}" از کلینیک اطمینان دارید؟`)) return;
   try {
@@ -784,7 +1129,6 @@ async function removeCounselor(name) {
   }
 }
 
-// حذف رکورد از مراجعین اخیر
 async function deleteRecord(id) {
   if (!confirm("آیا از حذف این جلسه اطمینان دارید؟")) return;
   try {
@@ -800,7 +1144,6 @@ async function deleteRecord(id) {
   }
 }
 
-// اجرای اولیه هنگام لود صفحه
 fetchInitialData();
 </script>
 </body>
