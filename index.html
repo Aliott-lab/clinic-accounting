@@ -327,7 +327,7 @@
 
   <div id="loading-indicator">در حال همگام‌سازی اطلاعات با سرور...</div>
 
-  <!-- سربرگ اختصاصی چاپ فیش -->
+  <!-- سربرگ مخصوص پرینت -->
   <div class="print-header">
     <h2 style="margin: 0;">کلینیک روان‌شناسی و مشاوره سپهر آرامش</h2>
     <p style="margin: 5px 0;" id="print_report_title">فیش گزارش و تسویه حساب مالی</p>
@@ -378,7 +378,6 @@
           </div>
         </div>
 
-        <!-- ماژول پرداخت -->
         <div class="payment-module">
           <div class="deposit-toggle-bar">
             <label style="font-weight: 500; color: #fff; cursor: pointer; display: flex; align-items: center; gap: 8px;">
@@ -416,7 +415,6 @@
           <input type="text" id="record_notes" placeholder="یادداشت منشی...">
         </div>
 
-        <!-- باکس خلاصه محاسبات -->
         <div class="summary-box">
           <div class="summary-item">
             <span class="label">درصد سهم مشاور</span>
@@ -440,7 +438,7 @@
       </form>
     </div>
 
-    <!-- آخرین مراجعین ثبت‌شده -->
+    <!-- مراجعین اخیر -->
     <div class="card">
       <h2 class="card-title">آخرین مراجعین ثبت‌شده</h2>
       <div class="table-wrapper">
@@ -507,7 +505,6 @@
       </div>
     </div>
 
-    <!-- کارت‌های آمار و خلاصه مالی -->
     <div id="report_results_area" style="display: none;">
       
       <div class="grid-4" style="margin-bottom: 16px;">
@@ -617,7 +614,7 @@
 
 </div>
 
-<!-- پاپ‌آپ ویرایش رکورد -->
+<!-- پاپ‌آپ ویرایش -->
 <div id="edit_modal" class="modal-backdrop">
   <div class="modal-content">
     <div class="modal-header">
@@ -752,16 +749,22 @@ function switchTab(tabName) {
   }
 }
 
-// تاریخ شمسی امروز و استخراج سال و ماه پیش‌فرض
+// مقداردهی تاریخ امروز با حذف کاراکترهای مخفی یونیکد
 function initDates() {
   const d = new Date();
-  const parts = new Intl.DateTimeFormat('fa-IR-u-nu-latn', { year: 'numeric', month: '2-digit', day: '2-digit' }).format(d).split('/');
-  state.shamsiDate = parts.join('/');
-  document.getElementById("current_date_display").innerText = "تاریخ امروز: " + new Intl.DateTimeFormat('fa-IR', { year: 'numeric', month: 'numeric', day: 'numeric' }).format(d);
   
-  if (parts.length === 3) {
-    document.getElementById("report_year").value = parts[0];
-    document.getElementById("report_month_select").value = parts[1];
+  // تاریخ استاندارد شمسی برای نمایش در هدر
+  state.shamsiDate = new Intl.DateTimeFormat('fa-IR', { year: 'numeric', month: '2-digit', day: '2-digit' }).format(d);
+  document.getElementById("current_date_display").innerText = "تاریخ امروز: " + state.shamsiDate;
+
+  // استخراج ارقام انگلیسی تمیز برای فیلترهای گزارش ماهانه
+  const engParts = new Intl.DateTimeFormat('fa-IR-u-nu-latn', { year: 'numeric', month: '2-digit' }).format(d)
+    .replace(/[\u200B-\u200D\uFEFF\u200E\u200F]/g, "")
+    .split('/');
+  
+  if (engParts.length >= 2) {
+    document.getElementById("report_year").value = engParts[0].trim();
+    document.getElementById("report_month_select").value = engParts[1].trim();
   }
 }
 initDates();
@@ -872,8 +875,9 @@ function renderRecentTable(list) {
   }
   list.forEach(r => {
     const tr = document.createElement("tr");
+    const displayDate = (r.date || "-").toString().split("T")[0];
     tr.innerHTML = `
-      <td>${r.date || "-"}</td>
+      <td>${displayDate}</td>
       <td>${r.clientName}</td>
       <td>${r.counselor}</td>
       <td>${r.sessionType}</td>
@@ -898,7 +902,7 @@ function getEffectivePercent(sType, cName) {
   return counselor ? counselor.percent : 70;
 }
 
-// المان‌های فرم ثبت اصلی
+// فرم ثبت اصلی
 const sessionTypeInput = document.getElementById("session_type");
 const partsCountInput = document.getElementById("parts_count");
 const totalAmountInput = document.getElementById("total_amount");
@@ -1033,7 +1037,7 @@ document.getElementById("record_form").addEventListener("submit", async function
   }
 });
 
-// بارگذاری گزارش ماهانه تسویه
+// بارگذاری گزارش ماهانه
 async function loadMonthlyReport() {
   const counselor = document.getElementById("report_counselor_select").value;
   const year = document.getElementById("report_year").value.trim();
@@ -1094,8 +1098,9 @@ function renderMonthlyReportData(records, counselor, monthFilter) {
     counselorDirectGot += directToCounselorThisSession;
 
     const tr = document.createElement("tr");
+    const displayDate = (r.date || "-").toString().split("T")[0];
     tr.innerHTML = `
-      <td>${r.date || "-"}</td>
+      <td>${displayDate}</td>
       <td>${r.clientName}</td>
       <td>${r.counselor}</td>
       <td>${r.sessionType}</td>
@@ -1138,7 +1143,7 @@ function renderMonthlyReportData(records, counselor, monthFilter) {
   }
 }
 
-// منطق پنجره پاپ‌آپ ویرایش
+// پنجره پاپ‌آپ ویرایش
 const editModal = document.getElementById("edit_modal");
 const editSessionType = document.getElementById("edit_session_type");
 const editPartsCount = document.getElementById("edit_parts_count");
@@ -1318,7 +1323,7 @@ window.onclick = function(event) {
   }
 };
 
-// سایر عملیات تنظیمات
+// تنظیمات نرخ‌ها و مشاوران
 async function saveSessionRate(type) {
   const rate = Number(document.getElementById(`rate_${type}`).value) || 0;
   const percent = Number(document.getElementById(`pct_${type}`).value) || 70;
