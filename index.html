@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>سامانه پذیرش و حسابداری | کلینیک سپهر آرامش</title>
+  <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+  <style>
+    :root {
+      --bg-main: #0b0f19;
+      --card-bg: #161f30;
+      --card-border: #24324a;
+      --primary: #38bdf8;
+      --primary-hover: #0284c7;
+      --success: #22c55e;
+      --danger: #ef4444;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --input-bg: #0f172a;
+    }
+
+    * { box-sizing: border-box; font-family: 'Vazirmatn', sans-serif; }
+    body { background-color: var(--bg-main); color: var(--text-main); margin: 0; padding: 15px 10px; line-height: 1.6; }
+    .container { max-width: 980px; margin: 0 auto; }
+
+    .header-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 16px 22px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    .clinic-info { display: flex; align-items: center; gap: 12px; }
+    .clinic-logo { width: 40px; height: 40px; object-fit: contain; }
+    .clinic-title { margin: 0; font-size: 1.2rem; color: #fff; }
+    .clinic-sub { margin: 0; font-size: 0.8rem; color: var(--primary); }
+
+    .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+    .tab-btn {
+      flex: 1;
+      padding: 12px;
+      background: rgba(22, 31, 48, 0.6);
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: 0.2s;
+    }
+    .tab-btn.active {
+      background: var(--card-bg);
+      color: var(--primary);
+      border-color: var(--primary);
+      box-shadow: 0 4px 15px rgba(56, 189, 248, 0.15);
+    }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 22px;
+      margin-bottom: 20px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+    }
+    .card-title {
+      margin-top: 0;
+      margin-bottom: 16px;
+      font-size: 1.1rem;
+      color: var(--primary);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; }
+
+    .form-group { display: flex; flex-direction: column; margin-bottom: 12px; }
+    .form-group label { font-size: 0.85rem; margin-bottom: 6px; color: var(--text-muted); }
+    .form-group input, .form-group select {
+      padding: 10px 12px;
+      background: var(--input-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      color: #fff;
+      outline: none;
+      transition: 0.2s;
+    }
+    .form-group input:focus, .form-group select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+    }
+
+    .summary-box {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 14px;
+      margin: 16px 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 10px;
+      text-align: center;
+    }
+    .summary-item .label { font-size: 0.8rem; color: var(--text-muted); display: block; }
+    .summary-item .val { font-size: 1.05rem; font-weight: bold; margin-top: 4px; display: block; }
+    .val-counselor { color: var(--primary); }
+    .val-clinic { color: var(--success); }
+    .val-total { color: #f8fafc; }
+
+    button.btn-submit {
+      width: 100%;
+      padding: 13px;
+      background: linear-gradient(135deg, #0284c7, #0ea5e9);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    button.btn-submit:hover { opacity: 0.9; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .counselor-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; }
+    .counselor-table th, .counselor-table td { padding: 10px 12px; border-bottom: 1px solid var(--card-border); text-align: right; }
+    .counselor-table th { color: var(--text-muted); background: rgba(15, 23, 42, 0.4); }
+    
+    .table-input {
+      padding: 6px 10px;
+      background: var(--input-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      color: #fff;
+      font-weight: bold;
+      outline: none;
+    }
+    .btn-action-sm {
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--primary);
+      border: 1px solid var(--primary);
+      padding: 5px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: 0.2s;
+    }
+    .btn-action-sm:hover { background: var(--primary); color: #000; }
+    .btn-delete-c {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--danger);
+      border: 1px solid var(--danger);
+      padding: 5px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+
+    .table-wrapper { overflow-x: auto; margin-top: 10px; }
+    table.data-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: right; }
+    table.data-table th, table.data-table td { padding: 10px 8px; border-bottom: 1px solid var(--card-border); white-space: nowrap; }
+    table.data-table th { color: var(--text-muted); background: rgba(15, 23, 42, 0.4); }
+
+    #loading-indicator {
+      display: none;
+      text-align: center;
+      padding: 8px;
+      font-size: 0.85rem;
+      color: var(--primary);
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- هدر -->
+  <div class="header-card">
+    <div class="clinic-info">
+      <img src="https://cdn.imgurl.ir/uploads/l39464_et_1s.png" class="clinic-logo" alt="لوگو">
+      <div>
+        <h1 class="clinic-title">کلینیک روان‌شناسی سپهر آرامش</h1>
+        <p class="clinic-sub">سامانه پذیرش و حسابداری جلسات</p>
+      </div>
+    </div>
+    <div style="font-size: 0.85rem; color: var(--primary);" id="current_date_display">در حال بارگذاری تاریخ...</div>
+  </div>
+
+  <!-- منوی تب‌ها -->
+  <div class="nav-tabs">
+    <button class="tab-btn active" onclick="switchTab('desk')">میز کار پذیرش و ثبت مراجع</button>
+    <button class="tab-btn" onclick="switchTab('settings')">تنظیمات، نرخ‌ها و مشاوران</button>
+  </div>
+
+  <div id="loading-indicator">در حال همگام‌سازی اطلاعات...</div>
+
+  <!-- تب اول: پذیرش -->
+  <div id="tab_desk" class="tab-content active">
+    
+    <div class="card">
+      <h2 class="card-title">ثبت پذیرش و تسویه مالی جلسه</h2>
+      <form id="record_form">
+        
+        <div class="grid-3">
+          <div class="form-group">
+            <label>نام و نام خانوادگی مراجع:</label>
+            <input type="text" id="client_name" required placeholder="مثال: علی رضایی">
+          </div>
+          <div class="form-group">
+            <label>شماره تماس مراجع:</label>
+            <input type="tel" id="client_phone" placeholder="۰۹۱۲..." dir="ltr">
+          </div>
+          <div class="form-group">
+            <label>مشاور:</label>
+            <select id="counselor_select" required>
+              <option value="" disabled selected>در حال بارگذاری...</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <div class="form-group">
+            <label>نوع جلسه:</label>
+            <select id="session_type" required>
+              <option value="آزاد">آزاد</option>
+              <option value="سپه">سپه</option>
+              <option value="ورزش و بهزیستی">ورزش و بهزیستی</option>
+              <option value="طلاق">طلاق</option>
+            </select>
+          </div>
+          <div class="form-group" id="group_parts" style="display: none;">
+            <label>تعداد پارت:</label>
+            <input type="number" id="parts_count" min="1" value="1">
+          </div>
+          <div class="form-group">
+            <label>مبلغ کل جلسه (تومان):</label>
+            <input type="number" id="total_amount" required value="0">
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <div class="form-group">
+            <label>مبلغ بیعانه (تومان):</label>
+            <input type="number" id="deposit_amount" value="0">
+          </div>
+          <div class="form-group">
+            <label>محل واریز بیعانه:</label>
+            <select id="deposit_to">
+              <option value="کلینیک">حساب کلینیک</option>
+              <option value="مشاور">حساب مستقیم مشاور</option>
+              <option value="ندارد">بیعانه نداشته است</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>محل واریز مانده مبلغ:</label>
+            <select id="balance_to">
+              <option value="کلینیک">کارت‌خوان / حساب کلینیک</option>
+              <option value="مشاور">کارت شخصی مشاور</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>توضیحات (اختیاری):</label>
+          <input type="text" id="record_notes" placeholder="یادداشت منشی...">
+        </div>
+
+        <!-- باکس خلاصه محاسبات -->
+        <div class="summary-box">
+          <div class="summary-item">
+            <span class="label">درصد اعمال‌شده مشاور</span>
+            <span class="val" id="box_percent" style="color: #cbd5e1;">--٪</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">مبلغ کل جلسه</span>
+            <span class="val val-total" id="box_total">۰ تومان</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">سهم مشاور</span>
+            <span class="val val-counselor" id="box_counselor">۰ تومان</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">سهم کلینیک</span>
+            <span class="val val-clinic" id="box_clinic">۰ تومان</span>
+          </div>
+        </div>
+
+        <button type="submit" id="btn_submit" class="btn-submit">ثبت در سیستم و شیت</button>
+      </form>
+    </div>
+
+    <!-- مراجعین اخیر -->
+    <div class="card">
+      <h2 class="card-title">آخرین مراجعین ثبت‌شده</h2>
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>تاریخ</th>
+              <th>مراجع</th>
+              <th>مشاور</th>
+              <th>نوع جلسه</th>
+              <th>مبلغ کل</th>
+              <th>سهم مشاور</th>
+              <th>سهم کلینیک</th>
+              <th>بیعانه</th>
+              <th>عملیات</th>
+            </tr>
+          </thead>
+          <tbody id="recent_table_body">
+            <tr><td colspan="9" style="text-align: center; color: var(--text-muted);">در حال دریافت...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- تب دوم: تنظیمات مبالغ سازمانی و مشاوران -->
+  <div id="tab_settings" class="tab-content">
+    
+    <!-- تنظیم نرخ و درصد جلسات سازمانی -->
+    <div class="card">
+      <h2 class="card-title">تنظیم نرخ و درصد جلسات سازمانی و آزاد</h2>
+      <div class="table-wrapper">
+        <table class="counselor-table">
+          <thead>
+            <tr>
+              <th>نوع جلسه</th>
+              <th>مبلغ هر پارت (تومان)</th>
+              <th>درصد پیش‌فرض مشاور (٪)</th>
+              <th>ذخیره در شیت</th>
+            </tr>
+          </thead>
+          <tbody id="session_rates_tbody">
+            <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">در حال دریافت اطلاعات...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- افزودن مشاور جدید -->
+    <div class="card">
+      <h2 class="card-title">افزودن مشاور جدید</h2>
+      <div style="display: flex; gap: 10px; max-width: 550px; flex-wrap: wrap;">
+        <input type="text" id="new_counselor_name" placeholder="نام و نام خانوادگی مشاور..." style="flex: 2; padding: 10px; background: var(--input-bg); border: 1px solid var(--card-border); border-radius: 8px; color: #fff;">
+        <input type="number" id="new_counselor_percent" placeholder="درصد سهم (مثلاً ۷۰)" value="70" style="width: 130px; padding: 10px; background: var(--input-bg); border: 1px solid var(--card-border); border-radius: 8px; color: #fff; text-align: center;">
+        <button type="button" id="btn_add_counselor" style="background: var(--primary); color: #000; border: none; border-radius: 8px; padding: 0 18px; font-weight: bold; cursor: pointer;">افزودن</button>
+      </div>
+    </div>
+
+    <!-- لیست مشاوران و درصدها -->
+    <div class="card">
+      <h2 class="card-title">لیست مشاوران فعال و ویرایش درصد سهم اختصاصی</h2>
+      <div class="table-wrapper">
+        <table class="counselor-table">
+          <thead>
+            <tr>
+              <th>نام مشاور</th>
+              <th>درصد سهم مشاور (٪)</th>
+              <th>ذخیره درصد</th>
+              <th>عملیات</th>
+            </tr>
+          </thead>
+          <tbody id="counselor_settings_tbody">
+            <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">در حال دریافت مشاوران...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwQNRp6anbyhNDlTXGnvHnSwHUHy7RTqQhQ6oNodgZVwCQiM8Lx9MOAVCZce2_NWUNZ/exec";
+
+let state = {
+  settings: {},
+  counselors: [],
+  shamsiDate: ""
+};
+
+function switchTab(tabName) {
+  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+  
+  if (tabName === 'desk') {
+    document.querySelectorAll('.tab-btn')[0].classList.add('active');
+    document.getElementById('tab_desk').classList.add('active');
+  } else {
+    document.querySelectorAll('.tab-btn')[1].classList.add('active');
+    document.getElementById('tab_settings').classList.add('active');
+  }
+}
+
+function getShamsiToday() {
+  const d = new Date();
+  return new Intl.DateTimeFormat('fa-IR', { year: 'numeric', month: 'numeric', day: 'numeric' }).format(d);
+}
+
+state.shamsiDate = getShamsiToday();
+document.getElementById("current_date_display").innerText = "تاریخ امروز: " + state.shamsiDate;
+
+async function fetchInitialData() {
+  document.getElementById("loading-indicator").style.display = "block";
+  try {
+    const res = await fetch(SCRIPT_URL + "?action=getInitialData");
+    const data = await res.json();
+    if (data.status === "success") {
+      state.settings = data.settings;
+      state.counselors = data.counselors;
+      renderCounselorSelect();
+      renderSessionRatesTable();
+      renderCounselorsSettingsTable();
+      renderRecentTable(data.recent);
+    }
+  } catch (err) {
+    console.error("خطا در همگام‌سازی:", err);
+  } finally {
+    document.getElementById("loading-indicator").style.display = "none";
+  }
+}
+
+function renderCounselorSelect() {
+  const sel = document.getElementById("counselor_select");
+  const currentVal = sel.value;
+  sel.innerHTML = '<option value="" disabled selected>انتخاب مشاور...</option>';
+  
+  state.counselors.forEach(c => {
+    const opt = document.createElement("option");
+    opt.value = c.name;
+    opt.innerText = c.name;
+    sel.appendChild(opt);
+  });
+  
+  if (currentVal) sel.value = currentVal;
+}
+
+// ساخت جدول ویرایش نرخ جلسات سازمانی در تب تنظیمات
+function renderSessionRatesTable() {
+  const tbody = document.getElementById("session_rates_tbody");
+  tbody.innerHTML = "";
+  const sessionTypes = ["آزاد", "سپه", "ورزش و بهزیستی", "طلاق"];
+  
+  sessionTypes.forEach(type => {
+    const conf = state.settings[type] || { defaultRate: 0, percent: 70 };
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td style="font-weight: bold; color: var(--primary);">${type}</td>
+      <td>
+        <input type="number" class="table-input" id="rate_${type}" value="${conf.defaultRate}" ${type === 'آزاد' ? 'disabled placeholder="دستی وارد می‌شود"' : ''} style="width: 140px;"> تومان
+      </td>
+      <td>
+        <input type="number" min="0" max="100" class="table-input" id="pct_${type}" value="${conf.percent}" style="width: 75px; text-align: center;"> ٪
+      </td>
+      <td>
+        <button class="btn-action-sm" onclick="saveSessionRate('${type}')">ذخیره نرخ و درصد</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderCounselorsSettingsTable() {
+  const tbody = document.getElementById("counselor_settings_tbody");
+  tbody.innerHTML = "";
+  
+  state.counselors.forEach(c => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td style="font-weight: 500;">${c.name}</td>
+      <td>
+        <input type="number" min="0" max="100" class="table-input" id="pct_input_${c.name}" value="${c.percent}" style="width: 75px; text-align: center;"> ٪
+      </td>
+      <td>
+        <button class="btn-action-sm" onclick="saveCounselorPercent('${c.name}')">بروزرسانی</button>
+      </td>
+      <td>
+        <button class="btn-delete-c" onclick="removeCounselor('${c.name}')">حذف</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderRecentTable(list) {
+  const tbody = document.getElementById("recent_table_body");
+  tbody.innerHTML = "";
+  if (!list || list.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; color: var(--text-muted);">هنوز مراجعی ثبت نشده است.</td></tr>';
+    return;
+  }
+  list.forEach(r => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${r.date || "-"}</td>
+      <td>${r.clientName}</td>
+      <td>${r.counselor}</td>
+      <td>${r.sessionType}</td>
+      <td>${Number(r.totalAmount).toLocaleString('fa-IR')}</td>
+      <td style="color:var(--primary); font-weight:bold;">${Number(r.counselorShare).toLocaleString('fa-IR')}</td>
+      <td style="color:var(--success); font-weight:bold;">${Number(r.clinicShare).toLocaleString('fa-IR')}</td>
+      <td>${Number(r.deposit).toLocaleString('fa-IR')}</td>
+      <td><button class="btn-delete-c" style="padding:2px 6px;" onclick="deleteRecord('${r.id}')">حذف</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// اولویت درصد: اگر سازمانی بود از تنظیمات همان سازمان، اگر آزاد بود از درصد اختصاصی مشاور
+function getEffectivePercent() {
+  const sType = document.getElementById("session_type").value;
+  if (sType !== "آزاد" && state.settings[sType]) {
+    return state.settings[sType].percent;
+  }
+  const selectedName = document.getElementById("counselor_select").value;
+  const counselor = state.counselors.find(c => c.name === selectedName);
+  return counselor ? counselor.percent : 70;
+}
+
+const sessionTypeInput = document.getElementById("session_type");
+const partsCountInput = document.getElementById("parts_count");
+const totalAmountInput = document.getElementById("total_amount");
+const counselorSelect = document.getElementById("counselor_select");
+
+counselorSelect.addEventListener("change", updateSummaryBoxes);
+
+sessionTypeInput.addEventListener("change", function() {
+  const type = this.value;
+  const partsGroup = document.getElementById("group_parts");
+  
+  if (type === "آزاد") {
+    partsGroup.style.display = "none";
+    totalAmountInput.readOnly = false;
+  } else {
+    partsGroup.style.display = "flex";
+    const conf = state.settings[type] || { defaultRate: 0 };
+    totalAmountInput.value = conf.defaultRate * Number(partsCountInput.value);
+    totalAmountInput.readOnly = true;
+  }
+  updateSummaryBoxes();
+});
+
+partsCountInput.addEventListener("input", function() {
+  const type = sessionTypeInput.value;
+  if (type !== "آزاد") {
+    const conf = state.settings[type] || { defaultRate: 0 };
+    totalAmountInput.value = conf.defaultRate * Number(this.value);
+  }
+  updateSummaryBoxes();
+});
+
+totalAmountInput.addEventListener("input", updateSummaryBoxes);
+
+function updateSummaryBoxes() {
+  const total = Number(totalAmountInput.value) || 0;
+  const percent = getEffectivePercent();
+  const counselorShare = Math.round((total * percent) / 100);
+  const clinicShare = total - counselorShare;
+
+  document.getElementById("box_percent").innerText = percent + "٪";
+  document.getElementById("box_total").innerText = total.toLocaleString('fa-IR') + " تومان";
+  document.getElementById("box_counselor").innerText = counselorShare.toLocaleString('fa-IR') + " تومان";
+  document.getElementById("box_clinic").innerText = clinicShare.toLocaleString('fa-IR') + " تومان";
+}
+
+// ثبت جلسه جدید
+document.getElementById("record_form").addEventListener("submit", async function(e) {
+  e.preventDefault();
+  const btn = document.getElementById("btn_submit");
+  btn.disabled = true;
+  btn.innerText = "در حال ثبت اطلاعات...";
+
+  const total = Number(totalAmountInput.value) || 0;
+  const percent = getEffectivePercent();
+  const cShare = Math.round((total * percent) / 100);
+  const clShare = total - cShare;
+
+  const payload = {
+    action: "addTransaction",
+    shamsiDate: state.shamsiDate,
+    clientName: document.getElementById("client_name").value,
+    clientPhone: document.getElementById("client_phone").value,
+    counselor: counselorSelect.value,
+    sessionType: sessionTypeInput.value,
+    parts: sessionTypeInput.value === "آزاد" ? 1 : partsCountInput.value,
+    totalAmount: total,
+    counselorPercent: percent,
+    counselorShare: cShare,
+    clinicShare: clShare,
+    deposit: Number(document.getElementById("deposit_amount").value) || 0,
+    depositTo: document.getElementById("deposit_to").value,
+    balanceTo: document.getElementById("balance_to").value,
+    notes: document.getElementById("record_notes").value
+  };
+
+  try {
+    await fetch(SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    
+    alert("جلسه مراجع با موفقیت ثبت شد.");
+    document.getElementById("record_form").reset();
+    sessionTypeInput.dispatchEvent(new Event('change'));
+    setTimeout(fetchInitialData, 1200);
+  } catch (err) {
+    alert("خطا در ارسال اطلاعات");
+  } finally {
+    btn.disabled = false;
+    btn.innerText = "ثبت در سیستم و شیت";
+  }
+});
+
+// ذخیره نرخ و درصد جلسات سازمانی در شیت
+async function saveSessionRate(type) {
+  const rateInput = document.getElementById(`rate_${type}`);
+  const pctInput = document.getElementById(`pct_${type}`);
+  const rate = Number(rateInput.value) || 0;
+  const percent = Number(pctInput.value) || 70;
+
+  try {
+    await fetch(SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "updateSessionRate", type: type, rate: rate, percent: percent })
+    });
+    alert(`تنظیمات جلسه "${type}" با موفقیت ذخیره شد.`);
+    setTimeout(fetchInitialData, 1200);
+  } catch (err) {
+    alert("خطا در به‌روزرسانی نرخ جلسه");
+  }
+}
+
+// ذخیره درصد اختصاصی مشاور
+async function saveCounselorPercent(name) {
+  const newPercent = document.getElementById(`pct_input_${name}`).value;
+  try {
+    await fetch(SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "updateCounselorPercent", name: name, percent: newPercent })
+    });
+    alert(`درصد سهم "${name}" به ${newPercent}٪ به‌روزرسانی شد.`);
+    setTimeout(fetchInitialData, 1200);
+  } catch (err) {
+    alert("خطا در به‌روزرسانی درصد");
+  }
+}
+
+// افزودن مشاور جدید
+document.getElementById("btn_add_counselor").addEventListener("click", async function() {
+  const nameInput = document.getElementById("new_counselor_name");
+  const pctInput = document.getElementById("new_counselor_percent");
+  const name = nameInput.value.trim();
+  const percent = Number(pctInput.value) || 70;
+  if (!name) return;
+
+  this.disabled = true;
+  try {
+    await fetch(SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "addCounselor", name: name, percent: percent })
+    });
+    nameInput.value = "";
+    alert(`مشاور "${name}" با سهم ${percent}٪ با موفقیت افزوده شد.`);
+    setTimeout(fetchInitialData, 1200);
+  } catch (e) {
+    alert("خطا در افزودن مشاور");
+  } finally {
+    this.disabled = false;
+  }
+});
+
+// حذف مشاور
+async function removeCounselor(name) {
+  if (!confirm(`آیا از حذف مشاور "${name}" از کلینیک اطمینان دارید؟`)) return;
+  try {
+    await fetch(SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "removeCounselor", name: name })
+    });
+    setTimeout(fetchInitialData, 1200);
+  } catch (e) {
+    alert("خطا در حذف مشاور");
+  }
+}
+
+// حذف رکورد
+async function deleteRecord(id) {
+  if (!confirm("آیا از حذف این جلسه اطمینان دارید؟")) return;
+  try {
+    await fetch(SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "deleteTransaction", id: id })
+    });
+    setTimeout(fetchInitialData, 1200);
+  } catch (e) {
+    alert("خطا در حذف رکورد");
+  }
+}
+
+fetchInitialData();
+</script>
+</body>
+</html>
