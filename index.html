@@ -103,6 +103,30 @@
       box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
     }
 
+    /* ماژول ساده‌شده پرداخت */
+    .payment-module {
+      background: rgba(15, 23, 42, 0.5);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .deposit-toggle-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .deposit-details-grid {
+      display: none;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      padding: 12px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+
     .summary-box {
       background: rgba(15, 23, 42, 0.7);
       border: 1px solid var(--card-border);
@@ -205,7 +229,7 @@
     <button class="tab-btn" onclick="switchTab('settings')">تنظیمات، نرخ‌ها و مشاوران</button>
   </div>
 
-  <div id="loading-indicator">در حال همگام‌سازی اطلاعات...</div>
+  <div id="loading-indicator">در حال همگام‌سازی اطلاعات با سرور...</div>
 
   <!-- تب اول: پذیرش -->
   <div id="tab_desk" class="tab-content active">
@@ -251,23 +275,36 @@
           </div>
         </div>
 
-        <div class="grid-3">
-          <div class="form-group">
-            <label>مبلغ بیعانه (تومان):</label>
-            <input type="number" id="deposit_amount" value="0">
+        <!-- بخش تسویه و پرداخت ساده‌شده -->
+        <div class="payment-module">
+          <div class="deposit-toggle-bar">
+            <label style="font-weight: 500; color: #fff; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+              <input type="checkbox" id="has_deposit_toggle" style="width: 17px; height: 17px; accent-color: var(--primary); cursor: pointer;">
+              این مراجع بیعانه پرداخت کرده است
+            </label>
+            <span id="remaining_badge" style="font-size: 0.85rem; color: var(--primary); font-weight: bold;"></span>
           </div>
-          <div class="form-group">
-            <label>محل واریز بیعانه:</label>
-            <select id="deposit_to">
-              <option value="کلینیک">حساب کلینیک</option>
-              <option value="مشاور">حساب مستقیم مشاور</option>
-              <option value="ندارد">بیعانه نداشته است</option>
-            </select>
+
+          <!-- فیلدهای بیعانه (در حالت عادی مخفی است) -->
+          <div id="deposit_fields_wrapper" class="deposit-details-grid">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label>مبلغ بیعانه دریافتی (تومان):</label>
+              <input type="number" id="deposit_amount" value="0" placeholder="مثال: ۲۰۰,۰۰۰">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label>بیعانه به حساب چه کسی رفته است؟</label>
+              <select id="deposit_to">
+                <option value="مشاور">مستقیم به کارت مشاور</option>
+                <option value="کلینیک">کارت‌خوان / کارت کلینیک</option>
+              </select>
+            </div>
           </div>
-          <div class="form-group">
-            <label>محل واریز مانده مبلغ:</label>
+
+          <!-- محل تسویه مانده جلسه در مطب -->
+          <div class="form-group" style="margin-bottom: 0;">
+            <label id="balance_label">تسویه کل مبلغ جلسه از طریق:</label>
             <select id="balance_to">
-              <option value="کلینیک">کارت‌خوان / حساب کلینیک</option>
+              <option value="کلینیک">کارت‌خوان کلینیک</option>
               <option value="مشاور">کارت شخصی مشاور</option>
             </select>
           </div>
@@ -278,10 +315,10 @@
           <input type="text" id="record_notes" placeholder="یادداشت منشی...">
         </div>
 
-        <!-- باکس خلاصه محاسبات -->
+        <!-- باکس خلاصه محاسبات زنده -->
         <div class="summary-box">
           <div class="summary-item">
-            <span class="label">درصد اعمال‌شده مشاور</span>
+            <span class="label">درصد سهم مشاور</span>
             <span class="val" id="box_percent" style="color: #cbd5e1;">--٪</span>
           </div>
           <div class="summary-item">
@@ -302,7 +339,7 @@
       </form>
     </div>
 
-    <!-- مراجعین اخیر -->
+    <!-- آخرین مراجعین ثبت‌شده -->
     <div class="card">
       <h2 class="card-title">آخرین مراجعین ثبت‌شده</h2>
       <div class="table-wrapper">
@@ -329,7 +366,7 @@
 
   </div>
 
-  <!-- تب دوم: تنظیمات مبالغ سازمانی و مشاوران -->
+  <!-- تب دوم: تنظیمات و مشاوران -->
   <div id="tab_settings" class="tab-content">
     
     <!-- تنظیم نرخ و درصد جلسات سازمانی -->
@@ -430,7 +467,7 @@ async function fetchInitialData() {
       renderRecentTable(data.recent);
     }
   } catch (err) {
-    console.error("خطا در همگام‌سازی:", err);
+    console.error("خطا در ارتباط با سرور:", err);
   } finally {
     document.getElementById("loading-indicator").style.display = "none";
   }
@@ -451,7 +488,6 @@ function renderCounselorSelect() {
   if (currentVal) sel.value = currentVal;
 }
 
-// ساخت جدول ویرایش نرخ جلسات سازمانی در تب تنظیمات
 function renderSessionRatesTable() {
   const tbody = document.getElementById("session_rates_tbody");
   tbody.innerHTML = "";
@@ -522,7 +558,6 @@ function renderRecentTable(list) {
   });
 }
 
-// اولویت درصد: اگر سازمانی بود از تنظیمات همان سازمان، اگر آزاد بود از درصد اختصاصی مشاور
 function getEffectivePercent() {
   const sType = document.getElementById("session_type").value;
   if (sType !== "آزاد" && state.settings[sType]) {
@@ -537,6 +572,39 @@ const sessionTypeInput = document.getElementById("session_type");
 const partsCountInput = document.getElementById("parts_count");
 const totalAmountInput = document.getElementById("total_amount");
 const counselorSelect = document.getElementById("counselor_select");
+
+// مدیریت بخش پرداخت و بیعانه تعاملی
+const depositToggle = document.getElementById("has_deposit_toggle");
+const depositWrapper = document.getElementById("deposit_fields_wrapper");
+const depositAmountInput = document.getElementById("deposit_amount");
+const balanceLabel = document.getElementById("balance_label");
+const remainingBadge = document.getElementById("remaining_badge");
+
+depositToggle.addEventListener("change", function() {
+  if (this.checked) {
+    depositWrapper.style.display = "grid";
+    balanceLabel.innerText = "مانده مبلغ در مطب به حساب کی رفت؟";
+  } else {
+    depositWrapper.style.display = "none";
+    depositAmountInput.value = 0;
+    balanceLabel.innerText = "تسویه کل مبلغ جلسه از طریق:";
+  }
+  updateRemainingDisplay();
+});
+
+depositAmountInput.addEventListener("input", updateRemainingDisplay);
+
+function updateRemainingDisplay() {
+  const total = Number(totalAmountInput.value) || 0;
+  const dep = depositToggle.checked ? (Number(depositAmountInput.value) || 0) : 0;
+  const rem = Math.max(0, total - dep);
+
+  if (depositToggle.checked && total > 0) {
+    remainingBadge.innerText = `مانده تسویه در مطب: ${rem.toLocaleString('fa-IR')} تومان`;
+  } else {
+    remainingBadge.innerText = "";
+  }
+}
 
 counselorSelect.addEventListener("change", updateSummaryBoxes);
 
@@ -565,7 +633,10 @@ partsCountInput.addEventListener("input", function() {
   updateSummaryBoxes();
 });
 
-totalAmountInput.addEventListener("input", updateSummaryBoxes);
+totalAmountInput.addEventListener("input", function() {
+  updateSummaryBoxes();
+  updateRemainingDisplay();
+});
 
 function updateSummaryBoxes() {
   const total = Number(totalAmountInput.value) || 0;
@@ -579,7 +650,7 @@ function updateSummaryBoxes() {
   document.getElementById("box_clinic").innerText = clinicShare.toLocaleString('fa-IR') + " تومان";
 }
 
-// ثبت جلسه جدید
+// ثبت جلسه در شیت
 document.getElementById("record_form").addEventListener("submit", async function(e) {
   e.preventDefault();
   const btn = document.getElementById("btn_submit");
@@ -590,6 +661,8 @@ document.getElementById("record_form").addEventListener("submit", async function
   const percent = getEffectivePercent();
   const cShare = Math.round((total * percent) / 100);
   const clShare = total - cShare;
+  const hasDeposit = depositToggle.checked;
+  const depositVal = hasDeposit ? (Number(depositAmountInput.value) || 0) : 0;
 
   const payload = {
     action: "addTransaction",
@@ -603,8 +676,8 @@ document.getElementById("record_form").addEventListener("submit", async function
     counselorPercent: percent,
     counselorShare: cShare,
     clinicShare: clShare,
-    deposit: Number(document.getElementById("deposit_amount").value) || 0,
-    depositTo: document.getElementById("deposit_to").value,
+    deposit: depositVal,
+    depositTo: hasDeposit ? document.getElementById("deposit_to").value : "ندارد",
     balanceTo: document.getElementById("balance_to").value,
     notes: document.getElementById("record_notes").value
   };
@@ -619,17 +692,19 @@ document.getElementById("record_form").addEventListener("submit", async function
     
     alert("جلسه مراجع با موفقیت ثبت شد.");
     document.getElementById("record_form").reset();
+    depositToggle.checked = false;
+    depositToggle.dispatchEvent(new Event('change'));
     sessionTypeInput.dispatchEvent(new Event('change'));
     setTimeout(fetchInitialData, 1200);
   } catch (err) {
-    alert("خطا در ارسال اطلاعات");
+    alert("خطا در ارسال اطلاعات به سرور");
   } finally {
     btn.disabled = false;
     btn.innerText = "ثبت در سیستم و شیت";
   }
 });
 
-// ذخیره نرخ و درصد جلسات سازمانی در شیت
+// ذخیره نرخ و درصد جلسات سازمانی
 async function saveSessionRate(type) {
   const rateInput = document.getElementById(`rate_${type}`);
   const pctInput = document.getElementById(`pct_${type}`);
@@ -709,7 +784,7 @@ async function removeCounselor(name) {
   }
 }
 
-// حذف رکورد
+// حذف رکورد از مراجعین اخیر
 async function deleteRecord(id) {
   if (!confirm("آیا از حذف این جلسه اطمینان دارید؟")) return;
   try {
@@ -725,6 +800,7 @@ async function deleteRecord(id) {
   }
 }
 
+// اجرای اولیه هنگام لود صفحه
 fetchInitialData();
 </script>
 </body>
