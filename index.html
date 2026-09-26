@@ -14,6 +14,7 @@
       --primary-hover: #0284c7;
       --success: #22c55e;
       --danger: #ef4444;
+      --warning: #f59e0b;
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
       --input-bg: #0f172a;
@@ -21,7 +22,7 @@
 
     * { box-sizing: border-box; font-family: 'Vazirmatn', sans-serif; }
     body { background-color: var(--bg-main); color: var(--text-main); margin: 0; padding: 15px 10px; line-height: 1.6; }
-    .container { max-width: 980px; margin: 0 auto; }
+    .container { max-width: 1020px; margin: 0 auto; }
 
     .header-card {
       background: var(--card-bg);
@@ -85,6 +86,7 @@
 
     .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
     .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
 
     .form-group { display: flex; flex-direction: column; margin-bottom: 12px; }
     .form-group label { font-size: 0.85rem; margin-bottom: 6px; color: var(--text-muted); }
@@ -142,6 +144,37 @@
     .val-counselor { color: var(--primary); }
     .val-clinic { color: var(--success); }
     .val-total { color: #f8fafc; }
+
+    /* کادرهای داشبورد مالی */
+    .kpi-card {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+    }
+    .kpi-title { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px; }
+    .kpi-value { font-size: 1.3rem; font-weight: bold; }
+
+    .settlement-banner {
+      border-radius: 12px;
+      padding: 18px 20px;
+      margin: 18px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border: 1px solid transparent;
+    }
+    .settlement-banner.to-counselor {
+      background: rgba(34, 197, 94, 0.12);
+      border-color: rgba(34, 197, 94, 0.3);
+      color: var(--success);
+    }
+    .settlement-banner.to-clinic {
+      background: rgba(239, 68, 68, 0.12);
+      border-color: rgba(239, 68, 68, 0.3);
+      color: var(--danger);
+    }
 
     button.btn-submit {
       width: 100%;
@@ -254,6 +287,21 @@
       font-size: 0.85rem;
       color: var(--primary);
     }
+
+    /* بهینه‌سازی پرینت فیش */
+    @media print {
+      body { background: #fff !important; color: #000 !important; }
+      .header-card, .nav-tabs, .report-filters, button, #loading-indicator { display: none !important; }
+      .card { border: none !important; box-shadow: none !important; padding: 0 !important; }
+      .kpi-card { border: 1px solid #ccc !important; color: #000 !important; }
+      .kpi-value { color: #000 !important; }
+      table.data-table { color: #000 !important; }
+      table.data-table th { background: #f0f0f0 !important; color: #000 !important; border: 1px solid #ddd; }
+      table.data-table td { border: 1px solid #ddd; }
+      .settlement-banner { border: 2px solid #000 !important; color: #000 !important; }
+      .print-header { display: block !important; margin-bottom: 20px; text-align: center; }
+    }
+    .print-header { display: none; }
   </style>
 </head>
 <body>
@@ -275,10 +323,18 @@
   <!-- منوی تب‌ها -->
   <div class="nav-tabs">
     <button class="tab-btn active" onclick="switchTab('desk')">میز کار پذیرش و ثبت مراجع</button>
+    <button class="tab-btn" onclick="switchTab('report')">گزارش و تسویه ماهانه</button>
     <button class="tab-btn" onclick="switchTab('settings')">تنظیمات، نرخ‌ها و مشاوران</button>
   </div>
 
   <div id="loading-indicator">در حال همگام‌سازی اطلاعات با سرور...</div>
+
+  <!-- سربرگ اختصاصی مخصوص زمان چاپ فیش -->
+  <div class="print-header">
+    <h2 style="margin: 0;">کلینیک روان‌شناسی و مشاوره سپهر آرامش</h2>
+    <p style="margin: 5px 0;" id="print_report_title">فیش گزارش و تسویه حساب مالی</p>
+    <hr style="border: none; border-top: 1px solid #ccc; margin: 15px 0;">
+  </div>
 
   <!-- تب اول: پذیرش -->
   <div id="tab_desk" class="tab-content active">
@@ -413,7 +469,105 @@
 
   </div>
 
-  <!-- تب دوم: تنظیمات و مشاوران -->
+  <!-- تب دوم: گزارش و تسویه ماهانه (جدید) -->
+  <div id="tab_report" class="tab-content">
+    
+    <div class="card report-filters">
+      <h2 class="card-title">فیلترهای گزارش تسویه حساب</h2>
+      <div class="grid-3">
+        <div class="form-group">
+          <label>انتخاب مشاور:</label>
+          <select id="report_counselor_select">
+            <option value="all">همه مشاوران (کل کلینیک)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>سال شمسی:</label>
+          <input type="text" id="report_year" value="1403" style="text-align: center;">
+        </div>
+        <div class="form-group">
+          <label>ماه شمسی:</label>
+          <select id="report_month_select">
+            <option value="01">فروردین</option>
+            <option value="02">اردیبهشت</option>
+            <option value="03">خرداد</option>
+            <option value="04">تیر</option>
+            <option value="05">مرداد</option>
+            <option value="06">شهریور</option>
+            <option value="07">مهر</option>
+            <option value="08">آبان</option>
+            <option value="09">آذر</option>
+            <option value="10">دی</option>
+            <option value="11">بهمن</option>
+            <option value="12">اسفند</option>
+          </select>
+        </div>
+      </div>
+      <div style="display: flex; gap: 10px; margin-top: 10px;">
+        <button type="button" class="btn-submit" style="flex: 2;" onclick="loadMonthlyReport()">مشاهده و محاسبه تسویه</button>
+        <button type="button" class="btn-action-sm" style="flex: 1; padding: 10px; font-size: 0.95rem;" onclick="window.print()">چاپ فیش تسویه</button>
+      </div>
+    </div>
+
+    <!-- کارت‌های آمار و خلاصه مالی -->
+    <div id="report_results_area" style="display: none;">
+      
+      <div class="grid-4" style="margin-bottom: 16px;">
+        <div class="kpi-card">
+          <div class="kpi-title">تعداد کل جلسات</div>
+          <div class="kpi-value" id="kpi_sessions_count" style="color: var(--primary);">۰</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-title">گردش مالی کل جلسات</div>
+          <div class="kpi-value" id="kpi_total_turnover" style="color: #fff;">۰ ت</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-title">سهم استحقاقی مشاور</div>
+          <div class="kpi-value" id="kpi_counselor_total_share" style="color: var(--primary);">۰ ت</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-title">دریافت مستقیم توسط مشاور</div>
+          <div class="kpi-value" id="kpi_counselor_direct_got" style="color: var(--warning);">۰ ت</div>
+        </div>
+      </div>
+
+      <!-- بنر وضعیت نهایی تسویه -->
+      <div class="settlement-banner to-counselor" id="settlement_status_box">
+        <div>
+          <span style="font-size: 0.9rem; display: block; opacity: 0.85;" id="settlement_status_label">وضعیت تسویه ماهانه:</span>
+          <strong style="font-size: 1.35rem;" id="settlement_status_text">در حال محاسبه...</strong>
+        </div>
+        <div style="font-size: 1.5rem; font-weight: bold;" id="settlement_status_amount">۰ تومان</div>
+      </div>
+
+      <!-- جدول ریز جلسات این ماه -->
+      <div class="card">
+        <h2 class="card-title">ریز جلسات و دریافتی‌های ماه انتخاب‌شده</h2>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>تاریخ</th>
+                <th>مراجع</th>
+                <th>مشاور</th>
+                <th>نوع</th>
+                <th>مبلغ کل</th>
+                <th>سهم مشاور</th>
+                <th>بیعانه</th>
+                <th>واریز بیعانه</th>
+                <th>واریز مانده</th>
+              </tr>
+            </thead>
+            <tbody id="report_table_body"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- تب سوم: تنظیمات و مشاوران -->
   <div id="tab_settings" class="tab-content">
     
     <!-- تنظیم نرخ و درصد جلسات سازمانی -->
@@ -598,19 +752,28 @@ function switchTab(tabName) {
   if (tabName === 'desk') {
     document.querySelectorAll('.tab-btn')[0].classList.add('active');
     document.getElementById('tab_desk').classList.add('active');
-  } else {
+  } else if (tabName === 'report') {
     document.querySelectorAll('.tab-btn')[1].classList.add('active');
+    document.getElementById('tab_report').classList.add('active');
+  } else {
+    document.querySelectorAll('.tab-btn')[2].classList.add('active');
     document.getElementById('tab_settings').classList.add('active');
   }
 }
 
-function getShamsiToday() {
+// تاریخ شمسی امروز و استخراج سال و ماه پیش‌فرض
+function initDates() {
   const d = new Date();
-  return new Intl.DateTimeFormat('fa-IR', { year: 'numeric', month: 'numeric', day: 'numeric' }).format(d);
+  const parts = new Intl.DateTimeFormat('fa-IR-u-nu-latn', { year: 'numeric', month: '2-digit', day: '2-digit' }).format(d).split('/');
+  state.shamsiDate = parts.join('/');
+  document.getElementById("current_date_display").innerText = "تاریخ امروز: " + new Intl.DateTimeFormat('fa-IR', { year: 'numeric', month: 'numeric', day: 'numeric' }).format(d);
+  
+  if (parts.length === 3) {
+    document.getElementById("report_year").value = parts[0];
+    document.getElementById("report_month_select").value = parts[1];
+  }
 }
-
-state.shamsiDate = getShamsiToday();
-document.getElementById("current_date_display").innerText = "تاریخ امروز: " + state.shamsiDate;
+initDates();
 
 async function fetchInitialData() {
   document.getElementById("loading-indicator").style.display = "block";
@@ -636,10 +799,12 @@ async function fetchInitialData() {
 function renderCounselorSelect() {
   const sel = document.getElementById("counselor_select");
   const editSel = document.getElementById("edit_counselor_select");
+  const reportSel = document.getElementById("report_counselor_select");
   
   const currentVal = sel.value;
   sel.innerHTML = '<option value="" disabled selected>انتخاب مشاور...</option>';
   editSel.innerHTML = '';
+  reportSel.innerHTML = '<option value="all">همه مشاوران (کل کلینیک)</option>';
   
   state.counselors.forEach(c => {
     const opt = document.createElement("option");
@@ -651,6 +816,11 @@ function renderCounselorSelect() {
     optEdit.value = c.name;
     optEdit.innerText = c.name;
     editSel.appendChild(optEdit);
+
+    const optReport = document.createElement("option");
+    optReport.value = c.name;
+    optReport.innerText = c.name;
+    reportSel.appendChild(optReport);
   });
   
   if (currentVal) sel.value = currentVal;
@@ -737,7 +907,7 @@ function getEffectivePercent(sType, cName) {
   return counselor ? counselor.percent : 70;
 }
 
-// عناصر فرم ثبت اصلی
+// فرم ثبت اصلی
 const sessionTypeInput = document.getElementById("session_type");
 const partsCountInput = document.getElementById("parts_count");
 const totalAmountInput = document.getElementById("total_amount");
@@ -818,7 +988,7 @@ function updateSummaryBoxes() {
   document.getElementById("box_clinic").innerText = clinicShare.toLocaleString('fa-IR') + " تومان";
 }
 
-// ثبت جلسه جدید
+// ثبت جلسه در شیت
 document.getElementById("record_form").addEventListener("submit", async function(e) {
   e.preventDefault();
   const btn = document.getElementById("btn_submit");
@@ -872,7 +1042,111 @@ document.getElementById("record_form").addEventListener("submit", async function
   }
 });
 
-// ======================== منطق مودال پاپ‌آپ ویرایش ========================
+// ======================== منطق گزارش و تسویه ماهانه ========================
+async function loadMonthlyReport() {
+  const counselor = document.getElementById("report_counselor_select").value;
+  const year = document.getElementById("report_year").value.trim();
+  const month = document.getElementById("report_month_select").value;
+  const monthFilter = year ? (year + "/" + month) : month;
+
+  const indicator = document.getElementById("loading-indicator");
+  indicator.style.display = "block";
+
+  try {
+    const url = `${SCRIPT_URL}?action=getMonthlyReport&counselor=${encodeURIComponent(counselor)}&month=${encodeURIComponent(monthFilter)}`;
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (data.status === "success") {
+      renderMonthlyReportData(data.records, counselor, monthFilter);
+    }
+  } catch (err) {
+    alert("خطا در دریافت گزارش ماهانه");
+  } finally {
+    indicator.style.display = "none";
+  }
+}
+
+function renderMonthlyReportData(records, counselor, monthFilter) {
+  const area = document.getElementById("report_results_area");
+  area.style.display = "block";
+
+  const monthNames = { "01": "فروردین", "02": "اردیبهشت", "03": "خرداد", "04": "تیر", "05": "مرداد", "06": "شهریور", "07": "مهر", "08": "آبان", "09": "آذر", "10": "دی", "11": "بهمن", "12": "اسفند" };
+  const currentMonthNum = document.getElementById("report_month_select").value;
+  const reportTitleText = `فیش تسویه حساب ماهانه - ${counselor === 'all' ? 'کل کلینیک' : 'مشاور: ' + counselor} (ماه ${monthNames[currentMonthNum]} سال ${document.getElementById("report_year").value})`;
+  document.getElementById("print_report_title").innerText = reportTitleText;
+
+  let totalSessions = records.length;
+  let totalTurnover = 0;
+  let counselorTotalShare = 0;
+  let counselorDirectGot = 0;
+
+  const tbody = document.getElementById("report_table_body");
+  tbody.innerHTML = "";
+
+  records.forEach(r => {
+    totalTurnover += r.totalAmount;
+    counselorTotalShare += r.counselorShare;
+
+    // مبالغی که مستقیم رفته به کارت مشاور
+    let directToCounselorThisSession = 0;
+    if (r.deposit > 0 && r.depositTo === "مشاور") {
+      directToCounselorThisSession += r.deposit;
+    }
+    if (r.balanceTo === "مشاور") {
+      const remaining = Math.max(0, r.totalAmount - (r.deposit || 0));
+      directToCounselorThisSession += remaining;
+    }
+    counselorDirectGot += directToCounselorThisSession;
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${r.date || "-"}</td>
+      <td>${r.clientName}</td>
+      <td>${r.counselor}</td>
+      <td>${r.sessionType}</td>
+      <td>${r.totalAmount.toLocaleString('fa-IR')}</td>
+      <td style="color:var(--primary); font-weight:bold;">${r.counselorShare.toLocaleString('fa-IR')}</td>
+      <td>${(r.deposit || 0).toLocaleString('fa-IR')}</td>
+      <td>${r.depositTo || "-"}</td>
+      <td>${r.balanceTo || "کلینیک"}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // پر کردن کارت‌های KPI
+  document.getElementById("kpi_sessions_count").innerText = totalSessions.toLocaleString('fa-IR');
+  document.getElementById("kpi_total_turnover").innerText = totalTurnover.toLocaleString('fa-IR') + " ت";
+  document.getElementById("kpi_counselor_total_share").innerText = counselorTotalShare.toLocaleString('fa-IR') + " ت";
+  document.getElementById("kpi_counselor_direct_got").innerText = counselorDirectGot.toLocaleString('fa-IR') + " ت";
+
+  // محاسبه خالص تسویه نهایی
+  const netSettlement = counselorTotalShare - counselorDirectGot;
+  const statusBox = document.getElementById("settlement_status_box");
+  const statusLabel = document.getElementById("settlement_status_label");
+  const statusText = document.getElementById("settlement_status_text");
+  const statusAmount = document.getElementById("settlement_status_amount");
+
+  if (counselor === "all") {
+    statusBox.className = "settlement-banner to-counselor";
+    statusLabel.innerText = "درآمد خالص کلینیک در این ماه:";
+    statusText.innerText = "سهم کلینیک از مجموع تمام جلسات";
+    const clinicTotalShare = totalTurnover - counselorTotalShare;
+    statusAmount.innerText = clinicTotalShare.toLocaleString('fa-IR') + " تومان";
+  } else if (netSettlement >= 0) {
+    statusBox.className = "settlement-banner to-counselor";
+    statusLabel.innerText = "بستانکاری مشاور از کلینیک:";
+    statusText.innerText = `کلینیک باید این مبلغ را به "${counselor}" واریز کند`;
+    statusAmount.innerText = netSettlement.toLocaleString('fa-IR') + " تومان";
+  } else {
+    statusBox.className = "settlement-banner to-clinic";
+    statusLabel.innerText = "بدهی مشاور به کلینیک:";
+    statusText.innerText = `مشاور "${counselor}" بیش از سهم خود دریافت مستقیم داشته و باید به کلینیک بازگرداند`;
+    statusAmount.innerText = Math.abs(netSettlement).toLocaleString('fa-IR') + " تومان";
+  }
+}
+
+// ======================== منطق مودال ویرایش ========================
 const editModal = document.getElementById("edit_modal");
 const editSessionType = document.getElementById("edit_session_type");
 const editPartsCount = document.getElementById("edit_parts_count");
@@ -907,7 +1181,6 @@ function openEditModal(recordId) {
     editTotalAmount.readOnly = true;
   }
 
-  // وضعیت بیعانه
   if (Number(r.deposit) > 0) {
     editDepositToggle.checked = true;
     editDepositWrapper.style.display = "grid";
@@ -997,7 +1270,6 @@ function updateEditModalCalculations() {
   }
 }
 
-// ثبت ویرایش در شیت
 document.getElementById("edit_record_form").addEventListener("submit", async function(e) {
   e.preventDefault();
   const btn = document.getElementById("btn_edit_submit");
@@ -1048,14 +1320,13 @@ document.getElementById("edit_record_form").addEventListener("submit", async fun
   }
 });
 
-// بستن مودال با کلیک بیرون از کادر
 window.onclick = function(event) {
   if (event.target == editModal) {
     closeEditModal();
   }
 };
 
-// بقیه توابع تنظیمات
+// بقیه توابع
 async function saveSessionRate(type) {
   const rate = Number(document.getElementById(`rate_${type}`).value) || 0;
   const percent = Number(document.getElementById(`pct_${type}`).value) || 70;
