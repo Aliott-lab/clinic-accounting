@@ -145,7 +145,6 @@
     .val-clinic { color: var(--success); }
     .val-total { color: #f8fafc; }
 
-    /* کادرهای داشبورد مالی */
     .kpi-card {
       background: rgba(15, 23, 42, 0.6);
       border: 1px solid var(--card-border);
@@ -288,7 +287,6 @@
       color: var(--primary);
     }
 
-    /* بهینه‌سازی پرینت فیش */
     @media print {
       body { background: #fff !important; color: #000 !important; }
       .header-card, .nav-tabs, .report-filters, button, #loading-indicator { display: none !important; }
@@ -329,7 +327,7 @@
 
   <div id="loading-indicator">در حال همگام‌سازی اطلاعات با سرور...</div>
 
-  <!-- سربرگ اختصاصی مخصوص زمان چاپ فیش -->
+  <!-- سربرگ اختصاصی چاپ فیش -->
   <div class="print-header">
     <h2 style="margin: 0;">کلینیک روان‌شناسی و مشاوره سپهر آرامش</h2>
     <p style="margin: 5px 0;" id="print_report_title">فیش گزارش و تسویه حساب مالی</p>
@@ -380,7 +378,7 @@
           </div>
         </div>
 
-        <!-- بخش پرداخت ساده‌شده -->
+        <!-- ماژول پرداخت -->
         <div class="payment-module">
           <div class="deposit-toggle-bar">
             <label style="font-weight: 500; color: #fff; cursor: pointer; display: flex; align-items: center; gap: 8px;">
@@ -418,7 +416,7 @@
           <input type="text" id="record_notes" placeholder="یادداشت منشی...">
         </div>
 
-        <!-- باکس خلاصه محاسبات زنده -->
+        <!-- باکس خلاصه محاسبات -->
         <div class="summary-box">
           <div class="summary-item">
             <span class="label">درصد سهم مشاور</span>
@@ -469,7 +467,7 @@
 
   </div>
 
-  <!-- تب دوم: گزارش و تسویه ماهانه (جدید) -->
+  <!-- تب دوم: گزارش و تسویه ماهانه -->
   <div id="tab_report" class="tab-content">
     
     <div class="card report-filters">
@@ -531,7 +529,6 @@
         </div>
       </div>
 
-      <!-- بنر وضعیت نهایی تسویه -->
       <div class="settlement-banner to-counselor" id="settlement_status_box">
         <div>
           <span style="font-size: 0.9rem; display: block; opacity: 0.85;" id="settlement_status_label">وضعیت تسویه ماهانه:</span>
@@ -540,7 +537,6 @@
         <div style="font-size: 1.5rem; font-weight: bold;" id="settlement_status_amount">۰ تومان</div>
       </div>
 
-      <!-- جدول ریز جلسات این ماه -->
       <div class="card">
         <h2 class="card-title">ریز جلسات و دریافتی‌های ماه انتخاب‌شده</h2>
         <div class="table-wrapper">
@@ -570,7 +566,6 @@
   <!-- تب سوم: تنظیمات و مشاوران -->
   <div id="tab_settings" class="tab-content">
     
-    <!-- تنظیم نرخ و درصد جلسات سازمانی -->
     <div class="card">
       <h2 class="card-title">تنظیم نرخ و درصد جلسات سازمانی و آزاد</h2>
       <div class="table-wrapper">
@@ -590,7 +585,6 @@
       </div>
     </div>
 
-    <!-- افزودن مشاور جدید -->
     <div class="card">
       <h2 class="card-title">افزودن مشاور جدید</h2>
       <div style="display: flex; gap: 10px; max-width: 550px; flex-wrap: wrap;">
@@ -600,7 +594,6 @@
       </div>
     </div>
 
-    <!-- لیست مشاوران و درصدها -->
     <div class="card">
       <h2 class="card-title">لیست مشاوران فعال و ویرایش درصد سهم اختصاصی</h2>
       <div class="table-wrapper">
@@ -624,7 +617,7 @@
 
 </div>
 
-<!-- پاپ‌آپ (مودال) ویرایش رکورد -->
+<!-- پاپ‌آپ ویرایش رکورد -->
 <div id="edit_modal" class="modal-backdrop">
   <div class="modal-content">
     <div class="modal-header">
@@ -677,7 +670,6 @@
         </div>
       </div>
 
-      <!-- بیعانه ویرایش -->
       <div class="payment-module">
         <div class="deposit-toggle-bar">
           <label style="font-weight: 500; color: #fff; cursor: pointer; display: flex; align-items: center; gap: 8px;">
@@ -715,7 +707,6 @@
         <input type="text" id="edit_record_notes">
       </div>
 
-      <!-- محاسبات ویرایش -->
       <div class="summary-box">
         <div class="summary-item">
           <span class="label">سهم مشاور</span>
@@ -907,7 +898,7 @@ function getEffectivePercent(sType, cName) {
   return counselor ? counselor.percent : 70;
 }
 
-// فرم ثبت اصلی
+// المان‌های فرم ثبت اصلی
 const sessionTypeInput = document.getElementById("session_type");
 const partsCountInput = document.getElementById("parts_count");
 const totalAmountInput = document.getElementById("total_amount");
@@ -988,7 +979,7 @@ function updateSummaryBoxes() {
   document.getElementById("box_clinic").innerText = clinicShare.toLocaleString('fa-IR') + " تومان";
 }
 
-// ثبت جلسه در شیت
+// ثبت جلسه جدید
 document.getElementById("record_form").addEventListener("submit", async function(e) {
   e.preventDefault();
   const btn = document.getElementById("btn_submit");
@@ -1042,26 +1033,30 @@ document.getElementById("record_form").addEventListener("submit", async function
   }
 });
 
-// ======================== منطق گزارش و تسویه ماهانه ========================
+// بارگذاری گزارش ماهانه تسویه
 async function loadMonthlyReport() {
   const counselor = document.getElementById("report_counselor_select").value;
   const year = document.getElementById("report_year").value.trim();
   const month = document.getElementById("report_month_select").value;
-  const monthFilter = year ? (year + "/" + month) : month;
 
   const indicator = document.getElementById("loading-indicator");
   indicator.style.display = "block";
 
   try {
-    const url = `${SCRIPT_URL}?action=getMonthlyReport&counselor=${encodeURIComponent(counselor)}&month=${encodeURIComponent(monthFilter)}`;
+    const url = `${SCRIPT_URL}?action=getMonthlyReport&counselor=${encodeURIComponent(counselor)}&year=${encodeURIComponent(year)}&month=${encodeURIComponent(month)}`;
     const res = await fetch(url);
     const data = await res.json();
 
     if (data.status === "success") {
-      renderMonthlyReportData(data.records, counselor, monthFilter);
+      if (data.records.length === 0) {
+        alert("هیچ رکوردی برای مشاور انتخابی در این ماه پیدا نشد.");
+      }
+      renderMonthlyReportData(data.records, counselor, month);
+    } else {
+      alert("خطا در پاسخ سرور: " + (data.message || "نامشخص"));
     }
   } catch (err) {
-    alert("خطا در دریافت گزارش ماهانه");
+    alert("خطا در دریافت گزارش ماهانه: " + err.message);
   } finally {
     indicator.style.display = "none";
   }
@@ -1088,7 +1083,6 @@ function renderMonthlyReportData(records, counselor, monthFilter) {
     totalTurnover += r.totalAmount;
     counselorTotalShare += r.counselorShare;
 
-    // مبالغی که مستقیم رفته به کارت مشاور
     let directToCounselorThisSession = 0;
     if (r.deposit > 0 && r.depositTo === "مشاور") {
       directToCounselorThisSession += r.deposit;
@@ -1114,13 +1108,11 @@ function renderMonthlyReportData(records, counselor, monthFilter) {
     tbody.appendChild(tr);
   });
 
-  // پر کردن کارت‌های KPI
   document.getElementById("kpi_sessions_count").innerText = totalSessions.toLocaleString('fa-IR');
   document.getElementById("kpi_total_turnover").innerText = totalTurnover.toLocaleString('fa-IR') + " ت";
   document.getElementById("kpi_counselor_total_share").innerText = counselorTotalShare.toLocaleString('fa-IR') + " ت";
   document.getElementById("kpi_counselor_direct_got").innerText = counselorDirectGot.toLocaleString('fa-IR') + " ت";
 
-  // محاسبه خالص تسویه نهایی
   const netSettlement = counselorTotalShare - counselorDirectGot;
   const statusBox = document.getElementById("settlement_status_box");
   const statusLabel = document.getElementById("settlement_status_label");
@@ -1146,7 +1138,7 @@ function renderMonthlyReportData(records, counselor, monthFilter) {
   }
 }
 
-// ======================== منطق مودال ویرایش ========================
+// منطق پنجره پاپ‌آپ ویرایش
 const editModal = document.getElementById("edit_modal");
 const editSessionType = document.getElementById("edit_session_type");
 const editPartsCount = document.getElementById("edit_parts_count");
@@ -1326,7 +1318,7 @@ window.onclick = function(event) {
   }
 };
 
-// بقیه توابع
+// سایر عملیات تنظیمات
 async function saveSessionRate(type) {
   const rate = Number(document.getElementById(`rate_${type}`).value) || 0;
   const percent = Number(document.getElementById(`pct_${type}`).value) || 70;
