@@ -164,14 +164,12 @@
       padding: 14px;
       margin: 16px 0;
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      grid-template-columns: 1fr;
       gap: 10px;
       text-align: center;
     }
-    .summary-item .label { font-size: 0.8rem; color: var(--text-muted); display: block; }
-    .summary-item .val { font-size: 1.05rem; font-weight: bold; margin-top: 4px; display: block; }
-    .val-counselor { color: var(--primary); }
-    .val-clinic { color: var(--success); }
+    .summary-item .label { font-size: 0.85rem; color: var(--text-muted); display: block; }
+    .summary-item .val { font-size: 1.2rem; font-weight: bold; margin-top: 4px; display: block; }
     .val-total { color: #f8fafc; }
 
     .kpi-card {
@@ -523,7 +521,7 @@
     <form id="login_form">
       <div class="form-group" style="text-align: right;">
         <label>نام کاربری:</label>
-        <input type="text" id="login_username" required placeholder="مثلاً: monshi_sobh" dir="ltr">
+        <input type="text" id="login_username" required placeholder="مثلاً: admin" dir="ltr">
       </div>
       <div class="form-group" style="text-align: right;">
         <label>رمز عبور:</label>
@@ -654,20 +652,8 @@
 
         <div class="summary-box">
           <div class="summary-item">
-            <span class="label">درصد سهم مشاور</span>
-            <span class="val" id="box_percent" style="color: #cbd5e1;">--٪</span>
-          </div>
-          <div class="summary-item">
             <span class="label">مبلغ کل جلسه</span>
             <span class="val val-total" id="box_total">۰ تومان</span>
-          </div>
-          <div class="summary-item">
-            <span class="label">سهم مشاور</span>
-            <span class="val val-counselor" id="box_counselor">۰ تومان</span>
-          </div>
-          <div class="summary-item">
-            <span class="label">سهم کلینیک</span>
-            <span class="val val-clinic" id="box_clinic">۰ تومان</span>
           </div>
         </div>
 
@@ -687,15 +673,13 @@
               <th>مشاور</th>
               <th>نوع جلسه</th>
               <th>مبلغ کل</th>
-              <th>سهم مشاور</th>
-              <th>سهم کلینیک</th>
               <th>بیعانه</th>
               <th>ثبت‌کننده</th>
               <th>عملیات</th>
             </tr>
           </thead>
           <tbody id="recent_table_body">
-            <tr><td colspan="10" style="text-align: center; color: var(--text-muted);">در حال دریافت...</td></tr>
+            <tr><td colspan="8" style="text-align: center; color: var(--text-muted);">در حال دریافت...</td></tr>
           </tbody>
         </table>
       </div>
@@ -839,25 +823,6 @@
   <!-- تب چهارم: تنظیمات و مشاوران -->
   <div id="tab_settings" class="tab-content">
     <div class="card">
-      <h2 class="card-title">تنظیم نرخ و درصد جلسات سازمانی و آزاد</h2>
-      <div class="table-wrapper">
-        <table class="counselor-table">
-          <thead>
-            <tr>
-              <th>نوع جلسه</th>
-              <th>مبلغ هر پارت (تومان)</th>
-              <th>درصد پیش‌فرض مشاور (٪)</th>
-              <th>ذخیره در شیت</th>
-            </tr>
-          </thead>
-          <tbody id="session_rates_tbody">
-            <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">در حال دریافت اطلاعات...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <div class="card">
       <h2 class="card-title">افزودن مشاور جدید</h2>
       <div style="display: flex; gap: 10px; max-width: 550px; flex-wrap: wrap;">
         <input type="text" id="new_counselor_name" placeholder="نام و نام خانوادگی مشاور..." style="flex: 2; padding: 10px; background: var(--input-bg); border: 1px solid var(--card-border); border-radius: 8px; color: #fff;">
@@ -880,6 +845,25 @@
           </thead>
           <tbody id="counselor_settings_tbody">
             <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">در حال دریافت مشاوران...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title">تنظیم نرخ و درصد جلسات سازمانی و آزاد</h2>
+      <div class="table-wrapper">
+        <table class="counselor-table">
+          <thead>
+            <tr>
+              <th>نوع جلسه</th>
+              <th>مبلغ هر پارت (تومان)</th>
+              <th>درصد پیش‌فرض مشاور (٪)</th>
+              <th>ذخیره در شیت</th>
+            </tr>
+          </thead>
+          <tbody id="session_rates_tbody">
+            <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">در حال دریافت اطلاعات...</td></tr>
           </tbody>
         </table>
       </div>
@@ -918,8 +902,8 @@
         </select>
       </div>
 
-      <div class="form-group">
-        <label id="bm_name_label">نام و نام خانوادگی مراجع:</label>
+      <div class="form-group" id="bm_name_label">
+        <label>نام و نام خانوادگی مراجع:</label>
         <input type="text" id="bm_client_name" required placeholder="مثال: نرگس محمدی">
       </div>
 
@@ -1045,7 +1029,7 @@
           <label>مبلغ کل جلسه (تومان):</label>
           <input type="number" id="edit_total_amount" required>
         </div>
-        <div class="form-group">
+        <div class="form-group" style="display: none;">
           <label>درصد سهم مشاور (٪):</label>
           <input type="number" id="edit_counselor_percent" min="0" max="100" required>
         </div>
@@ -1088,18 +1072,7 @@
         <input type="text" id="edit_record_notes">
       </div>
 
-      <div class="summary-box">
-        <div class="summary-item">
-          <span class="label">سهم مشاور</span>
-          <span class="val val-counselor" id="edit_box_counselor">۰ تومان</span>
-        </div>
-        <div class="summary-item">
-          <span class="label">سهم کلینیک</span>
-          <span class="val val-clinic" id="edit_box_clinic">۰ تومان</span>
-        </div>
-      </div>
-
-      <div style="display: flex; gap: 10px;">
+      <div style="display: flex; gap: 10px; margin-top: 15px;">
         <button type="submit" id="btn_edit_submit" class="btn-submit" style="flex: 2;">ذخیره تغییرات در شیت</button>
         <button type="button" onclick="closeEditModal()" style="flex: 1; background: #334155; color: #fff; border: none; border-radius: 10px; cursor: pointer; font-weight: bold;">انصراف</button>
       </div>
@@ -1343,7 +1316,7 @@ function renderRecentTable(list) {
   const tbody = document.getElementById("recent_table_body");
   tbody.innerHTML = "";
   if (!list || list.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center; color: var(--text-muted);">هنوز مراجعی ثبت نشده است.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color: var(--text-muted);">هنوز مراجعی ثبت نشده است.</td></tr>';
     return;
   }
   list.forEach(r => {
@@ -1355,8 +1328,6 @@ function renderRecentTable(list) {
       <td>${r.counselor}</td>
       <td>${r.sessionType}</td>
       <td>${Number(r.totalAmount).toLocaleString('fa-IR')}</td>
-      <td style="color:var(--primary); font-weight:bold;">${Number(r.counselorShare).toLocaleString('fa-IR')}</td>
-      <td style="color:var(--success); font-weight:bold;">${Number(r.clinicShare).toLocaleString('fa-IR')}</td>
       <td>${Number(r.deposit).toLocaleString('fa-IR')}</td>
       <td style="color: #cbd5e1; font-size: 0.78rem;">${r.operator || "-"}</td>
       <td>
@@ -1447,14 +1418,7 @@ totalAmountInput.addEventListener("input", function() {
 
 function updateSummaryBoxes() {
   const total = Number(totalAmountInput.value) || 0;
-  const percent = getEffectivePercent(sessionTypeInput.value, counselorSelect.value);
-  const counselorShare = Math.round((total * percent) / 100);
-  const clinicShare = total - counselorShare;
-
-  document.getElementById("box_percent").innerText = percent + "٪";
   document.getElementById("box_total").innerText = total.toLocaleString('fa-IR') + " تومان";
-  document.getElementById("box_counselor").innerText = counselorShare.toLocaleString('fa-IR') + " تومان";
-  document.getElementById("box_clinic").innerText = clinicShare.toLocaleString('fa-IR') + " تومان";
 }
 
 document.getElementById("record_form").addEventListener("submit", async function(e) {
@@ -1511,7 +1475,7 @@ document.getElementById("record_form").addEventListener("submit", async function
   }
 });
 
-// ======================== منطق تقویم هفتگی و پارت‌های دوگانه ========================
+// تقویم هفتگی و پارت‌های دوگانه
 function changeWeek(direction) {
   if (direction === 0) {
     state.currentWeekOffset = 0;
@@ -2136,14 +2100,8 @@ editDepositAmount.addEventListener("input", updateEditModalCalculations);
 
 function updateEditModalCalculations() {
   const total = Number(editTotalAmount.value) || 0;
-  const pct = Number(editCounselorPercent.value) || 0;
-  const cShare = Math.round((total * pct) / 100);
-  const clShare = total - cShare;
   const dep = editDepositToggle.checked ? (Number(editDepositAmount.value) || 0) : 0;
   const rem = Math.max(0, total - dep);
-
-  document.getElementById("edit_box_counselor").innerText = cShare.toLocaleString('fa-IR') + " تومان";
-  document.getElementById("edit_box_clinic").innerText = clShare.toLocaleString('fa-IR') + " تومان";
 
   if (editDepositToggle.checked && total > 0) {
     editRemainingBadge.innerText = `مانده تسویه: ${rem.toLocaleString('fa-IR')} تومان`;
