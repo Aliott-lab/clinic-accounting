@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>سامانه پذیرش و حسابداری | کلینیک سپهر آرامش</title>
+  <title>سامانه پذیرش و نوبت‌دهی | کلینیک سپهر آرامش</title>
   <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
   <style>
     :root {
@@ -22,7 +22,7 @@
 
     * { box-sizing: border-box; font-family: 'Vazirmatn', sans-serif; }
     body { background-color: var(--bg-main); color: var(--text-main); margin: 0; padding: 15px 10px; line-height: 1.6; }
-    .container { max-width: 1020px; margin: 0 auto; }
+    .container { max-width: 1040px; margin: 0 auto; }
 
     .header-card {
       background: var(--card-bg);
@@ -39,9 +39,10 @@
     .clinic-title { margin: 0; font-size: 1.2rem; color: #fff; }
     .clinic-sub { margin: 0; font-size: 0.8rem; color: var(--primary); }
 
-    .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+    .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
     .tab-btn {
       flex: 1;
+      min-width: 160px;
       padding: 12px;
       background: rgba(22, 31, 48, 0.6);
       border: 1px solid var(--card-border);
@@ -233,6 +234,28 @@
       cursor: pointer;
       font-size: 0.75rem;
     }
+    .btn-convert-desk {
+      background: rgba(34, 197, 94, 0.15);
+      color: var(--success);
+      border: 1px solid var(--success);
+      padding: 4px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.78rem;
+      font-weight: bold;
+    }
+    .btn-convert-desk:hover { background: var(--success); color: #000; }
+
+    .status-badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: bold;
+    }
+    .status-reserved { background: rgba(56, 189, 248, 0.2); color: var(--primary); }
+    .status-completed { background: rgba(34, 197, 94, 0.2); color: var(--success); }
+    .status-canceled { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
 
     .table-wrapper { overflow-x: auto; margin-top: 10px; }
     table.data-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: right; }
@@ -312,7 +335,7 @@
       <img src="https://cdn.imgurl.ir/uploads/l39464_et_1s.png" class="clinic-logo" alt="لوگو">
       <div>
         <h1 class="clinic-title">کلینیک روان‌شناسی سپهر آرامش</h1>
-        <p class="clinic-sub">سامانه پذیرش و حسابداری جلسات</p>
+        <p class="clinic-sub">سامانه پذیرش، نوبت‌دهی و حسابداری</p>
       </div>
     </div>
     <div style="font-size: 0.85rem; color: var(--primary);" id="current_date_display">در حال بارگذاری تاریخ...</div>
@@ -320,7 +343,8 @@
 
   <!-- منوی تب‌ها -->
   <div class="nav-tabs">
-    <button class="tab-btn active" onclick="switchTab('desk')">میز کار پذیرش و ثبت مراجع</button>
+    <button class="tab-btn active" onclick="switchTab('desk')">میز پذیرش و صندوق</button>
+    <button class="tab-btn" onclick="switchTab('appointments')">دفتر و تقویم نوبت‌دهی</button>
     <button class="tab-btn" onclick="switchTab('report')">گزارش و تسویه ماهانه</button>
     <button class="tab-btn" onclick="switchTab('settings')">تنظیمات، نرخ‌ها و مشاوران</button>
   </div>
@@ -334,7 +358,7 @@
     <hr style="border: none; border-top: 1px solid #ccc; margin: 15px 0;">
   </div>
 
-  <!-- تب اول: پذیرش -->
+  <!-- تب اول: پذیرش و صندوق -->
   <div id="tab_desk" class="tab-content active">
     
     <div class="card">
@@ -440,7 +464,7 @@
 
     <!-- مراجعین اخیر -->
     <div class="card">
-      <h2 class="card-title">آخرین مراجعین ثبت‌شده</h2>
+      <h2 class="card-title">آخرین مراجعین ثبت‌شده در صندوق</h2>
       <div class="table-wrapper">
         <table class="data-table">
           <thead>
@@ -465,7 +489,77 @@
 
   </div>
 
-  <!-- تب دوم: گزارش و تسویه ماهانه -->
+  <!-- تب دوم: تقویم و نوبت‌دهی (جدید) -->
+  <div id="tab_appointments" class="tab-content">
+    
+    <!-- فرم رزرو نوبت جدید -->
+    <div class="card">
+      <h2 class="card-title">رزرو و ثبت نوبت جدید برای مراجع</h2>
+      <form id="appointment_form">
+        <div class="grid-3">
+          <div class="form-group">
+            <label>مشاور مدنظر:</label>
+            <select id="app_counselor_select" required></select>
+          </div>
+          <div class="form-group">
+            <label>تاریخ نوبت (شمسی):</label>
+            <input type="text" id="app_date_input" required placeholder="مثال: ۱۴۰۵/۰۷/۱۵">
+          </div>
+          <div class="form-group">
+            <label>ساعت جلسه / پارت:</label>
+            <input type="text" id="app_time_input" required placeholder="مثال: ۱۶:۰۰ الی ۱۶:۴۵">
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <div class="form-group">
+            <label>نام و نام خانوادگی مراجع:</label>
+            <input type="text" id="app_client_name" required placeholder="نام مراجعه‌کننده">
+          </div>
+          <div class="form-group">
+            <label>شماره تماس مراجع:</label>
+            <input type="tel" id="app_client_phone" placeholder="۰۹۱۲..." dir="ltr">
+          </div>
+          <div class="form-group">
+            <label>بیعانه اولیه پرداختی (تومان):</label>
+            <input type="number" id="app_deposit_input" value="0">
+          </div>
+        </div>
+
+        <button type="submit" id="btn_app_submit" class="btn-submit" style="background: linear-gradient(135deg, #10b981, #059669);">ثبت نوبت در دفتر کلینیک</button>
+      </form>
+    </div>
+
+    <!-- لیست نوبت‌های ثبت‌شده -->
+    <div class="card">
+      <h2 class="card-title">
+        <span>دفتر نوبت‌های رزرو شده</span>
+        <button type="button" class="btn-action-sm" onclick="fetchAppointments()">بروزرسانی نوبت‌ها</button>
+      </h2>
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>تاریخ نوبت</th>
+              <th>ساعت</th>
+              <th>مراجع</th>
+              <th>شماره تماس</th>
+              <th>مشاور</th>
+              <th>بیعانه</th>
+              <th>وضعیت</th>
+              <th>عملیات و پذیرش</th>
+            </tr>
+          </thead>
+          <tbody id="appointments_table_body">
+            <tr><td colspan="8" style="text-align: center; color: var(--text-muted);">در حال دریافت نوبت‌ها...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- تب سوم: گزارش و تسویه ماهانه -->
   <div id="tab_report" class="tab-content">
     
     <div class="card report-filters">
@@ -560,7 +654,7 @@
 
   </div>
 
-  <!-- تب سوم: تنظیمات و مشاوران -->
+  <!-- تب چهارم: تنظیمات و مشاوران -->
   <div id="tab_settings" class="tab-content">
     
     <div class="card">
@@ -614,7 +708,7 @@
 
 </div>
 
-<!-- پاپ‌آپ ویرایش -->
+<!-- پاپ‌آپ ویرایش رکورد صندوق -->
 <div id="edit_modal" class="modal-backdrop">
   <div class="modal-content">
     <div class="modal-header">
@@ -730,7 +824,8 @@ let state = {
   settings: {},
   counselors: [],
   shamsiDate: "",
-  recentList: []
+  recentList: [],
+  appointmentsList: []
 };
 
 function switchTab(tabName) {
@@ -740,24 +835,25 @@ function switchTab(tabName) {
   if (tabName === 'desk') {
     document.querySelectorAll('.tab-btn')[0].classList.add('active');
     document.getElementById('tab_desk').classList.add('active');
-  } else if (tabName === 'report') {
+  } else if (tabName === 'appointments') {
     document.querySelectorAll('.tab-btn')[1].classList.add('active');
+    document.getElementById('tab_appointments').classList.add('active');
+    fetchAppointments();
+  } else if (tabName === 'report') {
+    document.querySelectorAll('.tab-btn')[2].classList.add('active');
     document.getElementById('tab_report').classList.add('active');
   } else {
-    document.querySelectorAll('.tab-btn')[2].classList.add('active');
+    document.querySelectorAll('.tab-btn')[3].classList.add('active');
     document.getElementById('tab_settings').classList.add('active');
   }
 }
 
-// مقداردهی تاریخ امروز با حذف کاراکترهای مخفی یونیکد
 function initDates() {
   const d = new Date();
-  
-  // تاریخ استاندارد شمسی برای نمایش در هدر
   state.shamsiDate = new Intl.DateTimeFormat('fa-IR', { year: 'numeric', month: '2-digit', day: '2-digit' }).format(d);
   document.getElementById("current_date_display").innerText = "تاریخ امروز: " + state.shamsiDate;
+  document.getElementById("app_date_input").value = state.shamsiDate;
 
-  // استخراج ارقام انگلیسی تمیز برای فیلترهای گزارش ماهانه
   const engParts = new Intl.DateTimeFormat('fa-IR-u-nu-latn', { year: 'numeric', month: '2-digit' }).format(d)
     .replace(/[\u200B-\u200D\uFEFF\u200E\u200F]/g, "")
     .split('/');
@@ -794,11 +890,13 @@ function renderCounselorSelect() {
   const sel = document.getElementById("counselor_select");
   const editSel = document.getElementById("edit_counselor_select");
   const reportSel = document.getElementById("report_counselor_select");
+  const appSel = document.getElementById("app_counselor_select");
   
   const currentVal = sel.value;
   sel.innerHTML = '<option value="" disabled selected>انتخاب مشاور...</option>';
   editSel.innerHTML = '';
   reportSel.innerHTML = '<option value="all">همه مشاوران (کل کلینیک)</option>';
+  appSel.innerHTML = '<option value="" disabled selected>انتخاب مشاور...</option>';
   
   state.counselors.forEach(c => {
     const opt = document.createElement("option");
@@ -815,6 +913,11 @@ function renderCounselorSelect() {
     optReport.value = c.name;
     optReport.innerText = c.name;
     reportSel.appendChild(optReport);
+
+    const optApp = document.createElement("option");
+    optApp.value = c.name;
+    optApp.innerText = c.name;
+    appSel.appendChild(optApp);
   });
   
   if (currentVal) sel.value = currentVal;
@@ -902,7 +1005,7 @@ function getEffectivePercent(sType, cName) {
   return counselor ? counselor.percent : 70;
 }
 
-// فرم ثبت اصلی
+// عناصر فرم پذیرش
 const sessionTypeInput = document.getElementById("session_type");
 const partsCountInput = document.getElementById("parts_count");
 const totalAmountInput = document.getElementById("total_amount");
@@ -983,7 +1086,7 @@ function updateSummaryBoxes() {
   document.getElementById("box_clinic").innerText = clinicShare.toLocaleString('fa-IR') + " تومان";
 }
 
-// ثبت جلسه جدید
+// ثبت در صندوق
 document.getElementById("record_form").addEventListener("submit", async function(e) {
   e.preventDefault();
   const btn = document.getElementById("btn_submit");
@@ -1023,7 +1126,7 @@ document.getElementById("record_form").addEventListener("submit", async function
       body: JSON.stringify(payload)
     });
     
-    alert("جلسه مراجع با موفقیت ثبت شد.");
+    alert("جلسه مراجع با موفقیت در صندوق و شیت ثبت شد.");
     document.getElementById("record_form").reset();
     depositToggle.checked = false;
     depositToggle.dispatchEvent(new Event('change'));
@@ -1037,7 +1140,142 @@ document.getElementById("record_form").addEventListener("submit", async function
   }
 });
 
-// بارگذاری گزارش ماهانه
+// ======================== منطق ماژول تقویم و نوبت‌دهی ========================
+async function fetchAppointments() {
+  const indicator = document.getElementById("loading-indicator");
+  indicator.style.display = "block";
+  try {
+    const res = await fetch(SCRIPT_URL + "?action=getAppointments");
+    const data = await res.json();
+    if (data.status === "success") {
+      state.appointmentsList = data.appointments || [];
+      renderAppointmentsTable(state.appointmentsList);
+    }
+  } catch (err) {
+    console.error("خطا در دریافت نوبت‌ها:", err);
+  } finally {
+    indicator.style.display = "none";
+  }
+}
+
+function renderAppointmentsTable(list) {
+  const tbody = document.getElementById("appointments_table_body");
+  tbody.innerHTML = "";
+  if (!list || list.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">هیچ نوبتی ثبت نشده است.</td></tr>';
+    return;
+  }
+
+  list.forEach(app => {
+    let badgeClass = "status-reserved";
+    if (app.status === "برگزار شده") badgeClass = "status-completed";
+    if (app.status === "کنسل شده") badgeClass = "status-canceled";
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${app.appointmentDate}</td>
+      <td><strong>${app.appointmentTime}</strong></td>
+      <td>${app.clientName}</td>
+      <td>${app.clientPhone || "-"}</td>
+      <td>${app.counselor}</td>
+      <td>${Number(app.deposit).toLocaleString('fa-IR')} تومان</td>
+      <td><span class="status-badge ${badgeClass}">${app.status}</span></td>
+      <td>
+        <button class="btn-convert-desk" onclick="convertToDesk('${app.id}')">تسویه و پذیرش</button>
+        <button class="btn-delete-c" style="margin-right: 4px;" onclick="changeAppStatus('${app.id}', 'کنسل شده')">لغو</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// ثبت نوبت جدید
+document.getElementById("appointment_form").addEventListener("submit", async function(e) {
+  e.preventDefault();
+  const btn = document.getElementById("btn_app_submit");
+  btn.disabled = true;
+  btn.innerText = "در حال رزرو نوبت...";
+
+  const payload = {
+    action: "addAppointment",
+    counselor: document.getElementById("app_counselor_select").value,
+    appointmentDate: document.getElementById("app_date_input").value,
+    appointmentTime: document.getElementById("app_time_input").value,
+    clientName: document.getElementById("app_client_name").value,
+    clientPhone: document.getElementById("app_client_phone").value,
+    deposit: Number(document.getElementById("app_deposit_input").value) || 0
+  };
+
+  try {
+    await fetch(SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    alert("نوبت با موفقیت در دفتر کلینیک ثبت شد.");
+    document.getElementById("app_client_name").value = "";
+    document.getElementById("app_client_phone").value = "";
+    document.getElementById("app_deposit_input").value = 0;
+    setTimeout(fetchAppointments, 1200);
+  } catch (err) {
+    alert("خطا در ثبت نوبت");
+  } finally {
+    btn.disabled = false;
+    btn.innerText = "ثبت نوبت در دفتر کلینیک";
+  }
+});
+
+// انتقال مستقیم اطلاعات نوبت به فرم میز پذیرش
+function convertToDesk(appId) {
+  const app = state.appointmentsList.find(a => a.id === appId);
+  if (!app) return;
+
+  // پر کردن خودکار فرم تب اول
+  document.getElementById("client_name").value = app.clientName;
+  document.getElementById("client_phone").value = app.clientPhone || "";
+  document.getElementById("counselor_select").value = app.counselor;
+  
+  if (app.deposit > 0) {
+    depositToggle.checked = true;
+    depositWrapper.style.display = "grid";
+    depositAmountInput.value = app.deposit;
+    balanceLabel.innerText = "مانده مبلغ در مطب به حساب کی رفت؟";
+  } else {
+    depositToggle.checked = false;
+    depositWrapper.style.display = "none";
+    depositAmountInput.value = 0;
+    balanceLabel.innerText = "تسویه کل مبلغ جلسه از طریق:";
+  }
+  
+  document.getElementById("record_notes").value = `نوبت ساعت ${app.appointmentTime} - تسویه در مطب`;
+  updateSummaryBoxes();
+  updateRemainingDisplay();
+
+  // تغییر وضعیت نوبت به "برگزار شده"
+  changeAppStatus(appId, "برگزار شده");
+
+  // سوییچ سریع به تب پذیرش
+  switchTab('desk');
+  alert(`اطلاعات "${app.clientName}" به میز پذیرش منتقل شد. مبلغ کل را وارد و ثبت نهایی کنید.`);
+}
+
+async function changeAppStatus(appId, newStatus) {
+  try {
+    await fetch(SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "updateAppointmentStatus", id: appId, status: newStatus })
+    });
+    setTimeout(fetchAppointments, 1200);
+  } catch (e) {
+    console.error("خطا در تغییر وضعیت نوبت:", e);
+  }
+}
+
+// گزارش ماهانه
 async function loadMonthlyReport() {
   const counselor = document.getElementById("report_counselor_select").value;
   const year = document.getElementById("report_year").value.trim();
@@ -1143,7 +1381,7 @@ function renderMonthlyReportData(records, counselor, monthFilter) {
   }
 }
 
-// پنجره پاپ‌آپ ویرایش
+// پاپ‌آپ ویرایش
 const editModal = document.getElementById("edit_modal");
 const editSessionType = document.getElementById("edit_session_type");
 const editPartsCount = document.getElementById("edit_parts_count");
@@ -1294,7 +1532,7 @@ document.getElementById("edit_record_form").addEventListener("submit", async fun
     clinicShare: clShare,
     deposit: depVal,
     depositTo: hasDeposit ? document.getElementById("edit_deposit_to").value : "ندارد",
-    balanceTo: document.getElementById("edit_balance_to").value,
+    balanceTo: document.getElementById("balance_to").value,
     notes: document.getElementById("edit_record_notes").value
   };
 
@@ -1323,7 +1561,7 @@ window.onclick = function(event) {
   }
 };
 
-// تنظیمات نرخ‌ها و مشاوران
+// تنظیمات
 async function saveSessionRate(type) {
   const rate = Number(document.getElementById(`rate_${type}`).value) || 0;
   const percent = Number(document.getElementById(`pct_${type}`).value) || 70;
