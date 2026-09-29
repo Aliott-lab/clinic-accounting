@@ -927,9 +927,9 @@
         </select>
       </div>
 
-      <div class="form-group" id="bm_name_label">
-        <label>نام و نام خانوادگی مراجع:</label>
-        <input type="text" id="bm_client_name" required placeholder="مثال: نرگس محمدی">
+      <div class="form-group" id="bm_name_group">
+        <label id="bm_name_label">نام و نام خانوادگی مراجع:</label>
+        <input type="text" id="bm_client_name" required placeholder="مثال: علی رضایی">
       </div>
 
       <div class="form-group" id="bm_phone_group">
@@ -958,7 +958,7 @@
       <button type="button" class="modal-close-btn" onclick="closeAppDetailsModal()">&times;</button>
     </div>
 
-    <div style="background: rgba(15, 23, 42, 0.6); padding: 14px; border-radius: 8px; margin-bottom: 14px; border: 1px solid var(--card-border); font-size: 0.9rem; line-height: 2;">
+    <div style="background: rgba(15, 23, 42, 0.6); padding: 14px; border-radius: 8px; margin-bottom: 14px; border: 1px solid var(--card-border); font-size: 0.9rem; line-2;">
       <div><strong>عنوان / مراجع:</strong> <span id="adm_client_name" style="color: #fff; font-weight: bold;">-</span></div>
       <div id="adm_phone_row"><strong>شماره تماس:</strong> <span id="adm_client_phone" style="color: var(--primary);">-</span></div>
       <div><strong>مشاور:</strong> <span id="adm_counselor">-</span></div>
@@ -1388,7 +1388,6 @@ async function fetchAppointments() {
   }
 }
 
-// تقویم معکوس با کلیک مستقیم
 function renderWeeklyCalendar() {
   const selectedCounselor = document.getElementById("cal_counselor_filter").value;
   const weekDays = getWeekDates(state.currentWeekOffset);
@@ -1430,7 +1429,6 @@ function renderWeeklyCalendar() {
       </td>
     `;
 
-    // بررسی حضور در روز
     let isDayInDuty = true;
     if (sched && sched.days) {
       isDayInDuty = sched.days.includes(day.dayName);
@@ -1447,7 +1445,6 @@ function renderWeeklyCalendar() {
         return;
       }
 
-      // بررسی ساعت کاری
       let isHourInDuty = true;
       if (sched) {
         if (sched.start && slot.start < sched.start) isHourInDuty = false;
@@ -1548,44 +1545,59 @@ function renderWeeklyCalendar() {
 }
 
 function openBookingModal(counselor, date, time, prefillType = "client_full") {
-  document.getElementById("bm_counselor").value = counselor;
-  document.getElementById("bm_counselor_text").innerText = counselor;
-  document.getElementById("bm_date").value = date;
-  document.getElementById("bm_date_text").innerText = date;
-  document.getElementById("bm_time").value = time;
-  document.getElementById("bm_time_text").innerText = time;
+  const cInput = document.getElementById("bm_counselor");
+  const cText = document.getElementById("bm_counselor_text");
+  const dInput = document.getElementById("bm_date");
+  const dText = document.getElementById("bm_date_text");
+  const tInput = document.getElementById("bm_time");
+  const tText = document.getElementById("bm_time_text");
+  const typeSelect = document.getElementById("bm_booking_type");
+  const nameInput = document.getElementById("bm_client_name");
+  const phoneInput = document.getElementById("bm_client_phone");
+  const depositInput = document.getElementById("bm_deposit");
+  const modal = document.getElementById("booking_modal");
 
-  document.getElementById("bm_booking_type").value = prefillType;
+  if (cInput) cInput.value = counselor || "";
+  if (cText) cText.innerText = counselor || "-";
+  if (dInput) dInput.value = date || "";
+  if (dText) dText.innerText = date || "-";
+  if (tInput) tInput.value = time || "";
+  if (tText) tText.innerText = time || "-";
+
+  if (typeSelect) typeSelect.value = prefillType;
   handleBookingTypeChange();
 
-  document.getElementById("bm_client_name").value = "";
-  document.getElementById("bm_client_phone").value = "";
-  document.getElementById("bm_deposit").value = 0;
+  if (nameInput) nameInput.value = "";
+  if (phoneInput) phoneInput.value = "";
+  if (depositInput) depositInput.value = 0;
 
-  document.getElementById("booking_modal").style.display = "flex";
+  if (modal) modal.style.display = "flex";
 }
 
 function handleBookingTypeChange() {
-  const bType = document.getElementById("bm_booking_type").value;
+  const typeSelect = document.getElementById("bm_booking_type");
+  const bType = typeSelect ? typeSelect.value : "client_full";
   const nameLabel = document.getElementById("bm_name_label");
+  const nameInput = document.getElementById("bm_client_name");
   const phoneGroup = document.getElementById("bm_phone_group");
   const depositGroup = document.getElementById("bm_deposit_group");
 
   if (bType === "meeting") {
-    nameLabel.innerText = "موضوع جلسه / با چه کسی:";
-    phoneGroup.style.display = "none";
-    depositGroup.style.display = "none";
-    document.getElementById("bm_client_name").placeholder = "مثال: بررسی پرونده با همکاران";
+    if (nameLabel) nameLabel.innerText = "موضوع جلسه / با چه کسی:";
+    if (phoneGroup) phoneGroup.style.display = "none";
+    if (depositGroup) depositGroup.style.display = "none";
+    if (nameInput) nameInput.placeholder = "مثال: بررسی پرونده با همکاران";
   } else {
-    nameLabel.innerText = "نام و نام خانوادگی مراجع:";
-    phoneGroup.style.display = "flex";
-    depositGroup.style.display = "flex";
-    document.getElementById("bm_client_name").placeholder = "مثال: علی رضایی";
+    if (nameLabel) nameLabel.innerText = "نام و نام خانوادگی مراجع:";
+    if (phoneGroup) phoneGroup.style.display = "flex";
+    if (depositGroup) depositGroup.style.display = "flex";
+    if (nameInput) nameInput.placeholder = "مثال: علی رضایی";
   }
 }
 
 function closeBookingModal() {
-  document.getElementById("booking_modal").style.display = "none";
+  const modal = document.getElementById("booking_modal");
+  if (modal) modal.style.display = "none";
 }
 
 document.getElementById("quick_booking_form").addEventListener("submit", async function(e) {
@@ -1784,7 +1796,6 @@ async function unblockDay(date, counselor) {
   }
 }
 
-// سایر فرمول‌ها و مدیریت صندوق
 const sessionTypeInput = document.getElementById("session_type");
 const partsCountInput = document.getElementById("parts_count");
 const totalAmountInput = document.getElementById("total_amount");
