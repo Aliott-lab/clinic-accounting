@@ -802,7 +802,7 @@
     </div>
   </div>
 
-  <!-- تب جدید: سوابق و پرونده مراجع (قبل از تنظیمات) -->
+  <!-- تب سوابق و پرونده مراجع -->
   <div id="tab_history" class="tab-content">
     <div class="card">
       <h2 class="card-title">جستجوی سوابق و پرونده مراجع</h2>
@@ -823,7 +823,6 @@
     </div>
 
     <div id="history_results_area" style="display: none;">
-      <!-- کارت‌های آماری مراجع -->
       <div class="grid-4" style="margin-bottom: 16px;">
         <div class="kpi-card">
           <div class="kpi-title">تعداد کل جلسات / مراجعات</div>
@@ -843,7 +842,6 @@
         </div>
       </div>
 
-      <!-- ریز جلسات صندوق -->
       <div class="card">
         <h2 class="card-title">جلسات ثبت‌شده در صندوق کلینیک</h2>
         <div class="table-wrapper">
@@ -866,7 +864,6 @@
         </div>
       </div>
 
-      <!-- ریز نوبت‌های ثبت‌شده در تقویم -->
       <div class="card">
         <h2 class="card-title">نوبت‌های رزروشده در تقویم</h2>
         <div class="table-wrapper">
@@ -1222,6 +1219,22 @@ const TIME_SLOTS = [
   { label: "۲۰:۰۰ - ۲۱:۰۰", start: "20:00", end: "21:00", h1: "۲۰:۰۰ - ۲۰:۳۰", h2: "۲۰:۳۰ - ۲۱:۰۰" }
 ];
 
+// تابع نرمال‌سازی شماره و تضمین درج صفر اول
+function normalizePhoneNumber(phone) {
+  if (!phone) return "";
+  let p = String(phone)
+    .replace(/[\u200B-\u200D\uFEFF\u200E\u200F]/g, "")
+    .replace(/[۰-۹]/g, w => String.fromCharCode(w.charCodeAt(0) - 1728))
+    .replace(/[٠-٩]/g, w => String.fromCharCode(w.charCodeAt(0) - 1584))
+    .replace(/\D/g, "")
+    .trim();
+  
+  if (p.length === 10 && p.startsWith("9")) {
+    p = "0" + p;
+  }
+  return p;
+}
+
 function checkAuth() {
   const savedUser = localStorage.getItem("sepehr_user");
   const savedUsername = localStorage.getItem("sepehr_username");
@@ -1356,7 +1369,12 @@ async function fetchInitialData() {
     if (data.status === "success") {
       state.settings = data.settings;
       state.counselors = data.counselors;
-      state.recentList = data.recent || [];
+      
+      // نرمال‌سازی شماره‌ها به محض دریافت از شیت
+      state.recentList = (data.recent || []).map(r => {
+        r.clientPhone = normalizePhoneNumber(r.clientPhone);
+        return r;
+      });
       
       const savedSchedules = localStorage.getItem("sepehr_counselor_schedules");
       if (savedSchedules) {
@@ -1384,9 +1402,9 @@ function buildClientsDirectory() {
   phonesDatalist.innerHTML = "";
 
   const processEntry = (name, phone) => {
-    if (!name || name === "-" || name.length < 2) return;
-    const cleanPhone = (phone || "").toString().replace(/[\s\-]/g, "").trim();
-    const cleanName = name.trim();
+    if (!name || name === "-" || String(name).length < 2) return;
+    const cleanPhone = normalizePhoneNumber(phone);
+    const cleanName = String(name).trim();
     
     if (!state.clientsDirectory[cleanName] && cleanPhone) {
       state.clientsDirectory[cleanName] = cleanPhone;
@@ -1427,12 +1445,12 @@ function onClientNameInput(val) {
   val = (val || "").trim();
   if (state.clientsDirectory[val]) {
     const phoneInput = document.getElementById("client_phone");
-    if (!phoneInput.value) phoneInput.value = state.clientsDirectory[val];
+    phoneInput.value = state.clientsDirectory[val];
   }
 }
 
 function onClientPhoneInput(val) {
-  val = (val || "").trim();
+  val = normalizePhoneNumber(val);
   if (state.clientsDirectory[val]) {
     const nameInput = document.getElementById("client_name");
     if (!nameInput.value) nameInput.value = state.clientsDirectory[val];
@@ -1443,19 +1461,18 @@ function onQuickNameInput(val) {
   val = (val || "").trim();
   if (state.clientsDirectory[val]) {
     const phoneInput = document.getElementById("bm_client_phone");
-    if (!phoneInput.value) phoneInput.value = state.clientsDirectory[val];
+    phoneInput.value = state.clientsDirectory[val];
   }
 }
 
 function onQuickPhoneInput(val) {
-  val = (val || "").trim();
+  val = normalizePhoneNumber(val);
   if (state.clientsDirectory[val]) {
     const nameInput = document.getElementById("bm_client_name");
     if (!nameInput.value) nameInput.value = state.clientsDirectory[val];
   }
 }
 
-// توابع تب جدید سوابق مراجع
 function onHistoryNameInput(val) {
   val = (val || "").trim();
   if (state.clientsDirectory[val]) {
@@ -1464,7 +1481,7 @@ function onHistoryNameInput(val) {
 }
 
 function onHistoryPhoneInput(val) {
-  val = (val || "").trim();
+  val = normalizePhoneNumber(val);
   if (state.clientsDirectory[val]) {
     document.getElementById("sh_client_name").value = state.clientsDirectory[val];
   }
@@ -1477,25 +1494,29 @@ function clearHistorySearch() {
 }
 
 function searchClientHistory() {
-  const nameQuery = document.getElementById("sh_client_name").value.trim();
-  const phoneQuery = document.getElementById("sh_client_phone").value.trim().replace(/[\s\-]/g, "");
+  const nameQuery = String(document.getElementById("sh_client_name").value || "").trim().toLowerCase();
+  const phoneQuery = normalizePhoneNumber(document.getElementById("sh_client_phone").value || "");
 
   if (!nameQuery && !phoneQuery) {
     alert("لطفاً نام یا شماره تماس مراجع را وارد کنید.");
     return;
   }
 
-  // فیلتر از لیست تراکنش‌های صندوق
   const matchedTrans = (state.recentList || []).filter(r => {
-    const mName = nameQuery && r.clientName && r.clientName.includes(nameQuery);
-    const mPhone = phoneQuery && r.clientPhone && r.clientPhone.replace(/[\s\-]/g, "").includes(phoneQuery);
+    const rName = String(r.clientName || "").trim().toLowerCase();
+    const rPhone = normalizePhoneNumber(r.clientPhone);
+
+    const mName = nameQuery && rName.includes(nameQuery);
+    const mPhone = phoneQuery && rPhone.includes(phoneQuery);
     return mName || mPhone;
   });
 
-  // فیلتر از لیست نوبت‌های تقویم
   const matchedApps = (state.appointmentsList || []).filter(a => {
-    const mName = nameQuery && a.clientName && a.clientName.includes(nameQuery);
-    const mPhone = phoneQuery && a.clientPhone && a.clientPhone.replace(/[\s\-]/g, "").includes(phoneQuery);
+    const aName = String(a.clientName || "").trim().toLowerCase();
+    const aPhone = normalizePhoneNumber(a.clientPhone);
+
+    const mName = nameQuery && aName.includes(nameQuery);
+    const mPhone = phoneQuery && aPhone.includes(phoneQuery);
     return (mName || mPhone) && a.status !== "کنسل شده";
   });
 
@@ -1505,7 +1526,6 @@ function searchClientHistory() {
     return;
   }
 
-  // محاسبات تجمیعی مراجع
   let totalPaid = 0;
   let totalDeposit = 0;
   const counselorsSet = new Set();
@@ -1527,7 +1547,6 @@ function searchClientHistory() {
   document.getElementById("hp_total_deposit").innerText = totalDeposit.toLocaleString('fa-IR') + " ت";
   document.getElementById("hp_counselors_list").innerText = Array.from(counselorsSet).join("، ") || "-";
 
-  // جدول تراکنش‌های صندوق
   const tBodyTrans = document.getElementById("hp_transactions_tbody");
   tBodyTrans.innerHTML = "";
   if (matchedTrans.length === 0) {
@@ -1550,7 +1569,6 @@ function searchClientHistory() {
     });
   }
 
-  // جدول نوبت‌های تقویم
   const tBodyApps = document.getElementById("hp_appointments_tbody");
   tBodyApps.innerHTML = "";
   if (matchedApps.length === 0) {
@@ -1698,7 +1716,10 @@ async function fetchAppointments() {
     const res = await fetch(SCRIPT_URL + "?action=getAppointments");
     const data = await res.json();
     if (data.status === "success") {
-      state.appointmentsList = data.appointments || [];
+      state.appointmentsList = (data.appointments || []).map(a => {
+        a.clientPhone = normalizePhoneNumber(a.clientPhone);
+        return a;
+      });
       buildClientsDirectory();
       renderWeeklyCalendar();
     }
@@ -1939,13 +1960,16 @@ document.getElementById("quick_booking_form").addEventListener("submit", async f
     slotType = "half2";
   }
 
+  const rawPhone = document.getElementById("bm_client_phone").value;
+  const cleanPhone = (bType === "meeting") ? "-" : normalizePhoneNumber(rawPhone);
+
   const payload = {
     action: "addAppointment",
     counselor: document.getElementById("bm_counselor").value,
     appointmentDate: document.getElementById("bm_date").value,
     appointmentTime: appTime,
     clientName: document.getElementById("bm_client_name").value,
-    clientPhone: (bType === "meeting") ? "-" : document.getElementById("bm_client_phone").value,
+    clientPhone: cleanPhone,
     deposit: (bType === "meeting") ? 0 : (Number(document.getElementById("bm_deposit").value) || 0),
     slotType: slotType,
     status: (bType === "meeting") ? "جلسه کاری" : "رزرو شده",
@@ -1989,7 +2013,7 @@ function openAppDetailsModal(appId) {
     document.getElementById("adm_phone_row").style.display = "block";
     document.getElementById("adm_deposit_row").style.display = "block";
     document.getElementById("btn_adm_to_desk").style.display = "block";
-    document.getElementById("adm_client_phone").innerText = app.clientPhone || "ثبت نشده";
+    document.getElementById("adm_client_phone").innerText = normalizePhoneNumber(app.clientPhone) || "ثبت نشده";
     document.getElementById("adm_deposit").innerText = Number(app.deposit).toLocaleString('fa-IR') + " تومان";
   }
 
@@ -2006,7 +2030,7 @@ function convertModalToDesk() {
   if (!app) return;
 
   document.getElementById("client_name").value = app.clientName;
-  document.getElementById("client_phone").value = app.clientPhone || "";
+  document.getElementById("client_phone").value = normalizePhoneNumber(app.clientPhone) || "";
   document.getElementById("counselor_select").value = app.counselor;
   
   if (app.slotType === "half1" || app.slotType === "half2") {
@@ -2208,12 +2232,13 @@ document.getElementById("record_form").addEventListener("submit", async function
   const clShare = total - cShare;
   const hasDeposit = depositToggle.checked;
   const depositVal = hasDeposit ? (Number(depositAmountInput.value) || 0) : 0;
+  const cleanPhone = normalizePhoneNumber(document.getElementById("client_phone").value);
 
   const payload = {
     action: "addTransaction",
     shamsiDate: state.shamsiDate,
     clientName: document.getElementById("client_name").value,
-    clientPhone: document.getElementById("client_phone").value,
+    clientPhone: cleanPhone,
     counselor: counselorSelect.value,
     sessionType: sessionTypeInput.value,
     parts: sessionTypeInput.value === "آزاد" ? 1 : partsCountInput.value,
@@ -2329,7 +2354,7 @@ function openEditModal(recordId) {
 
   document.getElementById("edit_id").value = r.id;
   document.getElementById("edit_client_name").value = r.clientName;
-  document.getElementById("edit_client_phone").value = r.clientPhone || "";
+  document.getElementById("edit_client_phone").value = normalizePhoneNumber(r.clientPhone) || "";
   document.getElementById("edit_counselor_select").value = r.counselor;
   document.getElementById("edit_session_type").value = r.sessionType;
   document.getElementById("edit_parts_count").value = r.parts || 1;
