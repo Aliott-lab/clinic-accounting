@@ -356,24 +356,31 @@
       min-width: 95px;
     }
     .cal-cell.blocked-day-cell {
-      background: rgba(239, 68, 68, 0.08) !important;
+      background: rgba(239, 68, 68, 0.12) !important;
       cursor: not-allowed;
     }
+    
+    /* استایل قرمز مشخص برای خانه‌های عدم حضور */
     .cal-cell.off-duty-cell {
-      background: rgba(15, 23, 42, 0.5) !important;
+      background: rgba(239, 68, 68, 0.08) !important;
+      border: 1px dashed rgba(239, 68, 68, 0.25) !important;
       cursor: not-allowed;
     }
     .off-duty-label {
       font-size: 0.72rem;
-      color: #475569;
+      color: #f87171;
+      font-weight: 500;
       display: flex;
       align-items: center;
       justify-content: center;
       height: 100%;
+      letter-spacing: -0.2px;
+      user-select: none;
     }
 
     .slot-full {
       height: 100%;
+      width: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -382,12 +389,13 @@
       transition: 0.15s;
     }
     .slot-full.empty:hover {
-      background: rgba(56, 189, 248, 0.12);
+      background: rgba(56, 189, 248, 0.15);
     }
     .slot-full.empty::after {
       content: '+ رزرو';
-      font-size: 0.7rem;
-      color: #475569;
+      font-size: 0.75rem;
+      font-weight: bold;
+      color: #64748b;
     }
     .slot-full.empty:hover::after {
       color: var(--primary);
@@ -397,6 +405,7 @@
       display: flex;
       flex-direction: column;
       height: 100%;
+      width: 100%;
     }
     .slot-half {
       flex: 1;
@@ -413,7 +422,7 @@
     .slot-half.empty::after {
       content: '+ نیم';
       font-size: 0.62rem;
-      color: #475569;
+      color: #64748b;
     }
     .slot-half.empty:hover::after { color: var(--primary); }
 
@@ -683,6 +692,14 @@
         </div>
       </div>
 
+      <!-- راهنمای علائم و رنگ‌ها -->
+      <div style="display: flex; gap: 14px; margin-bottom: 12px; font-size: 0.8rem; color: var(--text-muted); flex-wrap: wrap;">
+        <span style="display: flex; align-items: center; gap: 5px;"><span style="width: 12px; height: 12px; background: rgba(56, 189, 248, 0.4); border: 1px solid var(--primary); border-radius: 3px;"></span> نوبت رزرو شده</span>
+        <span style="display: flex; align-items: center; gap: 5px;"><span style="width: 12px; height: 12px; background: rgba(168, 85, 247, 0.4); border: 1px solid var(--purple); border-radius: 3px;"></span> جلسه کاری</span>
+        <span style="display: flex; align-items: center; gap: 5px;"><span style="width: 12px; height: 12px; background: rgba(34, 197, 94, 0.4); border: 1px solid var(--success); border-radius: 3px;"></span> برگزار / تسویه شده</span>
+        <span style="display: flex; align-items: center; gap: 5px;"><span style="width: 12px; height: 12px; background: rgba(239, 68, 68, 0.15); border: 1px dashed var(--danger); border-radius: 3px;"></span> عدم حضور مشاور (قرمز)</span>
+      </div>
+
       <!-- جدول معکوس -->
       <div class="calendar-table-wrapper">
         <table class="calendar-grid">
@@ -888,7 +905,7 @@
 
 </div>
 
-<!-- پاپ‌آپ‌ها -->
+<!-- پاپ‌آپ ۱: ثبت نوبت -->
 <div id="booking_modal" class="modal-backdrop">
   <div class="modal-content" style="max-width: 500px;">
     <div class="modal-header">
@@ -941,6 +958,7 @@
   </div>
 </div>
 
+<!-- پاپ‌آپ ۲: جزئیات نوبت -->
 <div id="app_details_modal" class="modal-backdrop">
   <div class="modal-content" style="max-width: 480px;">
     <div class="modal-header">
@@ -967,6 +985,7 @@
   </div>
 </div>
 
+<!-- پاپ‌آپ ۳: بستن کل روز -->
 <div id="block_day_modal" class="modal-backdrop">
   <div class="modal-content" style="max-width: 440px;">
     <div class="modal-header">
@@ -996,6 +1015,7 @@
   </div>
 </div>
 
+<!-- پاپ‌آپ ۴: ویرایش صندوق -->
 <div id="edit_modal" class="modal-backdrop">
   <div class="modal-content">
     <div class="modal-header">
@@ -1330,7 +1350,6 @@ function saveCounselorSchedule() {
   renderWeeklyCalendar();
 }
 
-// تقویم معکوس (ساعت‌ها در هدر افقی، روزها در ردیف عمودی)
 function changeWeek(direction) {
   state.currentWeekOffset = direction === 0 ? 0 : state.currentWeekOffset + direction;
   renderWeeklyCalendar();
@@ -1377,6 +1396,7 @@ async function fetchAppointments() {
   }
 }
 
+// تقویم معکوس با کلیک مستقیم و بدون باگ
 function renderWeeklyCalendar() {
   const selectedCounselor = document.getElementById("cal_counselor_filter").value;
   const weekDays = getWeekDates(state.currentWeekOffset);
@@ -1430,7 +1450,7 @@ function renderWeeklyCalendar() {
 
       if (isDayBlocked) {
         td.classList.add("blocked-day-cell");
-        td.innerHTML = `<div style="font-size:0.75rem; color:var(--danger);">🔒 روز مسدود</div>`;
+        td.innerHTML = `<div style="font-size:0.75rem; color:var(--danger); font-weight:bold;">🔒 روز مسدود</div>`;
         tr.appendChild(td);
         return;
       }
@@ -1481,17 +1501,35 @@ function renderWeeklyCalendar() {
           </div>
         `;
       } else if (half1App || half2App) {
-        let h1Html = half1App 
-          ? `<div class="slot-half"><div class="cal-badge status-reserved" onclick="openAppDetailsModal('${half1App.id}')"><strong>${half1App.clientName}</strong><span style="font-size:0.6rem;">نیمه اول</span></div></div>`
-          : `<div class="slot-half empty" onclick="openBookingModal('${selectedCounselor}', '${day.shamsiDate}', '${slot.h1}', 'client_half1')"></div>`;
+        const splitBox = document.createElement("div");
+        splitBox.className = "slot-split-container";
 
-        let h2Html = half2App
-          ? `<div class="slot-half"><div class="cal-badge status-reserved" onclick="openAppDetailsModal('${half2App.id}')"><strong>${half2App.clientName}</strong><span style="font-size:0.6rem;">نیمه دوم</span></div></div>`
-          : `<div class="slot-half empty" onclick="openBookingModal('${selectedCounselor}', '${day.shamsiDate}', '${slot.h2}', 'client_half2')"></div>`;
+        // نیم ساعت اول
+        const h1Div = document.createElement("div");
+        h1Div.className = half1App ? "slot-half" : "slot-half empty";
+        if (half1App) {
+          h1Div.innerHTML = `<div class="cal-badge status-reserved" onclick="openAppDetailsModal('${half1App.id}')"><strong>${half1App.clientName}</strong><span style="font-size:0.6rem;">نیمه اول</span></div>`;
+        } else {
+          h1Div.onclick = () => openBookingModal(selectedCounselor, day.shamsiDate, slot.h1, 'client_half1');
+        }
 
-        td.innerHTML = `<div class="slot-split-container">${h1Html}${h2Html}</div>`;
+        // نیم ساعت دوم
+        const h2Div = document.createElement("div");
+        h2Div.className = half2App ? "slot-half" : "slot-half empty";
+        if (half2App) {
+          h2Div.innerHTML = `<div class="cal-badge status-reserved" onclick="openAppDetailsModal('${half2App.id}')"><strong>${half2App.clientName}</strong><span style="font-size:0.6rem;">نیمه دوم</span></div>`;
+        } else {
+          h2Div.onclick = () => openBookingModal(selectedCounselor, day.shamsiDate, slot.h2, 'client_half2');
+        }
+
+        splitBox.appendChild(h1Div);
+        splitBox.appendChild(h2Div);
+        td.appendChild(splitBox);
       } else {
-        td.innerHTML = `<div class="slot-full empty" onclick="openBookingModal('${selectedCounselor}', '${day.shamsiDate}', '${slot.label}', 'client_full')"></div>`;
+        const emptyDiv = document.createElement("div");
+        emptyDiv.className = "slot-full empty";
+        emptyDiv.onclick = () => openBookingModal(selectedCounselor, day.shamsiDate, slot.label, 'client_full');
+        td.appendChild(emptyDiv);
       }
 
       tr.appendChild(td);
@@ -1738,7 +1776,7 @@ async function unblockDay(date, counselor) {
   }
 }
 
-// سایر توابع صندوق و مبالغ
+// سایر فرمول‌ها و مدیریت صندوق
 const sessionTypeInput = document.getElementById("session_type");
 const partsCountInput = document.getElementById("parts_count");
 const totalAmountInput = document.getElementById("total_amount");
@@ -1945,7 +1983,6 @@ function renderCounselorsSettingsTable() {
   });
 }
 
-// ویرایش، حذف و گزارش
 function openEditModal(recordId) {
   const r = state.recentList.find(item => item.id == recordId);
   if (!r) return;
