@@ -265,7 +265,6 @@
     table.data-table th, table.data-table td { padding: 10px 8px; border-bottom: 1px solid var(--card-border); white-space: nowrap; }
     table.data-table th { color: var(--text-muted); background: rgba(15, 23, 42, 0.4); }
 
-    /* تقویم افقی و اسکرول معکوس */
     .calendar-controls {
       display: flex;
       justify-content: space-between;
@@ -356,14 +355,13 @@
       min-width: 95px;
     }
     .cal-cell.blocked-day-cell {
-      background: rgba(239, 68, 68, 0.12) !important;
+      background: rgba(239, 68, 68, 0.15) !important;
       cursor: not-allowed;
     }
     
-    /* استایل قرمز مشخص برای خانه‌های عدم حضور */
     .cal-cell.off-duty-cell {
       background: rgba(239, 68, 68, 0.08) !important;
-      border: 1px dashed rgba(239, 68, 68, 0.25) !important;
+      border: 1px dashed rgba(239, 68, 68, 0.3) !important;
       cursor: not-allowed;
     }
     .off-duty-label {
@@ -374,30 +372,25 @@
       align-items: center;
       justify-content: center;
       height: 100%;
-      letter-spacing: -0.2px;
       user-select: none;
     }
 
-    .slot-full {
+    .slot-full-btn {
       height: 100%;
       width: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      padding: 4px;
       transition: 0.15s;
-    }
-    .slot-full.empty:hover {
-      background: rgba(56, 189, 248, 0.15);
-    }
-    .slot-full.empty::after {
-      content: '+ رزرو';
+      background: transparent;
+      border: none;
+      color: #64748b;
       font-size: 0.75rem;
       font-weight: bold;
-      color: #64748b;
     }
-    .slot-full.empty:hover::after {
+    .slot-full-btn:hover {
+      background: rgba(56, 189, 248, 0.15);
       color: var(--primary);
     }
 
@@ -407,24 +400,26 @@
       height: 100%;
       width: 100%;
     }
-    .slot-half {
+    .slot-half-btn {
       flex: 1;
+      width: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       padding: 2px;
+      border: none;
       border-bottom: 1px dashed rgba(255,255,255,0.08);
+      background: transparent;
+      color: #64748b;
+      font-size: 0.65rem;
       transition: 0.15s;
     }
-    .slot-half:last-child { border-bottom: none; }
-    .slot-half.empty:hover { background: rgba(56, 189, 248, 0.15); }
-    .slot-half.empty::after {
-      content: '+ نیم';
-      font-size: 0.62rem;
-      color: #64748b;
+    .slot-half-btn:last-child { border-bottom: none; }
+    .slot-half-btn:hover {
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--primary);
     }
-    .slot-half.empty:hover::after { color: var(--primary); }
 
     .cal-badge {
       display: flex;
@@ -670,7 +665,7 @@
     </div>
   </div>
 
-  <!-- تب دوم: تقویم معکوس (ساعت‌ها افقی، روزها عمودی) -->
+  <!-- تب دوم: تقویم معکوس -->
   <div id="tab_appointments" class="tab-content">
     <div class="card">
       <div class="calendar-controls">
@@ -692,7 +687,6 @@
         </div>
       </div>
 
-      <!-- راهنمای علائم و رنگ‌ها -->
       <div style="display: flex; gap: 14px; margin-bottom: 12px; font-size: 0.8rem; color: var(--text-muted); flex-wrap: wrap;">
         <span style="display: flex; align-items: center; gap: 5px;"><span style="width: 12px; height: 12px; background: rgba(56, 189, 248, 0.4); border: 1px solid var(--primary); border-radius: 3px;"></span> نوبت رزرو شده</span>
         <span style="display: flex; align-items: center; gap: 5px;"><span style="width: 12px; height: 12px; background: rgba(168, 85, 247, 0.4); border: 1px solid var(--purple); border-radius: 3px;"></span> جلسه کاری</span>
@@ -700,7 +694,6 @@
         <span style="display: flex; align-items: center; gap: 5px;"><span style="width: 12px; height: 12px; background: rgba(239, 68, 68, 0.15); border: 1px dashed var(--danger); border-radius: 3px;"></span> عدم حضور مشاور (قرمز)</span>
       </div>
 
-      <!-- جدول معکوس -->
       <div class="calendar-table-wrapper">
         <table class="calendar-grid">
           <thead>
@@ -807,7 +800,6 @@
   <!-- تب چهارم: تنظیمات -->
   <div id="tab_settings" class="tab-content">
     
-    <!-- بخش جدید: مدیریت روزها و ساعت حضور مشاوران -->
     <div class="card">
       <h2 class="card-title">برنامه حضور هفتگی مشاوران (روزها و ساعت‌ها)</h2>
       <div class="grid-3" style="margin-bottom: 14px;">
@@ -910,7 +902,7 @@
   <div class="modal-content" style="max-width: 500px;">
     <div class="modal-header">
       <h3 style="margin: 0; color: var(--primary); font-size: 1.1rem;">رزرو نوبت / جلسه در تقویم</h3>
-      <button class="modal-close-btn" onclick="closeBookingModal()">&times;</button>
+      <button type="button" class="modal-close-btn" onclick="closeBookingModal()">&times;</button>
     </div>
 
     <form id="quick_booking_form">
@@ -963,7 +955,7 @@
   <div class="modal-content" style="max-width: 480px;">
     <div class="modal-header">
       <h3 style="margin: 0; color: var(--primary); font-size: 1.1rem;">جزئیات نوبت / جلسه</h3>
-      <button class="modal-close-btn" onclick="closeAppDetailsModal()">&times;</button>
+      <button type="button" class="modal-close-btn" onclick="closeAppDetailsModal()">&times;</button>
     </div>
 
     <div style="background: rgba(15, 23, 42, 0.6); padding: 14px; border-radius: 8px; margin-bottom: 14px; border: 1px solid var(--card-border); font-size: 0.9rem; line-height: 2;">
@@ -990,7 +982,7 @@
   <div class="modal-content" style="max-width: 440px;">
     <div class="modal-header">
       <h3 style="margin: 0; color: var(--danger); font-size: 1.1rem;">مسدود کردن کل روز برای مشاور</h3>
-      <button class="modal-close-btn" onclick="closeBlockDayModal()">&times;</button>
+      <button type="button" class="modal-close-btn" onclick="closeBlockDayModal()">&times;</button>
     </div>
 
     <form id="block_day_form">
@@ -1020,7 +1012,7 @@
   <div class="modal-content">
     <div class="modal-header">
       <h3 style="margin: 0; color: var(--primary); font-size: 1.15rem;">ویرایش جلسه مراجع</h3>
-      <button class="modal-close-btn" onclick="closeEditModal()">&times;</button>
+      <button type="button" class="modal-close-btn" onclick="closeEditModal()">&times;</button>
     </div>
 
     <form id="edit_record_form">
@@ -1396,7 +1388,7 @@ async function fetchAppointments() {
   }
 }
 
-// تقویم معکوس با کلیک مستقیم و بدون باگ
+// تقویم معکوس با کلیک مستقیم
 function renderWeeklyCalendar() {
   const selectedCounselor = document.getElementById("cal_counselor_filter").value;
   const weekDays = getWeekDates(state.currentWeekOffset);
@@ -1414,11 +1406,7 @@ function renderWeeklyCalendar() {
   const tbody = document.getElementById("cal_table_body");
   tbody.innerHTML = "";
 
-  const sched = state.dutySchedules[selectedCounselor] || {
-    days: ["شنبه", "یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنجشنبه", "جمعه"],
-    start: "09:00",
-    end: "21:00"
-  };
+  const sched = state.dutySchedules[selectedCounselor] || null;
 
   weekDays.forEach(day => {
     const dayClean = day.shamsiDate.replace(/[\u200B-\u200D\uFEFF\u200E\u200F']/g, "").trim();
@@ -1442,7 +1430,11 @@ function renderWeeklyCalendar() {
       </td>
     `;
 
-    const isDayInDuty = sched.days.includes(day.dayName);
+    // بررسی حضور در روز
+    let isDayInDuty = true;
+    if (sched && sched.days) {
+      isDayInDuty = sched.days.includes(day.dayName);
+    }
 
     TIME_SLOTS.forEach(slot => {
       const td = document.createElement("td");
@@ -1455,7 +1447,13 @@ function renderWeeklyCalendar() {
         return;
       }
 
-      const isHourInDuty = (slot.start >= sched.start && slot.end <= sched.end);
+      // بررسی ساعت کاری
+      let isHourInDuty = true;
+      if (sched) {
+        if (sched.start && slot.start < sched.start) isHourInDuty = false;
+        if (sched.end && slot.end > sched.end) isHourInDuty = false;
+      }
+
       if (!isDayInDuty || !isHourInDuty) {
         td.classList.add("off-duty-cell");
         td.innerHTML = `<div class="off-duty-label">عدم حضور</div>`;
@@ -1493,43 +1491,53 @@ function renderWeeklyCalendar() {
         if (fullApp.status === "برگزار شده") bClass = "status-completed";
 
         td.innerHTML = `
-          <div class="slot-full">
-            <div class="cal-badge ${bClass}" onclick="openAppDetailsModal('${fullApp.id}')">
-              <strong>${fullApp.clientName}</strong>
-              <span style="font-size:0.65rem; opacity:0.85;">${fullApp.slotType === 'meeting' ? 'جلسه کاری' : fullApp.status}</span>
-            </div>
+          <div class="cal-badge ${bClass}" onclick="openAppDetailsModal('${fullApp.id}')">
+            <strong>${fullApp.clientName}</strong>
+            <span style="font-size:0.65rem; opacity:0.85;">${fullApp.slotType === 'meeting' ? 'جلسه کاری' : fullApp.status}</span>
           </div>
         `;
       } else if (half1App || half2App) {
         const splitBox = document.createElement("div");
         splitBox.className = "slot-split-container";
 
-        // نیم ساعت اول
-        const h1Div = document.createElement("div");
-        h1Div.className = half1App ? "slot-half" : "slot-half empty";
         if (half1App) {
-          h1Div.innerHTML = `<div class="cal-badge status-reserved" onclick="openAppDetailsModal('${half1App.id}')"><strong>${half1App.clientName}</strong><span style="font-size:0.6rem;">نیمه اول</span></div>`;
+          const h1Badge = document.createElement("div");
+          h1Badge.className = "cal-badge status-reserved";
+          h1Badge.onclick = () => openAppDetailsModal(half1App.id);
+          h1Badge.innerHTML = `<strong>${half1App.clientName}</strong><span style="font-size:0.6rem;">نیمه اول</span>`;
+          splitBox.appendChild(h1Badge);
         } else {
-          h1Div.onclick = () => openBookingModal(selectedCounselor, day.shamsiDate, slot.h1, 'client_half1');
+          const h1Btn = document.createElement("button");
+          h1Btn.type = "button";
+          h1Btn.className = "slot-half-btn";
+          h1Btn.innerText = "+ نیم اول";
+          h1Btn.onclick = () => openBookingModal(selectedCounselor, day.shamsiDate, slot.h1, 'client_half1');
+          splitBox.appendChild(h1Btn);
         }
 
-        // نیم ساعت دوم
-        const h2Div = document.createElement("div");
-        h2Div.className = half2App ? "slot-half" : "slot-half empty";
         if (half2App) {
-          h2Div.innerHTML = `<div class="cal-badge status-reserved" onclick="openAppDetailsModal('${half2App.id}')"><strong>${half2App.clientName}</strong><span style="font-size:0.6rem;">نیمه دوم</span></div>`;
+          const h2Badge = document.createElement("div");
+          h2Badge.className = "cal-badge status-reserved";
+          h2Badge.onclick = () => openAppDetailsModal(half2App.id);
+          h2Badge.innerHTML = `<strong>${half2App.clientName}</strong><span style="font-size:0.6rem;">نیمه دوم</span>`;
+          splitBox.appendChild(h2Badge);
         } else {
-          h2Div.onclick = () => openBookingModal(selectedCounselor, day.shamsiDate, slot.h2, 'client_half2');
+          const h2Btn = document.createElement("button");
+          h2Btn.type = "button";
+          h2Btn.className = "slot-half-btn";
+          h2Btn.innerText = "+ نیم دوم";
+          h2Btn.onclick = () => openBookingModal(selectedCounselor, day.shamsiDate, slot.h2, 'client_half2');
+          splitBox.appendChild(h2Btn);
         }
 
-        splitBox.appendChild(h1Div);
-        splitBox.appendChild(h2Div);
         td.appendChild(splitBox);
       } else {
-        const emptyDiv = document.createElement("div");
-        emptyDiv.className = "slot-full empty";
-        emptyDiv.onclick = () => openBookingModal(selectedCounselor, day.shamsiDate, slot.label, 'client_full');
-        td.appendChild(emptyDiv);
+        const bookBtn = document.createElement("button");
+        bookBtn.type = "button";
+        bookBtn.className = "slot-full-btn";
+        bookBtn.innerText = "+ رزرو";
+        bookBtn.onclick = () => openBookingModal(selectedCounselor, day.shamsiDate, slot.label, 'client_full');
+        td.appendChild(bookBtn);
       }
 
       tr.appendChild(td);
