@@ -550,7 +550,6 @@
 
   <div id="loading-indicator">در حال همگام‌سازی اطلاعات با سرور...</div>
 
-  <!-- لیست پیشنهادی تاریخچه مراجعین (Autocomplete) -->
   <datalist id="clients_name_datalist"></datalist>
   <datalist id="clients_phone_datalist"></datalist>
 
@@ -802,7 +801,7 @@
     </div>
   </div>
 
-  <!-- تب سوابق و پرونده مراجع -->
+  <!-- تب سوابق و پرونده مراجع (با تفکیک جلسات قطعی و نوبت‌های آتی) -->
   <div id="tab_history" class="tab-content">
     <div class="card">
       <h2 class="card-title">جستجوی سوابق و پرونده مراجع</h2>
@@ -825,11 +824,11 @@
     <div id="history_results_area" style="display: none;">
       <div class="grid-4" style="margin-bottom: 16px;">
         <div class="kpi-card">
-          <div class="kpi-title">تعداد کل جلسات / مراجعات</div>
+          <div class="kpi-title">تعداد جلسات برگزارشده (صندوق)</div>
           <div class="kpi-value" id="hp_total_sessions" style="color: var(--primary);">۰</div>
         </div>
         <div class="kpi-card">
-          <div class="kpi-title">مجموع مبالغ واریز شده</div>
+          <div class="kpi-title">مجموع کل مبالغ پرداخت‌شده</div>
           <div class="kpi-value" id="hp_total_paid" style="color: var(--success);">۰ ت</div>
         </div>
         <div class="kpi-card">
@@ -842,8 +841,9 @@
         </div>
       </div>
 
+      <!-- باکس ۱: جلسات ثبت‌شده و تسویه‌شده در صندوق -->
       <div class="card">
-        <h2 class="card-title">جلسات ثبت‌شده در صندوق کلینیک</h2>
+        <h2 class="card-title">جلسات برگزارشده و ثبت‌شده در صندوق کلینیک</h2>
         <div class="table-wrapper">
           <table class="data-table">
             <thead>
@@ -864,8 +864,9 @@
         </div>
       </div>
 
+      <!-- باکس ۲: فقط نوبت‌های آینده و رزروهای انجام‌نشده -->
       <div class="card">
-        <h2 class="card-title">نوبت‌های رزروشده در تقویم</h2>
+        <h2 class="card-title">نوبت‌های رزروشده آینده در تقویم (هنوز برگزار / تسویه نشده)</h2>
         <div class="table-wrapper">
           <table class="data-table">
             <thead>
@@ -873,7 +874,7 @@
                 <th>تاریخ نوبت</th>
                 <th>ساعت پارت</th>
                 <th>مشاور</th>
-                <th>بیعانه ثبت‌شده</th>
+                <th>بیعانه اولیه</th>
                 <th>وضعیت نوبت</th>
                 <th>ثبت‌کننده</th>
               </tr>
@@ -1219,7 +1220,6 @@ const TIME_SLOTS = [
   { label: "۲۰:۰۰ - ۲۱:۰۰", start: "20:00", end: "21:00", h1: "۲۰:۰۰ - ۲۰:۳۰", h2: "۲۰:۳۰ - ۲۱:۰۰" }
 ];
 
-// تابع نرمال‌سازی شماره و تضمین درج صفر اول
 function normalizePhoneNumber(phone) {
   if (!phone) return "";
   let p = String(phone)
@@ -1370,7 +1370,6 @@ async function fetchInitialData() {
       state.settings = data.settings;
       state.counselors = data.counselors;
       
-      // نرمال‌سازی شماره‌ها به محض دریافت از شیت
       state.recentList = (data.recent || []).map(r => {
         r.clientPhone = normalizePhoneNumber(r.clientPhone);
         return r;
@@ -1493,6 +1492,7 @@ function clearHistorySearch() {
   document.getElementById("history_results_area").style.display = "none";
 }
 
+// جستجوی سوابق مراجع با تفکیک قطعی جلسات تسویه‌شده از نوبت‌های آینده
 function searchClientHistory() {
   const nameQuery = String(document.getElementById("sh_client_name").value || "").trim().toLowerCase();
   const phoneQuery = normalizePhoneNumber(document.getElementById("sh_client_phone").value || "");
@@ -1502,6 +1502,7 @@ function searchClientHistory() {
     return;
   }
 
+  // ۱. جلسات ثبت‌شده و مالی صندوق
   const matchedTrans = (state.recentList || []).filter(r => {
     const rName = String(r.clientName || "").trim().toLowerCase();
     const rPhone = normalizePhoneNumber(r.clientPhone);
@@ -1511,21 +1512,24 @@ function searchClientHistory() {
     return mName || mPhone;
   });
 
-  const matchedApps = (state.appointmentsList || []).filter(a => {
+  // ۲. صرفاً نوبت‌های آینده که هنوز برگزار/تسویه نشده‌اند (وضعیت: رزرو شده)
+  const matchedFutureApps = (state.appointmentsList || []).filter(a => {
     const aName = String(a.clientName || "").trim().toLowerCase();
     const aPhone = normalizePhoneNumber(a.clientPhone);
 
     const mName = nameQuery && aName.includes(nameQuery);
     const mPhone = phoneQuery && aPhone.includes(phoneQuery);
-    return (mName || mPhone) && a.status !== "کنسل شده";
+    // فقط نوبت‌هایی که لغو نشده‌اند و هنوز برگزار/تسویه نشده‌اند
+    return (mName || mPhone) && a.status === "رزرو شده";
   });
 
-  if (matchedTrans.length === 0 && matchedApps.length === 0) {
-    alert("هیچ سابقه‌ای برای این مراجع پیدا نشد.");
+  if (matchedTrans.length === 0 && matchedFutureApps.length === 0) {
+    alert("هیچ سابقه یا نوبت فعالی برای این مراجع پیدا نشد.");
     document.getElementById("history_results_area").style.display = "none";
     return;
   }
 
+  // محاسبه آمار مالی فقط بر اساس جلسات ثبت‌شده در صندوق
   let totalPaid = 0;
   let totalDeposit = 0;
   const counselorsSet = new Set();
@@ -1536,21 +1540,20 @@ function searchClientHistory() {
     if (t.counselor) counselorsSet.add(t.counselor);
   });
 
-  matchedApps.forEach(a => {
+  matchedFutureApps.forEach(a => {
     if (a.counselor) counselorsSet.add(a.counselor);
   });
 
-  const totalSessionsCount = matchedTrans.length > 0 ? matchedTrans.length : matchedApps.length;
-
-  document.getElementById("hp_total_sessions").innerText = totalSessionsCount.toLocaleString('fa-IR');
+  document.getElementById("hp_total_sessions").innerText = matchedTrans.length.toLocaleString('fa-IR');
   document.getElementById("hp_total_paid").innerText = totalPaid.toLocaleString('fa-IR') + " ت";
   document.getElementById("hp_total_deposit").innerText = totalDeposit.toLocaleString('fa-IR') + " ت";
   document.getElementById("hp_counselors_list").innerText = Array.from(counselorsSet).join("، ") || "-";
 
+  // جدول جلسات ثبت‌شده در صندوق
   const tBodyTrans = document.getElementById("hp_transactions_tbody");
   tBodyTrans.innerHTML = "";
   if (matchedTrans.length === 0) {
-    tBodyTrans.innerHTML = `<tr><td colspan="9" style="text-align:center; color:var(--text-muted);">جلسه نهایی در صندوق برای این مراجع ثبت نشده است.</td></tr>`;
+    tBodyTrans.innerHTML = `<tr><td colspan="9" style="text-align:center; color:var(--text-muted);">جلسه نهایی در صندوق ثبت نشده است.</td></tr>`;
   } else {
     matchedTrans.forEach(t => {
       const tr = document.createElement("tr");
@@ -1569,19 +1572,20 @@ function searchClientHistory() {
     });
   }
 
+  // جدول نوبت‌های رزروشده آینده
   const tBodyApps = document.getElementById("hp_appointments_tbody");
   tBodyApps.innerHTML = "";
-  if (matchedApps.length === 0) {
-    tBodyApps.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">نوبتی در تقویم یافت نشد.</td></tr>`;
+  if (matchedFutureApps.length === 0) {
+    tBodyApps.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">هیچ نوبت رزروشده‌ای برای آینده وجود ندارد.</td></tr>`;
   } else {
-    matchedApps.forEach(a => {
+    matchedFutureApps.forEach(a => {
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td>${a.appointmentDate}</td>
         <td style="font-weight:bold; color:var(--warning);">${a.appointmentTime}</td>
         <td>${a.counselor}</td>
         <td>${Number(a.deposit || 0).toLocaleString('fa-IR')} ت</td>
-        <td><span style="background:rgba(56,189,248,0.15); padding:2px 8px; border-radius:4px; color:var(--primary); font-size:0.75rem;">${a.status}</span></td>
+        <td><span style="background:rgba(56,189,248,0.15); padding:2px 8px; border-radius:4px; color:var(--primary); font-size:0.75rem;">رزرو شده (پیش‌رو)</span></td>
         <td style="color:#cbd5e1; font-size:0.75rem;">${a.operator || "-"}</td>
       `;
       tBodyApps.appendChild(tr);
