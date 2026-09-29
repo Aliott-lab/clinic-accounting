@@ -550,6 +550,7 @@
 
   <div id="loading-indicator">در حال همگام‌سازی اطلاعات با سرور...</div>
 
+  <!-- لیست پیشنهادی تاریخچه مراجعین (Autocomplete) -->
   <datalist id="clients_name_datalist"></datalist>
   <datalist id="clients_phone_datalist"></datalist>
 
@@ -669,7 +670,7 @@
     </div>
   </div>
 
-  <!-- تب دوم: تقویم معکوس -->
+  <!-- تب دوم: تقویم هفتگی -->
   <div id="tab_appointments" class="tab-content">
     <div class="card">
       <div class="calendar-controls">
@@ -801,7 +802,7 @@
     </div>
   </div>
 
-  <!-- تب سوابق و پرونده مراجع (با تفکیک جلسات قطعی و نوبت‌های آتی) -->
+  <!-- تب چهارم: سوابق و پرونده مراجع -->
   <div id="tab_history" class="tab-content">
     <div class="card">
       <h2 class="card-title">جستجوی سوابق و پرونده مراجع</h2>
@@ -841,7 +842,6 @@
         </div>
       </div>
 
-      <!-- باکس ۱: جلسات ثبت‌شده و تسویه‌شده در صندوق -->
       <div class="card">
         <h2 class="card-title">جلسات برگزارشده و ثبت‌شده در صندوق کلینیک</h2>
         <div class="table-wrapper">
@@ -864,7 +864,6 @@
         </div>
       </div>
 
-      <!-- باکس ۲: فقط نوبت‌های آینده و رزروهای انجام‌نشده -->
       <div class="card">
         <h2 class="card-title">نوبت‌های رزروشده آینده در تقویم (هنوز برگزار / تسویه نشده)</h2>
         <div class="table-wrapper">
@@ -876,7 +875,7 @@
                 <th>مشاور</th>
                 <th>بیعانه اولیه</th>
                 <th>وضعیت نوبت</th>
-                <th>ثبت‌کننده</th>
+                <th>ثبت‌‌کننده</th>
               </tr>
             </thead>
             <tbody id="hp_appointments_tbody"></tbody>
@@ -932,7 +931,7 @@
         <label style="display:flex; align-items:center; gap:6px; font-size:0.9rem; cursor:pointer;"><input type="checkbox" class="duty-day-checkbox" value="جمعه"> جمعه</label>
       </div>
 
-      <button type="button" class="btn-action-sm" style="padding: 10px 18px; font-size: 0.9rem;" onclick="saveCounselorSchedule()">ذخیره برنامه حضور این مشاور</button>
+      <button type="button" class="btn-action-sm" style="padding: 10px 18px; font-size: 0.9rem;" onclick="saveCounselorSchedule()">ذخیره برنامه حضور این مشاور در سیستم و پرتال مراجعین</button>
     </div>
 
     <div class="card">
@@ -1369,16 +1368,12 @@ async function fetchInitialData() {
     if (data.status === "success") {
       state.settings = data.settings;
       state.counselors = data.counselors;
+      state.dutySchedules = data.dutySchedules || {};
       
       state.recentList = (data.recent || []).map(r => {
         r.clientPhone = normalizePhoneNumber(r.clientPhone);
         return r;
       });
-      
-      const savedSchedules = localStorage.getItem("sepehr_counselor_schedules");
-      if (savedSchedules) {
-        state.dutySchedules = JSON.parse(savedSchedules);
-      }
 
       buildClientsDirectory();
       renderCounselorSelect();
@@ -1492,7 +1487,6 @@ function clearHistorySearch() {
   document.getElementById("history_results_area").style.display = "none";
 }
 
-// جستجوی سوابق مراجع با تفکیک قطعی جلسات تسویه‌شده از نوبت‌های آینده
 function searchClientHistory() {
   const nameQuery = String(document.getElementById("sh_client_name").value || "").trim().toLowerCase();
   const phoneQuery = normalizePhoneNumber(document.getElementById("sh_client_phone").value || "");
@@ -1502,7 +1496,6 @@ function searchClientHistory() {
     return;
   }
 
-  // ۱. جلسات ثبت‌شده و مالی صندوق
   const matchedTrans = (state.recentList || []).filter(r => {
     const rName = String(r.clientName || "").trim().toLowerCase();
     const rPhone = normalizePhoneNumber(r.clientPhone);
@@ -1512,14 +1505,12 @@ function searchClientHistory() {
     return mName || mPhone;
   });
 
-  // ۲. صرفاً نوبت‌های آینده که هنوز برگزار/تسویه نشده‌اند (وضعیت: رزرو شده)
   const matchedFutureApps = (state.appointmentsList || []).filter(a => {
     const aName = String(a.clientName || "").trim().toLowerCase();
     const aPhone = normalizePhoneNumber(a.clientPhone);
 
     const mName = nameQuery && aName.includes(nameQuery);
     const mPhone = phoneQuery && aPhone.includes(phoneQuery);
-    // فقط نوبت‌هایی که لغو نشده‌اند و هنوز برگزار/تسویه نشده‌اند
     return (mName || mPhone) && a.status === "رزرو شده";
   });
 
@@ -1529,7 +1520,6 @@ function searchClientHistory() {
     return;
   }
 
-  // محاسبه آمار مالی فقط بر اساس جلسات ثبت‌شده در صندوق
   let totalPaid = 0;
   let totalDeposit = 0;
   const counselorsSet = new Set();
@@ -1549,7 +1539,6 @@ function searchClientHistory() {
   document.getElementById("hp_total_deposit").innerText = totalDeposit.toLocaleString('fa-IR') + " ت";
   document.getElementById("hp_counselors_list").innerText = Array.from(counselorsSet).join("، ") || "-";
 
-  // جدول جلسات ثبت‌شده در صندوق
   const tBodyTrans = document.getElementById("hp_transactions_tbody");
   tBodyTrans.innerHTML = "";
   if (matchedTrans.length === 0) {
@@ -1572,7 +1561,6 @@ function searchClientHistory() {
     });
   }
 
-  // جدول نوبت‌های رزروشده آینده
   const tBodyApps = document.getElementById("hp_appointments_tbody");
   tBodyApps.innerHTML = "";
   if (matchedFutureApps.length === 0) {
@@ -1658,7 +1646,8 @@ function loadCounselorScheduleUI() {
   document.getElementById("schedule_end_hour").value = current.end;
 }
 
-function saveCounselorSchedule() {
+// ذخیره دوطرفه برنامه هفتگی مشاور در شیت و مرورگر
+async function saveCounselorSchedule() {
   const counselor = document.getElementById("schedule_counselor_select").value;
   if (!counselor) {
     alert("لطفاً ابتدا مشاور را انتخاب کنید.");
@@ -1673,15 +1662,30 @@ function saveCounselorSchedule() {
   const startH = document.getElementById("schedule_start_hour").value;
   const endH = document.getElementById("schedule_end_hour").value;
 
-  state.dutySchedules[counselor] = {
+  const scheduleObj = {
     days: selectedDays,
     start: startH,
     end: endH
   };
 
-  localStorage.setItem("sepehr_counselor_schedules", JSON.stringify(state.dutySchedules));
-  alert(`برنامه کاری مشاور "${counselor}" ذخیره شد.`);
-  renderWeeklyCalendar();
+  state.dutySchedules[counselor] = scheduleObj;
+
+  try {
+    await fetch(SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "saveCounselorSchedule",
+        counselor: counselor,
+        schedule: scheduleObj
+      })
+    });
+    alert(`برنامه کاری مشاور "${counselor}" ذخیره شد و در پرتال مراجعین نیز فعال گردید.`);
+    renderWeeklyCalendar();
+  } catch(e) {
+    alert("خطا در ارسال تنظیمات به گوگل‌شیت.");
+  }
 }
 
 function changeWeek(direction) {
