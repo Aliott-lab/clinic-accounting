@@ -69,7 +69,7 @@
     .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
     .tab-btn {
       flex: 1;
-      min-width: 160px;
+      min-width: 150px;
       padding: 12px;
       background: rgba(22, 31, 48, 0.6);
       border: 1px solid var(--card-border);
@@ -233,10 +233,10 @@
       background: rgba(56, 189, 248, 0.15);
       color: var(--primary);
       border: 1px solid var(--primary);
-      padding: 5px 12px;
-      border-radius: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
       cursor: pointer;
-      font-size: 0.8rem;
+      font-size: 0.85rem;
       transition: 0.2s;
     }
     .btn-action-sm:hover { background: var(--primary); color: #000; }
@@ -544,6 +544,7 @@
     <button class="tab-btn active" id="btn_tab_desk" onclick="switchTab('desk')">میز پذیرش و صندوق</button>
     <button class="tab-btn" id="btn_tab_appointments" onclick="switchTab('appointments')">تقویم و نوبت‌دهی هفتگی</button>
     <button class="tab-btn" id="btn_tab_report" onclick="switchTab('report')">گزارش و تسویه ماهانه</button>
+    <button class="tab-btn" id="btn_tab_history" onclick="switchTab('history')">سوابق و پرونده مراجع</button>
     <button class="tab-btn" id="btn_tab_settings" onclick="switchTab('settings')">تنظیمات، نرخ‌ها و مشاوران</button>
   </div>
 
@@ -801,7 +802,93 @@
     </div>
   </div>
 
-  <!-- تب چهارم: تنظیمات -->
+  <!-- تب جدید: سوابق و پرونده مراجع (قبل از تنظیمات) -->
+  <div id="tab_history" class="tab-content">
+    <div class="card">
+      <h2 class="card-title">جستجوی سوابق و پرونده مراجع</h2>
+      <div class="grid-3" style="align-items: flex-end;">
+        <div class="form-group" style="margin-bottom: 0;">
+          <label>نام مراجع (با پیشنهاد خودکار):</label>
+          <input type="text" id="sh_client_name" placeholder="مثال: علی رضایی..." list="clients_name_datalist" oninput="onHistoryNameInput(this.value)">
+        </div>
+        <div class="form-group" style="margin-bottom: 0;">
+          <label>شماره تماس مراجع:</label>
+          <input type="tel" id="sh_client_phone" placeholder="۰۹۱۲..." dir="ltr" list="clients_phone_datalist" oninput="onHistoryPhoneInput(this.value)">
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button type="button" class="btn-submit" style="padding: 11px;" onclick="searchClientHistory()">جستجو پرونده</button>
+          <button type="button" class="btn-action-sm" onclick="clearHistorySearch()">پاک‌سازی</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="history_results_area" style="display: none;">
+      <!-- کارت‌های آماری مراجع -->
+      <div class="grid-4" style="margin-bottom: 16px;">
+        <div class="kpi-card">
+          <div class="kpi-title">تعداد کل جلسات / مراجعات</div>
+          <div class="kpi-value" id="hp_total_sessions" style="color: var(--primary);">۰</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-title">مجموع مبالغ واریز شده</div>
+          <div class="kpi-value" id="hp_total_paid" style="color: var(--success);">۰ ت</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-title">مجموع بیعانه‌های پرداخت شده</div>
+          <div class="kpi-value" id="hp_total_deposit" style="color: var(--warning);">۰ ت</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-title">مشاورین مراجعه‌شده</div>
+          <div class="kpi-value" id="hp_counselors_list" style="font-size: 0.95rem; color: #fff; margin-top: 5px;">-</div>
+        </div>
+      </div>
+
+      <!-- ریز جلسات صندوق -->
+      <div class="card">
+        <h2 class="card-title">جلسات ثبت‌شده در صندوق کلینیک</h2>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>تاریخ جلسه</th>
+                <th>مشاور</th>
+                <th>نوع جلسه</th>
+                <th>پارت</th>
+                <th>مبلغ کل</th>
+                <th>بیعانه</th>
+                <th>واریز مانده</th>
+                <th>ثبت‌کننده</th>
+                <th>یادداشت منشی</th>
+              </tr>
+            </thead>
+            <tbody id="hp_transactions_tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ریز نوبت‌های ثبت‌شده در تقویم -->
+      <div class="card">
+        <h2 class="card-title">نوبت‌های رزروشده در تقویم</h2>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>تاریخ نوبت</th>
+                <th>ساعت پارت</th>
+                <th>مشاور</th>
+                <th>بیعانه ثبت‌شده</th>
+                <th>وضعیت نوبت</th>
+                <th>ثبت‌کننده</th>
+              </tr>
+            </thead>
+            <tbody id="hp_appointments_tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- تب پنجم: تنظیمات -->
   <div id="tab_settings" class="tab-content">
     <div class="card">
       <h2 class="card-title">برنامه حضور هفتگی مشاوران (روزها و ساعت‌ها)</h2>
@@ -1117,7 +1204,7 @@ let state = {
   currentUser: "",
   currentUsername: "",
   dutySchedules: {},
-  clientsDirectory: {} // دیکشنری تاریخچه مراجعین برای تکمیل خودکار
+  clientsDirectory: {}
 };
 
 const TIME_SLOTS = [
@@ -1152,12 +1239,10 @@ function checkAuth() {
   }
 }
 
-// اعمال محدودیت دسترسی به تب‌ها
 function applyRolePermissions() {
   const reportTabBtn = document.getElementById("btn_tab_report");
   const username = (state.currentUsername || "").trim().toLowerCase();
 
-  // فقط کاربر aliott مجاز به دیدن تب گزارش ماهانه است
   if (username === "aliott") {
     reportTabBtn.style.display = "flex";
   } else {
@@ -1237,6 +1322,10 @@ function switchTab(tabName) {
   } else if (tabName === 'report') {
     document.getElementById('btn_tab_report').classList.add('active');
     document.getElementById('tab_report').classList.add('active');
+  } else if (tabName === 'history') {
+    document.getElementById('btn_tab_history').classList.add('active');
+    document.getElementById('tab_history').classList.add('active');
+    if (state.appointmentsList.length === 0) fetchAppointments();
   } else {
     document.getElementById('btn_tab_settings').classList.add('active');
     document.getElementById('tab_settings').classList.add('active');
@@ -1287,7 +1376,6 @@ async function fetchInitialData() {
   }
 }
 
-// ساخت تاریخچه یکتا از مراجعین بر اساس تراکنش‌ها و نوبت‌ها
 function buildClientsDirectory() {
   state.clientsDirectory = {};
   const namesDatalist = document.getElementById("clients_name_datalist");
@@ -1335,7 +1423,6 @@ function buildClientsDirectory() {
   });
 }
 
-// تکمیل خودکار در فرم پذیرش صندوق
 function onClientNameInput(val) {
   val = (val || "").trim();
   if (state.clientsDirectory[val]) {
@@ -1352,7 +1439,6 @@ function onClientPhoneInput(val) {
   }
 }
 
-// تکمیل خودکار در پاپ‌آپ رزرو سریع تقویم
 function onQuickNameInput(val) {
   val = (val || "").trim();
   if (state.clientsDirectory[val]) {
@@ -1367,6 +1453,124 @@ function onQuickPhoneInput(val) {
     const nameInput = document.getElementById("bm_client_name");
     if (!nameInput.value) nameInput.value = state.clientsDirectory[val];
   }
+}
+
+// توابع تب جدید سوابق مراجع
+function onHistoryNameInput(val) {
+  val = (val || "").trim();
+  if (state.clientsDirectory[val]) {
+    document.getElementById("sh_client_phone").value = state.clientsDirectory[val];
+  }
+}
+
+function onHistoryPhoneInput(val) {
+  val = (val || "").trim();
+  if (state.clientsDirectory[val]) {
+    document.getElementById("sh_client_name").value = state.clientsDirectory[val];
+  }
+}
+
+function clearHistorySearch() {
+  document.getElementById("sh_client_name").value = "";
+  document.getElementById("sh_client_phone").value = "";
+  document.getElementById("history_results_area").style.display = "none";
+}
+
+function searchClientHistory() {
+  const nameQuery = document.getElementById("sh_client_name").value.trim();
+  const phoneQuery = document.getElementById("sh_client_phone").value.trim().replace(/[\s\-]/g, "");
+
+  if (!nameQuery && !phoneQuery) {
+    alert("لطفاً نام یا شماره تماس مراجع را وارد کنید.");
+    return;
+  }
+
+  // فیلتر از لیست تراکنش‌های صندوق
+  const matchedTrans = (state.recentList || []).filter(r => {
+    const mName = nameQuery && r.clientName && r.clientName.includes(nameQuery);
+    const mPhone = phoneQuery && r.clientPhone && r.clientPhone.replace(/[\s\-]/g, "").includes(phoneQuery);
+    return mName || mPhone;
+  });
+
+  // فیلتر از لیست نوبت‌های تقویم
+  const matchedApps = (state.appointmentsList || []).filter(a => {
+    const mName = nameQuery && a.clientName && a.clientName.includes(nameQuery);
+    const mPhone = phoneQuery && a.clientPhone && a.clientPhone.replace(/[\s\-]/g, "").includes(phoneQuery);
+    return (mName || mPhone) && a.status !== "کنسل شده";
+  });
+
+  if (matchedTrans.length === 0 && matchedApps.length === 0) {
+    alert("هیچ سابقه‌ای برای این مراجع پیدا نشد.");
+    document.getElementById("history_results_area").style.display = "none";
+    return;
+  }
+
+  // محاسبات تجمیعی مراجع
+  let totalPaid = 0;
+  let totalDeposit = 0;
+  const counselorsSet = new Set();
+
+  matchedTrans.forEach(t => {
+    totalPaid += Number(t.totalAmount) || 0;
+    totalDeposit += Number(t.deposit) || 0;
+    if (t.counselor) counselorsSet.add(t.counselor);
+  });
+
+  matchedApps.forEach(a => {
+    if (a.counselor) counselorsSet.add(a.counselor);
+  });
+
+  const totalSessionsCount = matchedTrans.length > 0 ? matchedTrans.length : matchedApps.length;
+
+  document.getElementById("hp_total_sessions").innerText = totalSessionsCount.toLocaleString('fa-IR');
+  document.getElementById("hp_total_paid").innerText = totalPaid.toLocaleString('fa-IR') + " ت";
+  document.getElementById("hp_total_deposit").innerText = totalDeposit.toLocaleString('fa-IR') + " ت";
+  document.getElementById("hp_counselors_list").innerText = Array.from(counselorsSet).join("، ") || "-";
+
+  // جدول تراکنش‌های صندوق
+  const tBodyTrans = document.getElementById("hp_transactions_tbody");
+  tBodyTrans.innerHTML = "";
+  if (matchedTrans.length === 0) {
+    tBodyTrans.innerHTML = `<tr><td colspan="9" style="text-align:center; color:var(--text-muted);">جلسه نهایی در صندوق برای این مراجع ثبت نشده است.</td></tr>`;
+  } else {
+    matchedTrans.forEach(t => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${(t.date || "-").toString().split("T")[0]}</td>
+        <td style="color:var(--primary); font-weight:bold;">${t.counselor}</td>
+        <td>${t.sessionType}</td>
+        <td>${t.parts || 1}</td>
+        <td>${Number(t.totalAmount).toLocaleString('fa-IR')}</td>
+        <td>${Number(t.deposit || 0).toLocaleString('fa-IR')}</td>
+        <td>${t.balanceTo || "کلینیک"}</td>
+        <td style="color:#cbd5e1; font-size:0.75rem;">${t.operator || "-"}</td>
+        <td style="font-size:0.8rem; color:var(--text-muted);">${t.notes || "-"}</td>
+      `;
+      tBodyTrans.appendChild(tr);
+    });
+  }
+
+  // جدول نوبت‌های تقویم
+  const tBodyApps = document.getElementById("hp_appointments_tbody");
+  tBodyApps.innerHTML = "";
+  if (matchedApps.length === 0) {
+    tBodyApps.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">نوبتی در تقویم یافت نشد.</td></tr>`;
+  } else {
+    matchedApps.forEach(a => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${a.appointmentDate}</td>
+        <td style="font-weight:bold; color:var(--warning);">${a.appointmentTime}</td>
+        <td>${a.counselor}</td>
+        <td>${Number(a.deposit || 0).toLocaleString('fa-IR')} ت</td>
+        <td><span style="background:rgba(56,189,248,0.15); padding:2px 8px; border-radius:4px; color:var(--primary); font-size:0.75rem;">${a.status}</span></td>
+        <td style="color:#cbd5e1; font-size:0.75rem;">${a.operator || "-"}</td>
+      `;
+      tBodyApps.appendChild(tr);
+    });
+  }
+
+  document.getElementById("history_results_area").style.display = "block";
 }
 
 function renderCounselorSelect() {
