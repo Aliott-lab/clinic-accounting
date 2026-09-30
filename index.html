@@ -81,7 +81,6 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
       transition: 0.2s;
     }
     .tab-btn.active {
@@ -496,7 +495,6 @@
       color: var(--primary);
     }
 
-    /* نشانگر نسخه برنامه در گوشه پایین سمت چپ */
     .app-version-badge {
       position: fixed;
       bottom: 10px;
@@ -519,8 +517,7 @@
 </head>
 <body>
 
-<!-- نشانگر نسخه در پایین صفحه -->
-<div class="app-version-badge">v2.4.0</div>
+<div class="app-version-badge">v2.6.2</div>
 
 <div id="login_overlay">
   <div class="login-card">
@@ -557,7 +554,7 @@
     <div style="display: flex; align-items: center; gap: 15px;">
       <div style="font-size: 0.85rem; color: var(--primary);" id="current_date_display">در حال بارگذاری...</div>
       <div style="background: rgba(15, 23, 42, 0.8); border: 1px solid var(--card-border); padding: 5px 12px; border-radius: 8px; font-size: 0.82rem; display: flex; align-items: center; gap: 8px;">
-        <span>👤 کاربر: <strong id="active_user_badge" style="color: #fff;">-</strong></span>
+        <span>کاربر: <strong id="active_user_badge" style="color: #fff;">-</strong></span>
         <button onclick="logout()" style="background: transparent; border: none; color: var(--danger); cursor: pointer; font-weight: bold; font-size: 0.8rem; padding: 0 4px;">(خروج)</button>
       </div>
     </div>
@@ -573,7 +570,6 @@
 
   <div id="loading-indicator">در حال همگام‌سازی اطلاعات با سرور...</div>
 
-  <!-- لیست پیشنهادی تاریخچه مراجعین (Autocomplete) -->
   <datalist id="clients_name_datalist"></datalist>
   <datalist id="clients_phone_datalist"></datalist>
 
@@ -657,7 +653,6 @@
           <input type="text" id="record_notes" placeholder="یادداشت منشی...">
         </div>
 
-        <!-- کادر خلاصه ارقام جلسه با اضافه شدن زنده مانده قابل دریافت -->
         <div class="summary-box">
           <div class="summary-item">
             <span class="label">مبلغ کل جلسه</span>
@@ -771,13 +766,24 @@
           </select>
         </div>
       </div>
-      <div style="display: flex; gap: 10px; margin-top: 10px;">
+
+      <!-- گزینه انتخابی ریز جلسات در فیش پرینت -->
+      <div style="background: rgba(15, 23, 42, 0.5); padding: 12px 16px; border-radius: 8px; border: 1px solid var(--card-border); margin-top: 10px; display: flex; align-items: center; justify-content: space-between;">
+        <label style="color: #fff; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+          <input type="checkbox" id="include_details_toggle" checked style="width: 17px; height: 17px; accent-color: var(--primary); cursor: pointer;">
+          شامل جدول ریز جلسات در فیش چاپی
+        </label>
+        <span style="font-size: 0.78rem; color: var(--text-muted);">(در صورت برداشتن تیک، فقط جدول تفکیک مبالغ و واریزی‌ها و نتیجه تسویه چاپ می‌شود)</span>
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-top: 14px;">
         <button type="button" class="btn-submit" style="flex: 2;" onclick="loadMonthlyReport()">مشاهده و محاسبه تسویه</button>
         <button type="button" class="btn-action-sm" style="flex: 1; padding: 10px; font-size: 0.95rem;" onclick="printCleanSettlementReceipt()">چاپ فیش تسویه</button>
       </div>
     </div>
 
     <div id="report_results_area" style="display: none;">
+      <!-- خلاصه‌های کل در پنل -->
       <div class="grid-4" style="margin-bottom: 16px;">
         <div class="kpi-card">
           <div class="kpi-title">تعداد کل جلسات</div>
@@ -803,6 +809,29 @@
           <strong style="font-size: 1.35rem;" id="settlement_status_text">در حال محاسبه...</strong>
         </div>
         <div style="font-size: 1.5rem; font-weight: bold;" id="settlement_status_amount">۰ تومان</div>
+      </div>
+
+      <!-- جدول تفکیک نوع جلسات در پنل -->
+      <div class="card" style="border: 1px solid var(--primary); background: rgba(15, 23, 42, 0.45);">
+        <h2 class="card-title" style="color: var(--primary); font-size: 1.05rem;">
+          گزارش تفکیکی بر اساس نوع جلسه و محل واریز مبالغ
+        </h2>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>نوع جلسه</th>
+                <th>تعداد جلسات</th>
+                <th>گردش مالی کل</th>
+                <th>سهم مشاور</th>
+                <th>سهم کلینیک</th>
+                <th>واریز به حساب کلینیک</th>
+                <th>واریز به حساب مشاور</th>
+              </tr>
+            </thead>
+            <tbody id="breakdown_table_body"></tbody>
+          </table>
+        </div>
       </div>
 
       <div class="card" id="report_table_card">
@@ -1230,7 +1259,8 @@ let state = {
   currentUsername: "",
   dutySchedules: {},
   clientsDirectory: {},
-  currentLoadedReport: []
+  currentLoadedReport: [],
+  currentBreakdownData: {}
 };
 
 const TIME_SLOTS = [
@@ -1675,7 +1705,6 @@ function loadCounselorScheduleUI() {
   document.getElementById("schedule_end_hour").value = current.end;
 }
 
-// ذخیره دوطرفه برنامه هفتگی مشاور در شیت و مرورگر
 async function saveCounselorSchedule() {
   const counselor = document.getElementById("schedule_counselor_select").value;
   if (!counselor) {
@@ -1796,8 +1825,8 @@ function renderWeeklyCalendar() {
     );
 
     let actionBtn = isDayBlocked 
-      ? `<br><button class="btn-unblock-day" onclick="unblockDay('${day.shamsiDate}', '${selectedCounselor}')">🔓 بازگشایی</button>`
-      : `<br><button class="btn-block-day" onclick="openBlockDayModal('${day.shamsiDate}', '${selectedCounselor}')">🔒 بستن روز</button>`;
+      ? `<br><button class="btn-unblock-day" onclick="unblockDay('${day.shamsiDate}', '${selectedCounselor}')">بازگشایی</button>`
+      : `<br><button class="btn-block-day" onclick="openBlockDayModal('${day.shamsiDate}', '${selectedCounselor}')">بستن روز</button>`;
 
     const tr = document.createElement("tr");
     tr.innerHTML = `
@@ -1819,7 +1848,7 @@ function renderWeeklyCalendar() {
 
       if (isDayBlocked) {
         td.classList.add("blocked-day-cell");
-        td.innerHTML = `<div style="font-size:0.75rem; color:var(--danger); font-weight:bold;">🔒 روز مسدود</div>`;
+        td.innerHTML = `<div style="font-size:0.75rem; color:var(--danger); font-weight:bold;">روز مسدود</div>`;
         tr.appendChild(td);
         return;
       }
@@ -2474,16 +2503,57 @@ function renderMonthlyReportData(records, counselor) {
   let counselorTotalShare = 0;
   let counselorDirectGot = 0;
 
+  const breakdown = {};
+
   const tbody = document.getElementById("report_table_body");
   tbody.innerHTML = "";
 
   records.forEach(r => {
-    totalTurnover += r.totalAmount;
-    counselorTotalShare += r.counselorShare;
+    const total = Number(r.totalAmount) || 0;
+    const cShare = Number(r.counselorShare) || 0;
+    const clShare = Math.max(0, total - cShare);
+    const sType = r.sessionType || "سایر";
+
+    totalTurnover += total;
+    counselorTotalShare += cShare;
+
+    // محاسبه مبالغ دقیق واریزی به کلینیک و مشاور
+    const depVal = Number(r.deposit || 0);
+    const balVal = Math.max(0, total - depVal);
+    
+    let paidToClinic = 0;
+    let paidToCounselor = 0;
+
+    if (depVal > 0) {
+      if (r.depositTo === "مشاور") paidToCounselor += depVal;
+      else paidToClinic += depVal;
+    }
+
+    if (balVal > 0) {
+      if (r.balanceTo === "مشاور") paidToCounselor += balVal;
+      else paidToClinic += balVal;
+    }
+
+    if (!breakdown[sType]) {
+      breakdown[sType] = {
+        count: 0,
+        totalAmount: 0,
+        counselorShare: 0,
+        clinicShare: 0,
+        paidToClinic: 0,
+        paidToCounselor: 0
+      };
+    }
+    breakdown[sType].count += 1;
+    breakdown[sType].totalAmount += total;
+    breakdown[sType].counselorShare += cShare;
+    breakdown[sType].clinicShare += clShare;
+    breakdown[sType].paidToClinic += paidToClinic;
+    breakdown[sType].paidToCounselor += paidToCounselor;
 
     let directToCounselorThisSession = 0;
     if (r.deposit > 0 && r.depositTo === "مشاور") directToCounselorThisSession += r.deposit;
-    if (r.balanceTo === "مشاور") directToCounselorThisSession += Math.max(0, r.totalAmount - (r.deposit || 0));
+    if (r.balanceTo === "مشاور") directToCounselorThisSession += Math.max(0, total - (r.deposit || 0));
     counselorDirectGot += directToCounselorThisSession;
 
     const tr = document.createElement("tr");
@@ -2492,8 +2562,8 @@ function renderMonthlyReportData(records, counselor) {
       <td>${r.clientName}</td>
       <td>${r.counselor}</td>
       <td>${r.sessionType}</td>
-      <td>${r.totalAmount.toLocaleString('fa-IR')}</td>
-      <td style="color:var(--primary); font-weight:bold;">${r.counselorShare.toLocaleString('fa-IR')}</td>
+      <td>${total.toLocaleString('fa-IR')}</td>
+      <td style="color:var(--primary); font-weight:bold;">${cShare.toLocaleString('fa-IR')}</td>
       <td>${(r.deposit || 0).toLocaleString('fa-IR')}</td>
       <td>${r.depositTo || "-"}</td>
       <td>${r.balanceTo || "کلینیک"}</td>
@@ -2501,6 +2571,9 @@ function renderMonthlyReportData(records, counselor) {
     `;
     tbody.appendChild(tr);
   });
+
+  state.currentBreakdownData = breakdown;
+  renderBreakdownTable(breakdown);
 
   document.getElementById("kpi_sessions_count").innerText = totalSessions.toLocaleString('fa-IR');
   document.getElementById("kpi_total_turnover").innerText = totalTurnover.toLocaleString('fa-IR') + " ت";
@@ -2516,7 +2589,7 @@ function renderMonthlyReportData(records, counselor) {
   if (counselor === "all") {
     statusBox.className = "settlement-banner to-counselor";
     statusLabel.innerText = "درآمد کلینیک:";
-    statusText.innerText = "مجموع سهم کلینیک";
+    statusText.innerText = "مجموع سهم کلینیک از تمام جلسات";
     statusAmount.innerText = (totalTurnover - counselorTotalShare).toLocaleString('fa-IR') + " تومان";
   } else if (netSettlement >= 0) {
     statusBox.className = "settlement-banner to-counselor";
@@ -2531,7 +2604,35 @@ function renderMonthlyReportData(records, counselor) {
   }
 }
 
-// چاپ تمیز، رسمی و ایزوله فیش تسویه حساب بدون نمایش فیلترها و هدرهای پنل
+// رندر جدول تفکیکی در پنل با دو ستون واریز به کلینیک و واریز به مشاور
+function renderBreakdownTable(breakdown) {
+  const tbody = document.getElementById("breakdown_table_body");
+  tbody.innerHTML = "";
+
+  const types = Object.keys(breakdown);
+  if (types.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted);">رکوردی برای تفکیک یافت نشد.</td></tr>`;
+    return;
+  }
+
+  types.forEach(type => {
+    const b = breakdown[type];
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td style="font-weight:bold; color:var(--primary);">${type}</td>
+      <td><strong>${b.count.toLocaleString('fa-IR')}</strong> جلسه</td>
+      <td>${b.totalAmount.toLocaleString('fa-IR')} تومان</td>
+      <td style="color:var(--primary);">${b.counselorShare.toLocaleString('fa-IR')} تومان</td>
+      <td style="color:var(--success); font-weight:bold;">${b.clinicShare.toLocaleString('fa-IR')} تومان</td>
+      <td style="color:#38bdf8;">${b.paidToClinic.toLocaleString('fa-IR')} تومان</td>
+      <td style="color:#f59e0b;">${b.paidToCounselor.toLocaleString('fa-IR')} تومان</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// چاپ فیش رسمی تسویه مشاور بدون باکس خلاصه‌های اضافی و با محرمانه ماندن سهم کلینیک در سپه
 function printCleanSettlementReceipt() {
   if (!state.currentLoadedReport || state.currentLoadedReport.length === 0) {
     alert("ابتدا دکمه «مشاهده و محاسبه تسویه» را بزنید تا گزارش مالی لود شود.");
@@ -2543,50 +2644,37 @@ function printCleanSettlementReceipt() {
   const year = document.getElementById("report_year").value;
   const month = document.getElementById("report_month_select").value;
   
-  const count = document.getElementById("kpi_sessions_count").innerText;
-  const turnover = document.getElementById("kpi_total_turnover").innerText;
-  const cShare = document.getElementById("kpi_counselor_total_share").innerText;
-  const directGot = document.getElementById("kpi_counselor_direct_got").innerText;
   const statusText = document.getElementById("settlement_status_text").innerText;
   const statusAmount = document.getElementById("settlement_status_amount").innerText;
   const tableRows = document.getElementById("report_table_body").innerHTML;
+  const includeDetails = document.getElementById("include_details_toggle").checked;
 
-  const printWindow = window.open('', '_blank', 'width=950,height=700');
-  printWindow.document.write(`
-    <!DOCTYPE html>
-    <html lang="fa" dir="rtl">
-    <head>
-      <meta charset="UTF-8">
-      <title>فیش تسویه‌حساب مشاور - ${counselorName}</title>
-      <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
-      <style>
-        * { box-sizing: border-box; font-family: 'Vazirmatn', sans-serif; }
-        body { padding: 30px; color: #111; direction: rtl; font-size: 13px; line-height: 1.6; }
-        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #222; padding-bottom: 12px; margin-bottom: 20px; }
-        .clinic-name { font-size: 18px; font-weight: bold; margin: 0; }
-        .sub-title { font-size: 12px; color: #555; margin-top: 4px; }
-        .meta-box { font-size: 13px; text-align: left; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { border: 1px solid #bbb; padding: 8px 10px; text-align: right; }
-        th { background: #f1f5f9; }
-        .kpi-row { display: flex; justify-content: space-between; background: #f8fafc; border: 1px solid #ddd; padding: 12px; border-radius: 8px; margin-top: 15px; font-weight: bold; }
-        .settlement-box { margin-top: 15px; border: 1.5px solid #222; border-radius: 8px; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; background: #fafafa; font-size: 15px; }
-        .signatures { margin-top: 55px; display: flex; justify-content: space-between; padding: 0 40px; font-weight: bold; }
-      </style>
-    </head>
-    <body>
-      <div class="header">
-        <div>
-          <div class="clinic-name">کلینیک روان‌شناسی سپهر آرامش</div>
-          <div class="sub-title">صورت‌حساب و فیش رسمی تسویه‌‌حساب خدمات مشاوره</div>
-        </div>
-        <div class="meta-box">
-          <div>طرف حساب: <strong>${counselorName}</strong></div>
-          <div>دوره مالی: <strong>${year}/${month}</strong></div>
-          <div>تاریخ صدور فیش: <strong>${state.shamsiDate}</strong></div>
-        </div>
-      </div>
+  // ساخت ردیف‌های جدول تفکیک برای نسخه چاپی با رعایت عدم درج سهم کلینیک برای سپه
+  let printBreakdownRows = "";
+  for (const type in state.currentBreakdownData) {
+    const b = state.currentBreakdownData[type];
+    
+    // سهم کلینیک برای سپه در فیش مشاور درج نشود (محرمانه)
+    const isSepah = type.includes("سپه");
+    const clinicShareDisplay = isSepah ? "-" : (b.clinicShare.toLocaleString('fa-IR') + " تومان");
 
+    printBreakdownRows += `
+      <tr>
+        <td><strong>${type}</strong></td>
+        <td style="text-align:center;">${b.count.toLocaleString('fa-IR')}</td>
+        <td>${b.totalAmount.toLocaleString('fa-IR')} تومان</td>
+        <td>${b.counselorShare.toLocaleString('fa-IR')} تومان</td>
+        <td>${clinicShareDisplay}</td>
+        <td>${b.paidToClinic.toLocaleString('fa-IR')} تومان</td>
+        <td>${b.paidToCounselor.toLocaleString('fa-IR')} تومان</td>
+      </tr>
+    `;
+  }
+
+  let detailsSectionHtml = "";
+  if (includeDetails) {
+    detailsSectionHtml = `
+      <div class="section-title">ریز جلسات برگزارشده در این دوره</div>
       <table>
         <thead>
           <tr>
@@ -2606,17 +2694,68 @@ function printCleanSettlementReceipt() {
           ${tableRows}
         </tbody>
       </table>
+    `;
+  }
 
-      <div class="kpi-row">
-        <div>تعداد کل جلسات: ${count}</div>
-        <div>گردش مالی کل: ${turnover}</div>
-        <div>سهم استحقاقی مشاور: ${cShare}</div>
-        <div>دریافتی مستقیم مشاور: ${directGot}</div>
+  const printWindow = window.open('', '_blank', 'width=950,height=750');
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html lang="fa" dir="rtl">
+    <head>
+      <meta charset="UTF-8">
+      <title>فیش تسویه‌حساب و صورت‌وضعیت مالی - ${counselorName}</title>
+      <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+      <style>
+        * { box-sizing: border-box; font-family: 'Vazirmatn', sans-serif; }
+        body { padding: 30px; color: #111; direction: rtl; font-size: 13px; line-height: 1.6; }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #222; padding-bottom: 12px; margin-bottom: 20px; }
+        .clinic-name { font-size: 18px; font-weight: bold; margin: 0; }
+        .sub-title { font-size: 12px; color: #555; margin-top: 4px; }
+        .meta-box { font-size: 13px; text-align: left; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; margin-bottom: 20px; }
+        th, td { border: 1px solid #bbb; padding: 8px 10px; text-align: right; }
+        th { background: #f1f5f9; }
+        .section-title { font-size: 14px; font-weight: bold; margin-top: 20px; margin-bottom: 6px; color: #1e293b; }
+        .settlement-box { margin-top: 25px; border: 1.5px solid #222; border-radius: 8px; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; background: #fafafa; font-size: 15px; }
+        .signatures { margin-top: 60px; display: flex; justify-content: space-between; padding: 0 40px; font-weight: bold; }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <div>
+          <div class="clinic-name">کلینیک روان‌شناسی سپهر آرامش</div>
+          <div class="sub-title">صورت‌حساب و گزارش مالی رسمی خدمات مشاوره</div>
+        </div>
+        <div class="meta-box">
+          <div>طرف حساب: <strong>${counselorName}</strong></div>
+          <div>دوره مالی: <strong>${year}/${month}</strong></div>
+          <div>تاریخ صدور: <strong>${state.shamsiDate}</strong></div>
+        </div>
       </div>
 
+      <div class="section-title">جدول تفکیکی نوع جلسات و محل واریز مبالغ</div>
+      <table>
+        <thead>
+          <tr>
+            <th>نوع جلسه</th>
+            <th style="text-align:center;">تعداد جلسات</th>
+            <th>مبلغ کل</th>
+            <th>سهم مشاور</th>
+            <th>سهم کلینیک</th>
+            <th>مبلغ واریز شده به حساب کلینیک</th>
+            <th>مبلغ واریز شده به حساب مشاور</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${printBreakdownRows}
+        </tbody>
+      </table>
+
+      ${detailsSectionHtml}
+
       <div class="settlement-box">
-        <div><strong>نتیجه تسویه:</strong> ${statusText}</div>
-        <div><strong>مبلغ تسویه:</strong> <span style="font-size: 18px; font-weight: 900;">${statusAmount}</span></div>
+        <div><strong>وضعیت و نتیجه تسویه:</strong> ${statusText}</div>
+        <div><strong>مبلغ تسویه نهایی:</strong> <span style="font-size: 19px; font-weight: 900;">${statusAmount}</span></div>
       </div>
 
       <div class="signatures">
