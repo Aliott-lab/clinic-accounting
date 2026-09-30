@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>پنل میز پذیرش و مدیریت | کلینیک روان‌شناسی سپهر آرامش</title>
+  <title>سامانه جامع پذیرش و نوبت‌دهی تقویمی | کلینیک سپهر آرامش</title>
   <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
   <style>
     :root {
@@ -22,10 +22,33 @@
     }
 
     * { box-sizing: border-box; font-family: 'Vazirmatn', sans-serif; }
-    body { background-color: var(--bg-main); color: var(--text-main); margin: 0; padding: 15px; line-height: 1.6; }
-    .container { max-width: 1200px; margin: 0 auto; }
+    body { background-color: var(--bg-main); color: var(--text-main); margin: 0; padding: 15px 10px; line-height: 1.6; }
+    .container { max-width: 1400px; margin: 0 auto; }
 
-    /* هدر */
+    #login_overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--bg-main);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      padding: 15px;
+    }
+    .login-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 35px 25px;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+    }
+    .login-logo { width: 65px; height: 65px; object-fit: contain; margin-bottom: 12px; }
+    .login-title { margin: 0 0 5px 0; font-size: 1.3rem; color: #fff; }
+    .login-sub { margin: 0 0 25px 0; font-size: 0.85rem; color: var(--primary); }
+
     .header-card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
@@ -34,31 +57,31 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
       flex-wrap: wrap;
-      gap: 15px;
+      gap: 10px;
     }
-    .clinic-brand { display: flex; align-items: center; gap: 12px; }
-    .clinic-logo { width: 45px; height: 45px; object-fit: contain; }
-    .clinic-title { margin: 0; font-size: 1.25rem; color: #fff; }
+    .clinic-info { display: flex; align-items: center; gap: 12px; }
+    .clinic-logo { width: 40px; height: 40px; object-fit: contain; }
+    .clinic-title { margin: 0; font-size: 1.2rem; color: #fff; }
     .clinic-sub { margin: 0; font-size: 0.8rem; color: var(--primary); }
 
     .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
     .tab-btn {
       flex: 1;
-      min-width: 130px;
-      padding: 12px 10px;
+      min-width: 150px;
+      padding: 12px;
       background: rgba(22, 31, 48, 0.6);
       border: 1px solid var(--card-border);
       color: var(--text-muted);
       border-radius: 12px;
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       font-weight: bold;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
+      gap: 8px;
       transition: 0.2s;
     }
     .tab-btn.active {
@@ -77,156 +100,479 @@
       border-radius: 16px;
       padding: 22px;
       margin-bottom: 20px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
     }
     .card-title {
       margin-top: 0;
       margin-bottom: 16px;
-      font-size: 1.05rem;
+      font-size: 1.1rem;
       color: var(--primary);
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
 
-    .form-group { display: flex; flex-direction: column; margin-bottom: 14px; }
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+
+    .form-group { display: flex; flex-direction: column; margin-bottom: 12px; }
     .form-group label { font-size: 0.85rem; margin-bottom: 6px; color: var(--text-muted); }
-    .form-group input, .form-group select, .form-group textarea {
+    .form-group input, .form-group select {
       padding: 10px 12px;
       background: var(--input-bg);
       border: 1px solid var(--card-border);
-      border-radius: 9px;
+      border-radius: 8px;
       font-size: 0.95rem;
       color: #fff;
       outline: none;
+      transition: 0.2s;
     }
     .form-group input:focus, .form-group select:focus {
       border-color: var(--primary);
       box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
     }
 
-    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
-    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; }
-    .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px; }
-
-    /* کادر برجسته مانده تسویه */
-    .balance-highlight-box {
-      background: rgba(34, 197, 94, 0.1);
-      border: 1.5px dashed var(--success);
+    .payment-module {
+      background: rgba(15, 23, 42, 0.5);
+      border: 1px solid var(--card-border);
       border-radius: 12px;
-      padding: 14px 18px;
-      margin: 10px 0 18px 0;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .deposit-toggle-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      margin-bottom: 10px;
     }
-    .balance-label { font-size: 0.92rem; color: #fff; font-weight: bold; }
-    .balance-val { font-size: 1.25rem; color: var(--success); font-weight: 900; }
+    .deposit-details-grid {
+      display: none;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      padding: 12px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
 
-    .btn-submit {
+    .summary-box {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 14px;
+      margin: 16px 0;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      text-align: center;
+    }
+    .summary-item .label { font-size: 0.85rem; color: var(--text-muted); display: block; }
+    .summary-item .val { font-size: 1.2rem; font-weight: bold; margin-top: 4px; display: block; }
+    .val-total { color: #f8fafc; }
+
+    .kpi-card {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+    }
+    .kpi-title { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px; }
+    .kpi-value { font-size: 1.3rem; font-weight: bold; }
+
+    .settlement-banner {
+      border-radius: 12px;
+      padding: 18px 20px;
+      margin: 18px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border: 1px solid transparent;
+    }
+    .settlement-banner.to-counselor {
+      background: rgba(34, 197, 94, 0.12);
+      border-color: rgba(34, 197, 94, 0.3);
+      color: var(--success);
+    }
+    .settlement-banner.to-clinic {
+      background: rgba(239, 68, 68, 0.12);
+      border-color: rgba(239, 68, 68, 0.3);
+      color: var(--danger);
+    }
+
+    button.btn-submit {
       width: 100%;
       padding: 13px;
       background: linear-gradient(135deg, #0284c7, #0ea5e9);
       color: white;
       border: none;
-      border-radius: 11px;
-      font-size: 0.95rem;
+      border-radius: 10px;
+      font-size: 1rem;
       font-weight: bold;
       cursor: pointer;
       transition: 0.2s;
     }
-    .btn-submit:hover { opacity: 0.9; }
+    button.btn-submit:hover { opacity: 0.9; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-      font-size: 0.85rem;
-    }
-    th, td {
-      padding: 10px 12px;
-      text-align: right;
-      border-bottom: 1px solid var(--card-border);
-    }
-    th { background: rgba(15, 23, 42, 0.5); color: var(--text-muted); }
-    tr:hover { background: rgba(56, 189, 248, 0.03); }
-
-    .btn-action-sm {
-      padding: 4px 8px;
-      border-radius: 6px;
+    .counselor-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; }
+    .counselor-table th, .counselor-table td { padding: 10px 12px; border-bottom: 1px solid var(--card-border); text-align: right; }
+    .counselor-table th { color: var(--text-muted); background: rgba(15, 23, 42, 0.4); }
+    
+    .table-input {
+      padding: 6px 10px;
+      background: var(--input-bg);
       border: 1px solid var(--card-border);
-      background: transparent;
+      border-radius: 6px;
       color: #fff;
+      font-weight: bold;
+      outline: none;
+    }
+    .btn-action-sm {
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--primary);
+      border: 1px solid var(--primary);
+      padding: 6px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: 0.2s;
+    }
+    .btn-action-sm:hover { background: var(--primary); color: #000; }
+    .btn-edit-sm {
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--primary);
+      border: 1px solid var(--primary);
+      padding: 3px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      margin-left: 4px;
+    }
+    .btn-delete-c {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--danger);
+      border: 1px solid var(--danger);
+      padding: 3px 8px;
+      border-radius: 6px;
       cursor: pointer;
       font-size: 0.75rem;
     }
 
-    /* استایل اختصاصی پرینت فیش برای حذف کامل المان‌های زائد */
-    @media print {
-      body * {
-        visibility: hidden !important;
-      }
-      #printable_settlement_receipt, #printable_settlement_receipt * {
-        visibility: visible !important;
-      }
-      #printable_settlement_receipt {
-        position: absolute !important;
-        left: 0 !important;
-        top: 0 !important;
-        width: 100% !important;
-        background: #fff !important;
-        color: #000 !important;
-        padding: 25px !important;
-      }
-      .no-print { display: none !important; }
-      table { border-collapse: collapse; width: 100%; }
-      th, td { border: 1px solid #ddd !important; color: #000 !important; }
-      th { background-color: #f3f4f6 !important; }
+    .table-wrapper { overflow-x: auto; margin-top: 10px; }
+    table.data-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: right; }
+    table.data-table th, table.data-table td { padding: 10px 8px; border-bottom: 1px solid var(--card-border); white-space: nowrap; }
+    table.data-table th { color: var(--text-muted); background: rgba(15, 23, 42, 0.4); }
+
+    .calendar-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      background: rgba(15, 23, 42, 0.6);
+      padding: 14px 18px;
+      border-radius: 12px;
+      border: 1px solid var(--card-border);
+      margin-bottom: 16px;
+    }
+    .calendar-table-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      border-radius: 12px;
+      border: 1px solid var(--card-border);
+      background: var(--input-bg);
+    }
+    table.calendar-grid {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      min-width: 1250px;
+      background: var(--input-bg);
+    }
+    table.calendar-grid th, table.calendar-grid td {
+      border-bottom: 1px solid var(--card-border);
+      border-left: 1px solid var(--card-border);
+      text-align: center;
+      padding: 0;
+    }
+    table.calendar-grid th {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: #1e293b;
+      color: var(--primary);
+      font-size: 0.8rem;
+      font-weight: bold;
+      padding: 10px 6px;
+      white-space: nowrap;
+    }
+    .day-col {
+      width: 140px;
+      min-width: 140px;
+      background: #111827 !important;
+      color: #fff;
+      font-size: 0.85rem;
+      font-weight: bold;
+      vertical-align: middle;
+      position: sticky;
+      right: 0;
+      z-index: 5;
+      border-right: 1px solid var(--card-border);
+      padding: 8px !important;
+      text-align: center;
+    }
+    table.calendar-grid th.day-col { z-index: 15; }
+
+    .btn-block-day {
+      display: inline-block;
+      margin-top: 4px;
+      padding: 2px 6px;
+      font-size: 0.68rem;
+      border-radius: 4px;
+      cursor: pointer;
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid var(--danger);
+      color: #fca5a5;
+    }
+    .btn-unblock-day {
+      display: inline-block;
+      margin-top: 4px;
+      padding: 2px 6px;
+      font-size: 0.68rem;
+      border-radius: 4px;
+      cursor: pointer;
+      background: rgba(34, 197, 94, 0.2);
+      border: 1px solid var(--success);
+      color: #86efac;
+    }
+
+    .cal-cell {
+      height: 70px;
+      vertical-align: middle;
+      position: relative;
+      min-width: 95px;
+    }
+    .cal-cell.blocked-day-cell {
+      background: rgba(239, 68, 68, 0.15) !important;
+      cursor: not-allowed;
+    }
+    
+    .cal-cell.off-duty-cell {
+      background: rgba(239, 68, 68, 0.08) !important;
+      border: 1px dashed rgba(239, 68, 68, 0.3) !important;
+      cursor: not-allowed;
+    }
+    .off-duty-label {
+      font-size: 0.72rem;
+      color: #f87171;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      user-select: none;
+    }
+
+    .slot-full-btn {
+      height: 100%;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: 0.15s;
+      background: transparent;
+      border: none;
+      color: #64748b;
+      font-size: 0.75rem;
+      font-weight: bold;
+    }
+    .slot-full-btn:hover {
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--primary);
+    }
+
+    .slot-split-container {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      width: 100%;
+    }
+    .slot-half-btn {
+      flex: 1;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 2px;
+      border: none;
+      border-bottom: 1px dashed rgba(255,255,255,0.08);
+      background: transparent;
+      color: #64748b;
+      font-size: 0.65rem;
+      transition: 0.15s;
+    }
+    .slot-half-btn:last-child { border-bottom: none; }
+    .slot-half-btn:hover {
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--primary);
+    }
+
+    .cal-badge {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      border-radius: 5px;
+      padding: 2px 4px;
+      font-size: 0.72rem;
+      text-align: center;
+      cursor: pointer;
+    }
+    .cal-badge.status-reserved {
+      background: rgba(56, 189, 248, 0.22);
+      border: 1px solid var(--primary);
+      color: #fff;
+    }
+    .cal-badge.status-completed {
+      background: rgba(34, 197, 94, 0.2);
+      border: 1px solid var(--success);
+      color: #fff;
+    }
+    .cal-badge.status-meeting {
+      background: rgba(168, 85, 247, 0.25);
+      border: 1px solid var(--purple);
+      color: #e9d5ff;
+    }
+
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      padding: 15px;
+    }
+    .modal-content {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      max-width: 600px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 12px;
+    }
+    .modal-close-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.5rem;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    #loading-indicator {
+      display: none;
+      text-align: center;
+      padding: 8px;
+      font-size: 0.85rem;
+      color: var(--primary);
     }
   </style>
 </head>
 <body>
 
-<div class="container">
-  
-  <div class="header-card no-print">
-    <div class="clinic-brand">
+<div id="login_overlay">
+  <div class="login-card">
+    <img src="https://cdn.imgurl.ir/uploads/l39464_et_1s.png" class="login-logo" alt="لوگو">
+    <h2 class="login-title">کلینیک سپهر آرامش</h2>
+    <p class="login-sub">سامانه پذیرش و مدیریت مراجعین</p>
+    
+    <form id="login_form">
+      <div class="form-group" style="text-align: right;">
+        <label>نام کاربری:</label>
+        <input type="text" id="login_username" required placeholder="مثلاً: admin" dir="ltr">
+      </div>
+      <div class="form-group" style="text-align: right;">
+        <label>رمز عبور:</label>
+        <input type="password" id="login_password" required placeholder="••••••••" dir="ltr">
+      </div>
+      <button type="submit" id="btn_login" class="btn-submit" style="margin-top: 10px;">ورود به سامانه</button>
+      <div id="login_error" style="color: var(--danger); font-size: 0.85rem; margin-top: 12px; display: none;"></div>
+    </form>
+  </div>
+</div>
+
+<div class="container" id="main_app" style="display: none;">
+
+  <div class="header-card">
+    <div class="clinic-info">
       <img src="https://cdn.imgurl.ir/uploads/l39464_et_1s.png" class="clinic-logo" alt="لوگو">
       <div>
         <h1 class="clinic-title">کلینیک روان‌شناسی سپهر آرامش</h1>
-        <p class="clinic-sub">میز کار پذیرش و امور مالی</p>
+        <p class="clinic-sub">سامانه هوشمند پذیرش، نوبت‌دهی تقویمی و حسابداری</p>
       </div>
     </div>
-    <div style="font-size: 0.85rem; color: var(--text-muted);">
-      اپراتور: <strong id="operator_display_name" style="color: #fff;">منشی پذیرش</strong>
+    
+    <div style="display: flex; align-items: center; gap: 15px;">
+      <div style="font-size: 0.85rem; color: var(--primary);" id="current_date_display">در حال بارگذاری...</div>
+      <div style="background: rgba(15, 23, 42, 0.8); border: 1px solid var(--card-border); padding: 5px 12px; border-radius: 8px; font-size: 0.82rem; display: flex; align-items: center; gap: 8px;">
+        <span>👤 کاربر: <strong id="active_user_badge" style="color: #fff;">-</strong></span>
+        <button onclick="logout()" style="background: transparent; border: none; color: var(--danger); cursor: pointer; font-weight: bold; font-size: 0.8rem; padding: 0 4px;">(خروج)</button>
+      </div>
     </div>
   </div>
 
-  <div class="nav-tabs no-print">
-    <button class="tab-btn active" onclick="switchDeskTab('reception')">🛎️ میز پذیرش و ثبت تراکنش</button>
-    <button class="tab-btn" onclick="switchDeskTab('calendar')">📅 تقویم نوبت‌ها</button>
-    <button class="tab-btn" onclick="switchDeskTab('settlement')">📊 تسویه‌حساب ماهانه مشاوران</button>
+  <div class="nav-tabs">
+    <button class="tab-btn active" id="btn_tab_desk" onclick="switchTab('desk')">میز پذیرش و صندوق</button>
+    <button class="tab-btn" id="btn_tab_appointments" onclick="switchTab('appointments')">تقویم و نوبت‌دهی هفتگی</button>
+    <button class="tab-btn" id="btn_tab_report" onclick="switchTab('report')">گزارش و تسویه ماهانه</button>
+    <button class="tab-btn" id="btn_tab_history" onclick="switchTab('history')">سوابق و پرونده مراجع</button>
+    <button class="tab-btn" id="btn_tab_settings" onclick="switchTab('settings')">تنظیمات، نرخ‌ها و مشاوران</button>
   </div>
 
-  <!-- ۱. تب میز پذیرش -->
-  <div id="tab_reception" class="tab-content active no-print">
+  <div id="loading-indicator">در حال همگام‌سازی اطلاعات با سرور...</div>
+
+  <!-- لیست پیشنهادی تاریخچه مراجعین (Autocomplete) -->
+  <datalist id="clients_name_datalist"></datalist>
+  <datalist id="clients_phone_datalist"></datalist>
+
+  <!-- تب اول: پذیرش و صندوق -->
+  <div id="tab_desk" class="tab-content active">
     <div class="card">
-      <h3 class="card-title">ثبت و تسویه جلسه مشاوره</h3>
-      
-      <form id="form_reception_transaction">
+      <h2 class="card-title">ثبت پذیرش و تسویه مالی جلسه</h2>
+      <form id="record_form">
+        
         <div class="grid-3">
           <div class="form-group">
-            <label>نام مراجع:</label>
-            <input type="text" id="t_client_name" required placeholder="مثال: مریم محمدی">
+            <label>نام و نام خانوادگی مراجع (با سابقه قبلی):</label>
+            <input type="text" id="client_name" required placeholder="تایپ نام جهت پیشنهاد خودکار..." list="clients_name_datalist" oninput="onClientNameInput(this.value)">
           </div>
           <div class="form-group">
             <label>شماره تماس مراجع:</label>
-            <input type="tel" id="t_client_phone" placeholder="۰۹۱۲..." dir="ltr">
+            <input type="tel" id="client_phone" placeholder="۰۹۱۲..." dir="ltr" list="clients_phone_datalist" oninput="onClientPhoneInput(this.value)">
           </div>
           <div class="form-group">
-            <label>نام مشاور:</label>
-            <select id="t_counselor" required onchange="calcSharesAndBalance()">
-              <option value="" disabled selected>انتخاب مشاور...</option>
+            <label>مشاور:</label>
+            <select id="counselor_select" required>
+              <option value="" disabled selected>در حال بارگذاری...</option>
             </select>
           </div>
         </div>
@@ -234,206 +580,612 @@
         <div class="grid-3">
           <div class="form-group">
             <label>نوع جلسه:</label>
-            <select id="t_session_type" onchange="onSessionTypeChanged()">
+            <select id="session_type" required>
               <option value="آزاد">آزاد</option>
-              <option value="دانشجویی">دانشجویی</option>
-              <option value="روان‌سنجی">روان‌سنجی</option>
-              <option value="سوپرویژن">سوپرویژن</option>
+              <option value="سپه">سپه</option>
+              <option value="ورزش و بهزیستی">ورزش و بهزیستی</option>
+              <option value="طلاق">طلاق</option>
             </select>
           </div>
-          <div class="form-group">
+          <div class="form-group" id="group_parts" style="display: none;">
             <label>تعداد پارت:</label>
-            <input type="number" id="t_parts" min="1" value="1" oninput="calcSharesAndBalance()">
+            <input type="number" id="parts_count" min="1" value="1">
           </div>
           <div class="form-group">
             <label>مبلغ کل جلسه (تومان):</label>
-            <input type="number" id="t_total_amount" required value="0" oninput="calcSharesAndBalance()">
+            <input type="number" id="total_amount" required value="0">
           </div>
         </div>
 
-        <div class="grid-3">
-          <div class="form-group">
-            <label>بیعانه پرداخت‌شده قبلی (تومان):</label>
-            <input type="number" id="t_deposit" value="0" oninput="calcSharesAndBalance()">
+        <div class="payment-module">
+          <div class="deposit-toggle-bar">
+            <label style="font-weight: 500; color: #fff; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+              <input type="checkbox" id="has_deposit_toggle" style="width: 17px; height: 17px; accent-color: var(--primary); cursor: pointer;">
+              این مراجع بیعانه پرداخت کرده است
+            </label>
+            <span id="remaining_badge" style="font-size: 0.85rem; color: var(--primary); font-weight: bold;"></span>
           </div>
-          <div class="form-group">
-            <label>واریز بیعانه به حساب:</label>
-            <select id="t_deposit_to">
-              <option value="کلینیک">کلینیک</option>
-              <option value="مشاور">مشاور</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>واریز مانده تسویه به حساب:</label>
-            <select id="t_balance_to">
-              <option value="کلینیک">کلینیک</option>
-              <option value="مشاور">مشاور</option>
-            </select>
-          </div>
-        </div>
 
-        <!-- کادر برجسته مانده قابل دریافت که خواسته بودید -->
-        <div class="balance-highlight-box">
-          <div>
-            <div class="balance-label">مبلغ باقیمانده قابل دریافت (کارتخوان / تسویه):</div>
-            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 3px;">
-              (مبلغ کل منهای بیعانه پرداختی)
+          <div id="deposit_fields_wrapper" class="deposit-details-grid">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label>مبلغ بیعانه دریافتی (تومان):</label>
+              <input type="number" id="deposit_amount" value="0" placeholder="مثال: ۲۰۰,۰۰۰">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label>بیعانه به حساب چه کسی رفته است؟</label>
+              <select id="deposit_to">
+                <option value="مشاور">مستقیم به کارت مشاور</option>
+                <option value="کلینیک">کارت‌خوان / کارت کلینیک</option>
+              </select>
             </div>
           </div>
-          <div class="balance-val" id="display_due_balance">۰ تومان</div>
-        </div>
 
-        <div class="grid-2">
-          <div style="background: rgba(15,23,42,0.5); padding: 12px; border-radius: 9px; border: 1px solid var(--card-border); font-size: 0.85rem;">
-            سهم مشاور (<span id="display_counselor_pct">۷۰</span>٪): <strong id="display_counselor_share" style="color: var(--primary);">۰</strong> تومان
-          </div>
-          <div style="background: rgba(15,23,42,0.5); padding: 12px; border-radius: 9px; border: 1px solid var(--card-border); font-size: 0.85rem;">
-            سهم کلینیک: <strong id="display_clinic_share" style="color: var(--warning);">۰</strong> تومان
+          <div class="form-group" style="margin-bottom: 0;">
+            <label id="balance_label">تسویه کل مبلغ جلسه از طریق:</label>
+            <select id="balance_to">
+              <option value="کلینیک">کارت‌خوان کلینیک</option>
+              <option value="مشاور">کارت شخصی مشاور</option>
+            </select>
           </div>
         </div>
 
-        <div class="form-group" style="margin-top: 14px;">
-          <label>توضیحات و یادداشت:</label>
-          <input type="text" id="t_notes" placeholder="اختیاری...">
+        <div class="form-group">
+          <label>توضیحات (اختیاری):</label>
+          <input type="text" id="record_notes" placeholder="یادداشت منشی...">
         </div>
 
-        <button type="submit" id="btn_save_trans" class="btn-submit">ثبت نهایی تراکنش در سیستم</button>
+        <div class="summary-box">
+          <div class="summary-item">
+            <span class="label">مبلغ کل جلسه</span>
+            <span class="val val-total" id="box_total">۰ تومان</span>
+          </div>
+        </div>
+
+        <button type="submit" id="btn_submit" class="btn-submit">ثبت در سیستم و شیت</button>
       </form>
     </div>
 
-    <!-- جدول آخرین تراکنش‌های ثبت‌شده -->
+    <!-- مراجعین اخیر -->
     <div class="card">
-      <h3 class="card-title">آخرین تراکنش‌های ثبت‌شده پذیرش</h3>
-      <div style="overflow-x: auto;">
-        <table>
+      <h2 class="card-title">آخرین مراجعین ثبت‌شده در صندوق</h2>
+      <div class="table-wrapper">
+        <table class="data-table">
           <thead>
             <tr>
-              <th>کد</th>
               <th>تاریخ</th>
               <th>مراجع</th>
               <th>مشاور</th>
-              <th>مبلغ کل</th>
-              <th>بیعانه</th>
-              <th>مانده دریافتی</th>
-              <th>سهم مشاور</th>
-              <th>سهم کلینیک</th>
-            </tr>
-          </thead>
-          <tbody id="recent_transactions_tbody">
-            <tr><td colspan="9" style="text-align: center; color: var(--text-muted);">در حال دریافت اطلاعات...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- ۲. تب تقویم و نوبت‌ها -->
-  <div id="tab_calendar" class="tab-content no-print">
-    <div class="card">
-      <h3 class="card-title">نوبت‌های ثبت‌شده کلینیک</h3>
-      <div style="overflow-x: auto;">
-        <table>
-          <thead>
-            <tr>
-              <th>کد نوبت</th>
-              <th>تاریخ</th>
-              <th>ساعت</th>
-              <th>مراجع</th>
-              <th>شماره تماس</th>
-              <th>مشاور</th>
-              <th>وضعیت</th>
-              <th>اقدام</th>
-            </tr>
-          </thead>
-          <tbody id="desk_appointments_tbody">
-            <tr><td colspan="8" style="text-align:center; color:var(--text-muted);">در حال دریافت نوبت‌ها...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- ۳. تب تسویه ماهانه مشاوران (اصلاح‌شده برای پرینت تمیز) -->
-  <div id="tab_settlement" class="tab-content">
-    <div class="card no-print">
-      <h3 class="card-title">فیلتر و تهیه صورت‌حساب ماهانه</h3>
-      <div class="grid-3">
-        <div class="form-group">
-          <label>مشاور:</label>
-          <select id="settle_counselor">
-            <option value="all">همه مشاوران</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>سال (شمسی):</label>
-          <input type="text" id="settle_year" value="1403" dir="ltr">
-        </div>
-        <div class="form-group">
-          <label>ماه:</label>
-          <select id="settle_month">
-            <option value="01">فروردین (01)</option>
-            <option value="02">اردیبهشت (02)</option>
-            <option value="03">خرداد (03)</option>
-            <option value="04">تیر (04)</option>
-            <option value="05">مرداد (05)</option>
-            <option value="06">شهریور (06)</option>
-            <option value="07">مهر (07)</option>
-            <option value="08">آبان (08)</option>
-            <option value="09">آذر (09)</option>
-            <option value="10">دی (10)</option>
-            <option value="11">بهمن (11)</option>
-            <option value="12">اسفند (12)</option>
-          </select>
-        </div>
-      </div>
-      <div style="display: flex; gap: 10px;">
-        <button type="button" onclick="loadMonthlyReport()" class="btn-submit" style="flex: 2;">مشاهده گزارش</button>
-        <button type="button" onclick="printCleanReceipt()" class="btn-submit" style="flex: 1; background: #334155;">🖨️ چاپ فیش رسمی تسویه</button>
-      </div>
-    </div>
-
-    <!-- این بخش تنها چیزی است که در پرینت یا خروجی فیش می‌افتد -->
-    <div id="printable_settlement_receipt" class="card">
-      <div style="border-bottom: 2px solid #38bdf8; padding-bottom: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
-        <div>
-          <h2 style="margin: 0; font-size: 1.25rem;">فیش تسویه‌‌حساب خدمات مشاوره</h2>
-          <div style="font-size: 0.82rem; margin-top: 4px;">کلینیک روان‌شناسی سپهر آرامش</div>
-        </div>
-        <div style="text-align: left; font-size: 0.85rem; line-height: 1.8;">
-          <div>مشاور: <strong id="receipt_counselor_name">-</strong></div>
-          <div>دوره: <strong id="receipt_period">-</strong></div>
-        </div>
-      </div>
-
-      <div style="overflow-x: auto;">
-        <table>
-          <thead>
-            <tr>
-              <th>ردیف</th>
-              <th>تاریخ</th>
-              <th>مراجع</th>
               <th>نوع جلسه</th>
               <th>مبلغ کل</th>
-              <th>سهم مشاور</th>
-              <th>دریافت مستقیم</th>
-              <th>وضعیت تسویه</th>
+              <th>بیعانه</th>
+              <th>ثبت‌کننده</th>
+              <th>عملیات</th>
             </tr>
           </thead>
-          <tbody id="settlement_table_tbody">
-            <tr><td colspan="8" style="text-align:center; color:var(--text-muted);">گزارشی بارگذاری نشده است.</td></tr>
+          <tbody id="recent_table_body">
+            <tr><td colspan="8" style="text-align: center; color: var(--text-muted);">در حال دریافت...</td></tr>
           </tbody>
         </table>
-      </div>
-
-      <div id="receipt_summary_box" style="margin-top: 18px; padding: 14px; background: rgba(15,23,42,0.4); border-radius: 10px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; font-size: 0.9rem;">
-        <div>تعداد جلسات: <strong id="sum_count">۰</strong></div>
-        <div>گردش کل: <strong id="sum_turnover">۰</strong> تومان</div>
-        <div>کل سهم مشاور: <strong id="sum_counselor_total" style="color:var(--primary);">۰</strong> تومان</div>
-        <div>مانده خالص قابل پرداخت کلینیک: <strong id="sum_net_payable" style="color:var(--success); font-size: 1.05rem;">۰</strong> تومان</div>
       </div>
     </div>
   </div>
 
+  <!-- تب دوم: تقویم هفتگی -->
+  <div id="tab_appointments" class="tab-content">
+    <div class="card">
+      <div class="calendar-controls">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <label style="font-weight: bold; color: var(--primary);">مشاور:</label>
+          <select id="cal_counselor_filter" style="padding: 8px 12px; background: var(--input-bg); border: 1px solid var(--card-border); color: #fff; border-radius: 8px; font-weight: bold;" onchange="renderWeeklyCalendar()">
+            <option value="" disabled selected>در حال بارگذاری...</option>
+          </select>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button type="button" class="btn-action-sm" onclick="changeWeek(-1)">« هفته قبل</button>
+          <button type="button" class="btn-action-sm" onclick="changeWeek(0)">هفته جاری</button>
+          <button type="button" class="btn-action-sm" onclick="changeWeek(1)">هفته بعد »</button>
+        </div>
+
+        <div id="cal_week_range_display" style="font-weight: bold; color: #fff; font-size: 0.9rem;">
+          در حال بارگذاری تاریخ‌ها...
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 14px; margin-bottom: 12px; font-size: 0.8rem; color: var(--text-muted); flex-wrap: wrap;">
+        <span style="display: flex; align-items: center; gap: 5px;"><span style="width: 12px; height: 12px; background: rgba(56, 189, 248, 0.4); border: 1px solid var(--primary); border-radius: 3px;"></span> نوبت رزرو شده</span>
+        <span style="display: flex; align-items: center; gap: 5px;"><span style="width: 12px; height: 12px; background: rgba(168, 85, 247, 0.4); border: 1px solid var(--purple); border-radius: 3px;"></span> جلسه کاری</span>
+        <span style="display: flex; align-items: center; gap: 5px;"><span style="width: 12px; height: 12px; background: rgba(34, 197, 94, 0.4); border: 1px solid var(--success); border-radius: 3px;"></span> برگزار / تسویه شده</span>
+        <span style="display: flex; align-items: center; gap: 5px;"><span style="width: 12px; height: 12px; background: rgba(239, 68, 68, 0.15); border: 1px dashed var(--danger); border-radius: 3px;"></span> عدم حضور مشاور (قرمز)</span>
+      </div>
+
+      <div class="calendar-table-wrapper">
+        <table class="calendar-grid">
+          <thead>
+            <tr id="cal_table_header"></tr>
+          </thead>
+          <tbody id="cal_table_body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- تب سوم: گزارش ماهانه (دسترسی اختصاصی aliott) -->
+  <div id="tab_report" class="tab-content">
+    <div class="card report-filters">
+      <h2 class="card-title">فیلترهای گزارش تسویه حساب</h2>
+      <div class="grid-3">
+        <div class="form-group">
+          <label>انتخاب مشاور:</label>
+          <select id="report_counselor_select">
+            <option value="all">همه مشاوران (کل کلینیک)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>سال شمسی:</label>
+          <input type="text" id="report_year" value="1405" style="text-align: center;">
+        </div>
+        <div class="form-group">
+          <label>ماه شمسی:</label>
+          <select id="report_month_select">
+            <option value="01">فروردین</option>
+            <option value="02">اردیبهشت</option>
+            <option value="03">خرداد</option>
+            <option value="04">تیر</option>
+            <option value="05">مرداد</option>
+            <option value="06">شهریور</option>
+            <option value="07">مهر</option>
+            <option value="08">آبان</option>
+            <option value="09">آذر</option>
+            <option value="10">دی</option>
+            <option value="11">بهمن</option>
+            <option value="12">اسفند</option>
+          </select>
+        </div>
+      </div>
+      <div style="display: flex; gap: 10px; margin-top: 10px;">
+        <button type="button" class="btn-submit" style="flex: 2;" onclick="loadMonthlyReport()">مشاهده و محاسبه تسویه</button>
+        <button type="button" class="btn-action-sm" style="flex: 1; padding: 10px; font-size: 0.95rem;" onclick="window.print()">چاپ فیش تسویه</button>
+      </div>
+    </div>
+
+    <div id="report_results_area" style="display: none;">
+      <div class="grid-4" style="margin-bottom: 16px;">
+        <div class="kpi-card">
+          <div class="kpi-title">تعداد کل جلسات</div>
+          <div class="kpi-value" id="kpi_sessions_count" style="color: var(--primary);">۰</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-title">گردش مالی کل جلسات</div>
+          <div class="kpi-value" id="kpi_total_turnover" style="color: #fff;">۰ ت</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-title">سهم استحقاقی مشاور</div>
+          <div class="kpi-value" id="kpi_counselor_total_share" style="color: var(--primary);">۰ ت</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-title">دریافت مستقیم توسط مشاور</div>
+          <div class="kpi-value" id="kpi_counselor_direct_got" style="color: var(--warning);">۰ ت</div>
+        </div>
+      </div>
+
+      <div class="settlement-banner to-counselor" id="settlement_status_box">
+        <div>
+          <span style="font-size: 0.9rem; display: block; opacity: 0.85;" id="settlement_status_label">وضعیت تسویه ماهانه:</span>
+          <strong style="font-size: 1.35rem;" id="settlement_status_text">در حال محاسبه...</strong>
+        </div>
+        <div style="font-size: 1.5rem; font-weight: bold;" id="settlement_status_amount">۰ تومان</div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">ریز جلسات و دریافتی‌های ماه انتخاب‌شده</h2>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>تاریخ</th>
+                <th>مراجع</th>
+                <th>مشاور</th>
+                <th>نوع</th>
+                <th>مبلغ کل</th>
+                <th>سهم مشاور</th>
+                <th>بیعانه</th>
+                <th>واریز بیعانه</th>
+                <th>واریز مانده</th>
+                <th>ثبت‌کننده</th>
+              </tr>
+            </thead>
+            <tbody id="report_table_body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- تب چهارم: سوابق و پرونده مراجع -->
+  <div id="tab_history" class="tab-content">
+    <div class="card">
+      <h2 class="card-title">جستجوی سوابق و پرونده مراجع</h2>
+      <div class="grid-3" style="align-items: flex-end;">
+        <div class="form-group" style="margin-bottom: 0;">
+          <label>نام مراجع (با پیشنهاد خودکار):</label>
+          <input type="text" id="sh_client_name" placeholder="مثال: علی رضایی..." list="clients_name_datalist" oninput="onHistoryNameInput(this.value)">
+        </div>
+        <div class="form-group" style="margin-bottom: 0;">
+          <label>شماره تماس مراجع:</label>
+          <input type="tel" id="sh_client_phone" placeholder="۰۹۱۲..." dir="ltr" list="clients_phone_datalist" oninput="onHistoryPhoneInput(this.value)">
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button type="button" class="btn-submit" style="padding: 11px;" onclick="searchClientHistory()">جستجو پرونده</button>
+          <button type="button" class="btn-action-sm" onclick="clearHistorySearch()">پاک‌سازی</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="history_results_area" style="display: none;">
+      <div class="grid-4" style="margin-bottom: 16px;">
+        <div class="kpi-card">
+          <div class="kpi-title">تعداد جلسات برگزارشده (صندوق)</div>
+          <div class="kpi-value" id="hp_total_sessions" style="color: var(--primary);">۰</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-title">مجموع کل مبالغ پرداخت‌شده</div>
+          <div class="kpi-value" id="hp_total_paid" style="color: var(--success);">۰ ت</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-title">مجموع بیعانه‌های پرداخت شده</div>
+          <div class="kpi-value" id="hp_total_deposit" style="color: var(--warning);">۰ ت</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-title">مشاورین مراجعه‌شده</div>
+          <div class="kpi-value" id="hp_counselors_list" style="font-size: 0.95rem; color: #fff; margin-top: 5px;">-</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">جلسات برگزارشده و ثبت‌شده در صندوق کلینیک</h2>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>تاریخ جلسه</th>
+                <th>مشاور</th>
+                <th>نوع جلسه</th>
+                <th>پارت</th>
+                <th>مبلغ کل</th>
+                <th>بیعانه</th>
+                <th>واریز مانده</th>
+                <th>ثبت‌کننده</th>
+                <th>یادداشت منشی</th>
+              </tr>
+            </thead>
+            <tbody id="hp_transactions_tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">نوبت‌های رزروشده آینده در تقویم (هنوز برگزار / تسویه نشده)</h2>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>تاریخ نوبت</th>
+                <th>ساعت پارت</th>
+                <th>مشاور</th>
+                <th>بیعانه اولیه</th>
+                <th>وضعیت نوبت</th>
+                <th>ثبت‌‌کننده</th>
+              </tr>
+            </thead>
+            <tbody id="hp_appointments_tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- تب پنجم: تنظیمات -->
+  <div id="tab_settings" class="tab-content">
+    <div class="card">
+      <h2 class="card-title">برنامه حضور هفتگی مشاوران (روزها و ساعت‌ها)</h2>
+      <div class="grid-3" style="margin-bottom: 14px;">
+        <div class="form-group">
+          <label>انتخاب مشاور:</label>
+          <select id="schedule_counselor_select" onchange="loadCounselorScheduleUI()">
+            <option value="" disabled selected>انتخاب مشاور...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>ساعت شروع کار مشاور:</label>
+          <select id="schedule_start_hour">
+            <option value="09:00">۰۹:۰۰</option>
+            <option value="10:00">۱۰:۰۰</option>
+            <option value="11:00">۱۱:۰۰</option>
+            <option value="12:00">۱۲:۰۰</option>
+            <option value="14:00">۱۴:۰۰</option>
+            <option value="15:00">۱۵:۰۰</option>
+            <option value="16:00">۱۶:۰۰</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>ساعت پایان کار مشاور:</label>
+          <select id="schedule_end_hour">
+            <option value="14:00">۱۴:۰۰</option>
+            <option value="16:00">۱۶:۰۰</option>
+            <option value="18:00">۱۸:۰۰</option>
+            <option value="20:00">۲۰:۰۰</option>
+            <option value="21:00" selected>۲۱:۰۰</option>
+          </select>
+        </div>
+      </div>
+
+      <label style="font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 8px;">روزهای حضور مشاور در کلینیک:</label>
+      <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 16px;">
+        <label style="display:flex; align-items:center; gap:6px; font-size:0.9rem; cursor:pointer;"><input type="checkbox" class="duty-day-checkbox" value="شنبه"> شنبه</label>
+        <label style="display:flex; align-items:center; gap:6px; font-size:0.9rem; cursor:pointer;"><input type="checkbox" class="duty-day-checkbox" value="یکشنبه"> یکشنبه</label>
+        <label style="display:flex; align-items:center; gap:6px; font-size:0.9rem; cursor:pointer;"><input type="checkbox" class="duty-day-checkbox" value="دوشنبه"> دوشنبه</label>
+        <label style="display:flex; align-items:center; gap:6px; font-size:0.9rem; cursor:pointer;"><input type="checkbox" class="duty-day-checkbox" value="سه‌شنبه"> سه‌شنبه</label>
+        <label style="display:flex; align-items:center; gap:6px; font-size:0.9rem; cursor:pointer;"><input type="checkbox" class="duty-day-checkbox" value="چهارشنبه"> چهارشنبه</label>
+        <label style="display:flex; align-items:center; gap:6px; font-size:0.9rem; cursor:pointer;"><input type="checkbox" class="duty-day-checkbox" value="پنجشنبه"> پنجشنبه</label>
+        <label style="display:flex; align-items:center; gap:6px; font-size:0.9rem; cursor:pointer;"><input type="checkbox" class="duty-day-checkbox" value="جمعه"> جمعه</label>
+      </div>
+
+      <button type="button" class="btn-action-sm" style="padding: 10px 18px; font-size: 0.9rem;" onclick="saveCounselorSchedule()">ذخیره برنامه حضور این مشاور در سیستم و پرتال مراجعین</button>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title">افزودن مشاور جدید</h2>
+      <div style="display: flex; gap: 10px; max-width: 550px; flex-wrap: wrap;">
+        <input type="text" id="new_counselor_name" placeholder="نام و نام خانوادگی مشاور..." style="flex: 2; padding: 10px; background: var(--input-bg); border: 1px solid var(--card-border); border-radius: 8px; color: #fff;">
+        <input type="number" id="new_counselor_percent" placeholder="درصد سهم (مثلاً ۷۰)" value="70" style="width: 130px; padding: 10px; background: var(--input-bg); border: 1px solid var(--card-border); border-radius: 8px; color: #fff; text-align: center;">
+        <button type="button" id="btn_add_counselor" style="background: var(--primary); color: #000; border: none; border-radius: 8px; padding: 0 18px; font-weight: bold; cursor: pointer;">افزودن</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title">لیست مشاوران فعال و ویرایش درصد سهم اختصاصی</h2>
+      <div class="table-wrapper">
+        <table class="counselor-table">
+          <thead>
+            <tr>
+              <th>نام مشاور</th>
+              <th>درصد سهم مشاور (٪)</th>
+              <th>ذخیره درصد</th>
+              <th>عملیات</th>
+            </tr>
+          </thead>
+          <tbody id="counselor_settings_tbody">
+            <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">در حال دریافت مشاوران...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title">تنظیم نرخ و درصد جلسات سازمانی و آزاد</h2>
+      <div class="table-wrapper">
+        <table class="counselor-table">
+          <thead>
+            <tr>
+              <th>نوع جلسه</th>
+              <th>مبلغ هر پارت (تومان)</th>
+              <th>درصد پیش‌فرض مشاور (٪)</th>
+              <th>ذخیره در شیت</th>
+            </tr>
+          </thead>
+          <tbody id="session_rates_tbody">
+            <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">در حال دریافت اطلاعات...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- پاپ‌آپ ۱: ثبت نوبت -->
+<div id="booking_modal" class="modal-backdrop">
+  <div class="modal-content" style="max-width: 500px;">
+    <div class="modal-header">
+      <h3 style="margin: 0; color: var(--primary); font-size: 1.1rem;">رزرو نوبت / جلسه در تقویم</h3>
+      <button type="button" class="modal-close-btn" onclick="closeBookingModal()">&times;</button>
+    </div>
+
+    <form id="quick_booking_form">
+      <div style="background: rgba(15, 23, 42, 0.6); padding: 12px; border-radius: 8px; margin-bottom: 14px; border: 1px solid var(--card-border); font-size: 0.9rem;">
+        <div style="margin-bottom: 6px;"><strong>مشاور:</strong> <span id="bm_counselor_text" style="color: var(--primary);">-</span></div>
+        <div style="margin-bottom: 6px;"><strong>تاریخ نوبت:</strong> <span id="bm_date_text" style="color: #fff;">-</span></div>
+        <div><strong>ساعت پارت:</strong> <span id="bm_time_text" style="color: var(--success);">-</span></div>
+      </div>
+
+      <input type="hidden" id="bm_counselor">
+      <input type="hidden" id="bm_date">
+      <input type="hidden" id="bm_time">
+      <input type="hidden" id="bm_slot_type" value="full">
+
+      <div class="form-group">
+        <label>نوع ثبت زمان:</label>
+        <select id="bm_booking_type" onchange="handleBookingTypeChange()">
+          <option value="client_full">مراجع عادی (جلسه کامل ۱ ساعته)</option>
+          <option value="client_half1">مراجع طلاق (نیم‌ساعت اول پارت)</option>
+          <option value="client_half2">مراجع طلاق (نیم‌ساعت دوم پارت)</option>
+          <option value="meeting">جلسه کاری / همکاران (غیرمراجع)</option>
+        </select>
+      </div>
+
+      <div class="form-group" id="bm_name_group">
+        <label id="bm_name_label">نام و نام خانوادگی مراجع:</label>
+        <input type="text" id="bm_client_name" required placeholder="تایپ نام جهت پیشنهاد خودکار..." list="clients_name_datalist" oninput="onQuickNameInput(this.value)">
+      </div>
+
+      <div class="form-group" id="bm_phone_group">
+        <label>شماره تماس مراجع:</label>
+        <input type="tel" id="bm_client_phone" placeholder="۰۹۱۲..." dir="ltr" list="clients_phone_datalist" oninput="onQuickPhoneInput(this.value)">
+      </div>
+
+      <div class="form-group" id="bm_deposit_group">
+        <label>بیعانه اولیه پرداختی (تومان):</label>
+        <input type="number" id="bm_deposit" value="0">
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-top: 15px;">
+        <button type="submit" id="btn_quick_book" class="btn-submit" style="flex: 2; background: linear-gradient(135deg, #10b981, #059669);">ثبت قطعی در تقویم</button>
+        <button type="button" onclick="closeBookingModal()" style="flex: 1; background: #334155; color: #fff; border: none; border-radius: 10px; cursor: pointer; font-weight: bold;">انصراف</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- پاپ‌آپ ۲: جزئیات نوبت -->
+<div id="app_details_modal" class="modal-backdrop">
+  <div class="modal-content" style="max-width: 480px;">
+    <div class="modal-header">
+      <h3 style="margin: 0; color: var(--primary); font-size: 1.1rem;">جزئیات نوبت / جلسه</h3>
+      <button type="button" class="modal-close-btn" onclick="closeAppDetailsModal()">&times;</button>
+    </div>
+
+    <div style="background: rgba(15, 23, 42, 0.6); padding: 14px; border-radius: 8px; margin-bottom: 14px; border: 1px solid var(--card-border); font-size: 0.9rem; line-height: 2;">
+      <div><strong>عنوان / مراجع:</strong> <span id="adm_client_name" style="color: #fff; font-weight: bold;">-</span></div>
+      <div id="adm_phone_row"><strong>شماره تماس:</strong> <span id="adm_client_phone" style="color: var(--primary);">-</span></div>
+      <div><strong>مشاور:</strong> <span id="adm_counselor">-</span></div>
+      <div><strong>زمان نوبت:</strong> <span id="adm_datetime" style="color: var(--warning);">-</span></div>
+      <div id="adm_deposit_row"><strong>بیعانه پرداختی:</strong> <span id="adm_deposit" style="color: var(--success); font-weight: bold;">-</span></div>
+      <div><strong>وضعیت:</strong> <span id="adm_status">-</span></div>
+      <div><strong>ثبت شده توسط:</strong> <span id="adm_operator" style="color: var(--primary); font-weight: bold;">-</span></div>
+    </div>
+
+    <input type="hidden" id="adm_app_id">
+
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <button type="button" id="btn_adm_to_desk" class="btn-submit" style="background: linear-gradient(135deg, #0284c7, #0ea5e9);" onclick="convertModalToDesk()">انتقال مراجع به میز پذیرش و صندوق</button>
+      <button type="button" style="background: rgba(239, 68, 68, 0.2); color: var(--danger); border: 1px solid var(--danger); padding: 10px; border-radius: 10px; font-weight: bold; cursor: pointer;" onclick="cancelAppointmentFromModal()">لغو / کنسلی نوبت (آزاد شدن این ساعت)</button>
+    </div>
+  </div>
+</div>
+
+<!-- پاپ‌آپ ۳: بستن کل روز -->
+<div id="block_day_modal" class="modal-backdrop">
+  <div class="modal-content" style="max-width: 440px;">
+    <div class="modal-header">
+      <h3 style="margin: 0; color: var(--danger); font-size: 1.1rem;">مسدود کردن کل روز برای مشاور</h3>
+      <button type="button" class="modal-close-btn" onclick="closeBlockDayModal()">&times;</button>
+    </div>
+
+    <form id="block_day_form">
+      <input type="hidden" id="bdm_date">
+      <input type="hidden" id="bdm_counselor">
+
+      <div style="background: rgba(15, 23, 42, 0.6); padding: 12px; border-radius: 8px; margin-bottom: 14px; border: 1px solid var(--card-border); font-size: 0.9rem;">
+        <div style="margin-bottom: 6px;"><strong>مشاور:</strong> <span id="bdm_counselor_text" style="color: var(--primary);">-</span></div>
+        <div><strong>تاریخ روز:</strong> <span id="bdm_date_text" style="color: #fff;">-</span></div>
+      </div>
+
+      <div class="form-group">
+        <label>علت عدم حضور مشاور:</label>
+        <input type="text" id="bdm_reason" required placeholder="مثال: مرخصی / مسافرت">
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-top: 15px;">
+        <button type="submit" id="btn_block_submit" class="btn-submit" style="flex: 2; background: linear-gradient(135deg, #ef4444, #dc2626);">مسدود کردن این روز</button>
+        <button type="button" onclick="closeBlockDayModal()" style="flex: 1; background: #334155; color: #fff; border: none; border-radius: 10px; cursor: pointer; font-weight: bold;">انصراف</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- پاپ‌آپ ۴: ویرایش صندوق -->
+<div id="edit_modal" class="modal-backdrop">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 style="margin: 0; color: var(--primary); font-size: 1.15rem;">ویرایش جلسه مراجع</h3>
+      <button type="button" class="modal-close-btn" onclick="closeEditModal()">&times;</button>
+    </div>
+
+    <form id="edit_record_form">
+      <input type="hidden" id="edit_id">
+
+      <div class="grid-2">
+        <div class="form-group">
+          <label>نام و نام خانوادگی مراجع:</label>
+          <input type="text" id="edit_client_name" required>
+        </div>
+        <div class="form-group">
+          <label>شماره تماس مراجع:</label>
+          <input type="tel" id="edit_client_phone" dir="ltr">
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="form-group">
+          <label>مشاور:</label>
+          <select id="edit_counselor_select" required></select>
+        </div>
+        <div class="form-group">
+          <label>نوع جلسه:</label>
+          <select id="edit_session_type" required>
+            <option value="آزاد">آزاد</option>
+            <option value="سپه">سپه</option>
+            <option value="ورزش و بهزیستی">ورزش و بهزیستی</option>
+            <option value="طلاق">طلاق</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid-3">
+        <div class="form-group" id="edit_group_parts" style="display: none;">
+          <label>تعداد پارت:</label>
+          <input type="number" id="edit_parts_count" min="1" value="1">
+        </div>
+        <div class="form-group">
+          <label>مبلغ کل جلسه (تومان):</label>
+          <input type="number" id="edit_total_amount" required>
+        </div>
+      </div>
+
+      <div class="payment-module">
+        <div class="deposit-toggle-bar">
+          <label style="font-weight: 500; color: #fff; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+            <input type="checkbox" id="edit_has_deposit_toggle" style="width: 17px; height: 17px; accent-color: var(--primary); cursor: pointer;">
+            بیعانه پرداخت شده است
+          </label>
+          <span id="edit_remaining_badge" style="font-size: 0.85rem; color: var(--primary); font-weight: bold;"></span>
+        </div>
+
+        <div id="edit_deposit_fields_wrapper" class="deposit-details-grid">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label>مبلغ بیعانه (تومان):</label>
+            <input type="number" id="edit_deposit_amount" value="0">
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label>بیعانه به حساب کی رفت؟</label>
+            <select id="edit_deposit_to">
+              <option value="مشاور">مستقیم به کارت مشاور</option>
+              <option value="کلینیک">کارت‌خوان / کارت کلینیک</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label id="edit_balance_label">تسویه کل مبلغ از طریق:</label>
+          <select id="edit_balance_to">
+            <option value="کلینیک">کارت‌خوان کلینیک</option>
+            <option value="مشاور">کارت شخصی مشاور</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>توضیحات یا یادداشت:</label>
+        <input type="text" id="edit_record_notes">
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-top: 15px;">
+        <button type="submit" id="btn_edit_submit" class="btn-submit" style="flex: 2;">ذخیره تغییرات در شیت</button>
+        <button type="button" onclick="closeEditModal()" style="flex: 1; background: #334155; color: #fff; border: none; border-radius: 10px; cursor: pointer; font-weight: bold;">انصراف</button>
+      </div>
+    </form>
+  </div>
 </div>
 
 <script>
@@ -442,132 +1194,794 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwQNRp6anbyhNDlTXGnv
 let state = {
   settings: {},
   counselors: [],
-  appointments: [],
-  recentTransactions: [],
-  currentLoadedReport: []
+  shamsiDate: "",
+  recentList: [],
+  appointmentsList: [],
+  currentWeekOffset: 0,
+  currentUser: "",
+  currentUsername: "",
+  dutySchedules: {},
+  clientsDirectory: {}
 };
 
-function formatToman(num) {
-  return Number(num || 0).toLocaleString('fa-IR');
+const TIME_SLOTS = [
+  { label: "۰۹:۰۰ - ۱۰:۰۰", start: "09:00", end: "10:00", h1: "۰۹:۰۰ - ۰۹:۳۰", h2: "۰۹:۳۰ - ۱۰:۰۰" },
+  { label: "۱۰:۰۰ - ۱۱:۰۰", start: "10:00", end: "11:00", h1: "۱۰:۰۰ - ۱۰:۳۰", h2: "۱۰:۳۰ - ۱۱:۰۰" },
+  { label: "۱۱:۰۰ - ۱۲:۰۰", start: "11:00", end: "12:00", h1: "۱۱:۰۰ - ۱۱:۳۰", h2: "۱۱:۳۰ - ۱۲:۰۰" },
+  { label: "۱۲:۰۰ - ۱۳:۰۰", start: "12:00", end: "13:00", h1: "۱۲:۰۰ - ۱۲:۳۰", h2: "۱۲:۳۰ - ۱۳:۰۰" },
+  { label: "۱۳:۰۰ - ۱۴:۰۰", start: "13:00", end: "14:00", h1: "۱۳:۰۰ - ۱۳:۳۰", h2: "۱۳:۳۰ - ۱۴:۰۰" },
+  { label: "۱۴:۰۰ - ۱۵:۰۰", start: "14:00", end: "15:00", h1: "۱۴:۰۰ - ۱۴:۳۰", h2: "۱۴:۳۰ - ۱۵:۰۰" },
+  { label: "۱۵:۰۰ - ۱۶:۰۰", start: "15:00", end: "16:00", h1: "۱۵:۰۰ - ۱۵:۳۰", h2: "۱۵:۳۰ - ۱۶:۰۰" },
+  { label: "۱۶:۰۰ - ۱۷:۰۰", start: "16:00", end: "17:00", h1: "۱۶:۰۰ - ۱۶:۳۰", h2: "۱۶:۳۰ - ۱۷:۰۰" },
+  { label: "۱۷:۰۰ - ۱۸:۰۰", start: "17:00", end: "18:00", h1: "۱۷:۰۰ - ۱۷:۳۰", h2: "۱۷:۳۰ - ۱۸:۰۰" },
+  { label: "۱۸:۰۰ - ۱۹:۰۰", start: "18:00", end: "19:00", h1: "۱۸:۰۰ - ۱۸:۳۰", h2: "۱۸:۳۰ - ۱۹:۰۰" },
+  { label: "۱۹:۰۰ - ۲۰:۰۰", start: "19:00", end: "20:00", h1: "۱۹:۰۰ - ۱۹:۳۰", h2: "۱۹:۳۰ - ۲۰:۰۰" },
+  { label: "۲۰:۰۰ - ۲۱:۰۰", start: "20:00", end: "21:00", h1: "۲۰:۰۰ - ۲۰:۳۰", h2: "۲۰:۳۰ - ۲۱:۰۰" }
+];
+
+function normalizePhoneNumber(phone) {
+  if (!phone) return "";
+  let p = String(phone)
+    .replace(/[\u200B-\u200D\uFEFF\u200E\u200F]/g, "")
+    .replace(/[۰-۹]/g, w => String.fromCharCode(w.charCodeAt(0) - 1728))
+    .replace(/[٠-٩]/g, w => String.fromCharCode(w.charCodeAt(0) - 1584))
+    .replace(/\D/g, "")
+    .trim();
+  
+  if (p.length === 10 && p.startsWith("9")) {
+    p = "0" + p;
+  }
+  return p;
 }
 
-async function initDesk() {
-  await fetchDeskInitialData();
-}
-
-async function fetchDeskInitialData() {
-  try {
-    const [initRes, appRes] = await Promise.all([
-      fetch(SCRIPT_URL + "?action=getInitialData").then(r => r.json()),
-      fetch(SCRIPT_URL + "?action=getAppointments").then(r => r.json())
-    ]);
-
-    if (initRes.status === "success") {
-      state.settings = initRes.settings || {};
-      state.counselors = initRes.counselors || [];
-      state.recentTransactions = initRes.recent || [];
-      populateCounselorDropdowns();
-      renderRecentTransactions();
-    }
-
-    if (appRes.status === "success") {
-      state.appointments = appRes.appointments || [];
-      renderDeskAppointments();
-    }
-  } catch(e) {
-    console.error("خطا در همگام‌سازی:", e);
+function checkAuth() {
+  const savedUser = localStorage.getItem("sepehr_user");
+  const savedUsername = localStorage.getItem("sepehr_username");
+  if (savedUser) {
+    state.currentUser = savedUser;
+    state.currentUsername = savedUsername || "";
+    document.getElementById("active_user_badge").innerText = savedUser + (savedUsername ? ` (${savedUsername})` : "");
+    document.getElementById("login_overlay").style.display = "none";
+    document.getElementById("main_app").style.display = "block";
+    applyRolePermissions();
+    fetchInitialData();
+  } else {
+    document.getElementById("login_overlay").style.display = "flex";
+    document.getElementById("main_app").style.display = "none";
   }
 }
 
-function populateCounselorDropdowns() {
-  const cSel = document.getElementById("t_counselor");
-  const sSel = document.getElementById("settle_counselor");
+function applyRolePermissions() {
+  const reportTabBtn = document.getElementById("btn_tab_report");
+  const username = (state.currentUsername || "").trim().toLowerCase();
+
+  if (username === "aliott") {
+    reportTabBtn.style.display = "flex";
+  } else {
+    reportTabBtn.style.display = "none";
+  }
+}
+
+document.getElementById("login_form").addEventListener("submit", async function(e) {
+  e.preventDefault();
+  const btn = document.getElementById("btn_login");
+  const errBox = document.getElementById("login_error");
+  btn.disabled = true;
+  btn.innerText = "در حال بررسی...";
+  errBox.style.display = "none";
+
+  const user = document.getElementById("login_username").value.trim();
+  const pass = document.getElementById("login_password").value.trim();
+
+  try {
+    const res = await fetch(SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ action: "login", username: user, password: pass })
+    });
+    const data = await res.json();
+
+    if (data.status === "success") {
+      state.currentUser = data.operatorName;
+      state.currentUsername = (data.username || user).toLowerCase();
+
+      localStorage.setItem("sepehr_user", data.operatorName);
+      localStorage.setItem("sepehr_username", state.currentUsername);
+
+      document.getElementById("active_user_badge").innerText = data.operatorName + ` (${state.currentUsername})`;
+      document.getElementById("login_overlay").style.display = "none";
+      document.getElementById("main_app").style.display = "block";
+      applyRolePermissions();
+      fetchInitialData();
+    } else {
+      errBox.innerText = data.message || "اطلاعات ورود نامعتبر است.";
+      errBox.style.display = "block";
+    }
+  } catch (err) {
+    errBox.innerText = "خطا در ارتباط با سرور کلینیک.";
+    errBox.style.display = "block";
+  } finally {
+    btn.disabled = false;
+    btn.innerText = "ورود به سامانه";
+  }
+});
+
+function logout() {
+  if (!confirm("آیا قصد خروج از حساب کاربری را دارید؟")) return;
+  localStorage.removeItem("sepehr_user");
+  localStorage.removeItem("sepehr_username");
+  state.currentUser = "";
+  state.currentUsername = "";
+  location.reload();
+}
+
+function switchTab(tabName) {
+  if (tabName === 'report' && (state.currentUsername || "").trim().toLowerCase() !== "aliott") {
+    alert("دسترسی به بخش گزارشات و تسویه مالی فقط برای مدیریت (aliott) مجاز است.");
+    return;
+  }
+
+  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
   
-  cSel.innerHTML = '<option value="" disabled selected>انتخاب مشاور...</option>';
-  sSel.innerHTML = '<option value="all">همه مشاوران</option>';
+  if (tabName === 'desk') {
+    document.getElementById('btn_tab_desk').classList.add('active');
+    document.getElementById('tab_desk').classList.add('active');
+  } else if (tabName === 'appointments') {
+    document.getElementById('btn_tab_appointments').classList.add('active');
+    document.getElementById('tab_appointments').classList.add('active');
+    fetchAppointments();
+  } else if (tabName === 'report') {
+    document.getElementById('btn_tab_report').classList.add('active');
+    document.getElementById('tab_report').classList.add('active');
+  } else if (tabName === 'history') {
+    document.getElementById('btn_tab_history').classList.add('active');
+    document.getElementById('tab_history').classList.add('active');
+    if (state.appointmentsList.length === 0) fetchAppointments();
+  } else {
+    document.getElementById('btn_tab_settings').classList.add('active');
+    document.getElementById('tab_settings').classList.add('active');
+  }
+}
 
-  state.counselors.forEach(c => {
-    const opt1 = document.createElement("option");
-    opt1.value = c.name;
-    opt1.innerText = `${c.name} (${c.percent}٪)`;
-    opt1.dataset.percent = c.percent;
-    cSel.appendChild(opt1);
+function initDates() {
+  const d = new Date();
+  state.shamsiDate = new Intl.DateTimeFormat('fa-IR', { year: 'numeric', month: '2-digit', day: '2-digit' }).format(d);
+  document.getElementById("current_date_display").innerText = "تاریخ امروز: " + state.shamsiDate;
 
-    const opt2 = document.createElement("option");
-    opt2.value = c.name;
-    opt2.innerText = c.name;
-    sSel.appendChild(opt2);
+  const engParts = new Intl.DateTimeFormat('fa-IR-u-nu-latn', { year: 'numeric', month: '2-digit' }).format(d)
+    .replace(/[\u200B-\u200D\uFEFF\u200E\u200F]/g, "")
+    .split('/');
+  
+  if (engParts.length >= 2) {
+    document.getElementById("report_year").value = engParts[0].trim();
+    document.getElementById("report_month_select").value = engParts[1].trim();
+  }
+}
+initDates();
+
+async function fetchInitialData() {
+  document.getElementById("loading-indicator").style.display = "block";
+  try {
+    const res = await fetch(SCRIPT_URL + "?action=getInitialData");
+    const data = await res.json();
+    if (data.status === "success") {
+      state.settings = data.settings;
+      state.counselors = data.counselors;
+      state.dutySchedules = data.dutySchedules || {};
+      
+      state.recentList = (data.recent || []).map(r => {
+        r.clientPhone = normalizePhoneNumber(r.clientPhone);
+        return r;
+      });
+
+      buildClientsDirectory();
+      renderCounselorSelect();
+      renderSessionRatesTable();
+      renderCounselorsSettingsTable();
+      renderRecentTable(state.recentList);
+    }
+  } catch (err) {
+    console.error("خطا در ارتباط با سرور:", err);
+  } finally {
+    document.getElementById("loading-indicator").style.display = "none";
+  }
+}
+
+function buildClientsDirectory() {
+  state.clientsDirectory = {};
+  const namesDatalist = document.getElementById("clients_name_datalist");
+  const phonesDatalist = document.getElementById("clients_phone_datalist");
+  namesDatalist.innerHTML = "";
+  phonesDatalist.innerHTML = "";
+
+  const processEntry = (name, phone) => {
+    if (!name || name === "-" || String(name).length < 2) return;
+    const cleanPhone = normalizePhoneNumber(phone);
+    const cleanName = String(name).trim();
+    
+    if (!state.clientsDirectory[cleanName] && cleanPhone) {
+      state.clientsDirectory[cleanName] = cleanPhone;
+    }
+    if (cleanPhone && !state.clientsDirectory[cleanPhone]) {
+      state.clientsDirectory[cleanPhone] = cleanName;
+    }
+  };
+
+  (state.recentList || []).forEach(r => processEntry(r.clientName, r.clientPhone));
+  (state.appointmentsList || []).forEach(a => processEntry(a.clientName, a.clientPhone));
+
+  const uniqueNames = new Set();
+  const uniquePhones = new Set();
+
+  for (let key in state.clientsDirectory) {
+    if (/^09\d{9}$/.test(key) || /^\d{7,}$/.test(key)) {
+      uniquePhones.add(key);
+    } else {
+      uniqueNames.add(key);
+    }
+  }
+
+  uniqueNames.forEach(n => {
+    const opt = document.createElement("option");
+    opt.value = n;
+    namesDatalist.appendChild(opt);
+  });
+
+  uniquePhones.forEach(p => {
+    const opt = document.createElement("option");
+    opt.value = p;
+    phonesDatalist.appendChild(opt);
   });
 }
 
-function onSessionTypeChanged() {
-  const sType = document.getElementById("t_session_type").value;
-  const parts = Number(document.getElementById("t_parts").value) || 1;
-  if (state.settings[sType]) {
-    const baseRate = state.settings[sType].defaultRate || 0;
-    document.getElementById("t_total_amount").value = baseRate * parts;
+function onClientNameInput(val) {
+  val = (val || "").trim();
+  if (state.clientsDirectory[val]) {
+    const phoneInput = document.getElementById("client_phone");
+    phoneInput.value = state.clientsDirectory[val];
   }
-  calcSharesAndBalance();
 }
 
-// محاسبه خودکار زنده مبالغ سهم و مانده قابل دریافت
-function calcSharesAndBalance() {
-  const total = Number(document.getElementById("t_total_amount").value) || 0;
-  const deposit = Number(document.getElementById("t_deposit").value) || 0;
+function onClientPhoneInput(val) {
+  val = normalizePhoneNumber(val);
+  if (state.clientsDirectory[val]) {
+    const nameInput = document.getElementById("client_name");
+    if (!nameInput.value) nameInput.value = state.clientsDirectory[val];
+  }
+}
+
+function onQuickNameInput(val) {
+  val = (val || "").trim();
+  if (state.clientsDirectory[val]) {
+    const phoneInput = document.getElementById("bm_client_phone");
+    phoneInput.value = state.clientsDirectory[val];
+  }
+}
+
+function onQuickPhoneInput(val) {
+  val = normalizePhoneNumber(val);
+  if (state.clientsDirectory[val]) {
+    const nameInput = document.getElementById("bm_client_name");
+    if (!nameInput.value) nameInput.value = state.clientsDirectory[val];
+  }
+}
+
+function onHistoryNameInput(val) {
+  val = (val || "").trim();
+  if (state.clientsDirectory[val]) {
+    document.getElementById("sh_client_phone").value = state.clientsDirectory[val];
+  }
+}
+
+function onHistoryPhoneInput(val) {
+  val = normalizePhoneNumber(val);
+  if (state.clientsDirectory[val]) {
+    document.getElementById("sh_client_name").value = state.clientsDirectory[val];
+  }
+}
+
+function clearHistorySearch() {
+  document.getElementById("sh_client_name").value = "";
+  document.getElementById("sh_client_phone").value = "";
+  document.getElementById("history_results_area").style.display = "none";
+}
+
+function searchClientHistory() {
+  const nameQuery = String(document.getElementById("sh_client_name").value || "").trim().toLowerCase();
+  const phoneQuery = normalizePhoneNumber(document.getElementById("sh_client_phone").value || "");
+
+  if (!nameQuery && !phoneQuery) {
+    alert("لطفاً نام یا شماره تماس مراجع را وارد کنید.");
+    return;
+  }
+
+  const matchedTrans = (state.recentList || []).filter(r => {
+    const rName = String(r.clientName || "").trim().toLowerCase();
+    const rPhone = normalizePhoneNumber(r.clientPhone);
+
+    const mName = nameQuery && rName.includes(nameQuery);
+    const mPhone = phoneQuery && rPhone.includes(phoneQuery);
+    return mName || mPhone;
+  });
+
+  const matchedFutureApps = (state.appointmentsList || []).filter(a => {
+    const aName = String(a.clientName || "").trim().toLowerCase();
+    const aPhone = normalizePhoneNumber(a.clientPhone);
+
+    const mName = nameQuery && aName.includes(nameQuery);
+    const mPhone = phoneQuery && aPhone.includes(phoneQuery);
+    return (mName || mPhone) && a.status === "رزرو شده";
+  });
+
+  if (matchedTrans.length === 0 && matchedFutureApps.length === 0) {
+    alert("هیچ سابقه یا نوبت فعالی برای این مراجع پیدا نشد.");
+    document.getElementById("history_results_area").style.display = "none";
+    return;
+  }
+
+  let totalPaid = 0;
+  let totalDeposit = 0;
+  const counselorsSet = new Set();
+
+  matchedTrans.forEach(t => {
+    totalPaid += Number(t.totalAmount) || 0;
+    totalDeposit += Number(t.deposit) || 0;
+    if (t.counselor) counselorsSet.add(t.counselor);
+  });
+
+  matchedFutureApps.forEach(a => {
+    if (a.counselor) counselorsSet.add(a.counselor);
+  });
+
+  document.getElementById("hp_total_sessions").innerText = matchedTrans.length.toLocaleString('fa-IR');
+  document.getElementById("hp_total_paid").innerText = totalPaid.toLocaleString('fa-IR') + " ت";
+  document.getElementById("hp_total_deposit").innerText = totalDeposit.toLocaleString('fa-IR') + " ت";
+  document.getElementById("hp_counselors_list").innerText = Array.from(counselorsSet).join("، ") || "-";
+
+  const tBodyTrans = document.getElementById("hp_transactions_tbody");
+  tBodyTrans.innerHTML = "";
+  if (matchedTrans.length === 0) {
+    tBodyTrans.innerHTML = `<tr><td colspan="9" style="text-align:center; color:var(--text-muted);">جلسه نهایی در صندوق ثبت نشده است.</td></tr>`;
+  } else {
+    matchedTrans.forEach(t => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${(t.date || "-").toString().split("T")[0]}</td>
+        <td style="color:var(--primary); font-weight:bold;">${t.counselor}</td>
+        <td>${t.sessionType}</td>
+        <td>${t.parts || 1}</td>
+        <td>${Number(t.totalAmount).toLocaleString('fa-IR')}</td>
+        <td>${Number(t.deposit || 0).toLocaleString('fa-IR')}</td>
+        <td>${t.balanceTo || "کلینیک"}</td>
+        <td style="color:#cbd5e1; font-size:0.75rem;">${t.operator || "-"}</td>
+        <td style="font-size:0.8rem; color:var(--text-muted);">${t.notes || "-"}</td>
+      `;
+      tBodyTrans.appendChild(tr);
+    });
+  }
+
+  const tBodyApps = document.getElementById("hp_appointments_tbody");
+  tBodyApps.innerHTML = "";
+  if (matchedFutureApps.length === 0) {
+    tBodyApps.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">هیچ نوبت رزروشده‌ای برای آینده وجود ندارد.</td></tr>`;
+  } else {
+    matchedFutureApps.forEach(a => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${a.appointmentDate}</td>
+        <td style="font-weight:bold; color:var(--warning);">${a.appointmentTime}</td>
+        <td>${a.counselor}</td>
+        <td>${Number(a.deposit || 0).toLocaleString('fa-IR')} ت</td>
+        <td><span style="background:rgba(56,189,248,0.15); padding:2px 8px; border-radius:4px; color:var(--primary); font-size:0.75rem;">رزرو شده (پیش‌رو)</span></td>
+        <td style="color:#cbd5e1; font-size:0.75rem;">${a.operator || "-"}</td>
+      `;
+      tBodyApps.appendChild(tr);
+    });
+  }
+
+  document.getElementById("history_results_area").style.display = "block";
+}
+
+function renderCounselorSelect() {
+  const sel = document.getElementById("counselor_select");
+  const editSel = document.getElementById("edit_counselor_select");
+  const reportSel = document.getElementById("report_counselor_select");
+  const calFilter = document.getElementById("cal_counselor_filter");
+  const schedSel = document.getElementById("schedule_counselor_select");
   
-  // محاسبه مانده تسویه قابل دریافت
-  const dueBalance = Math.max(0, total - deposit);
-  document.getElementById("display_due_balance").innerText = formatToman(dueBalance) + " تومان";
+  sel.innerHTML = '<option value="" disabled selected>انتخاب مشاور...</option>';
+  editSel.innerHTML = '';
+  reportSel.innerHTML = '<option value="all">همه مشاوران (کل کلینیک)</option>';
+  calFilter.innerHTML = '';
+  schedSel.innerHTML = '<option value="" disabled selected>انتخاب مشاور...</option>';
+  
+  state.counselors.forEach((c, idx) => {
+    const opt = document.createElement("option");
+    opt.value = c.name;
+    opt.innerText = c.name;
+    sel.appendChild(opt);
 
-  // محاسبه سهم مشاور و کلینیک
-  const cSel = document.getElementById("t_counselor");
-  let pct = 70;
-  if (cSel.selectedIndex > 0) {
-    pct = parseFloat(cSel.options[cSel.selectedIndex].dataset.percent) || 70;
-  }
-  document.getElementById("display_counselor_pct").innerText = pct;
+    const optEdit = document.createElement("option");
+    optEdit.value = c.name;
+    optEdit.innerText = c.name;
+    editSel.appendChild(optEdit);
 
-  const counselorShare = Math.round(total * (pct / 100));
-  const clinicShare = total - counselorShare;
+    const optReport = document.createElement("option");
+    optReport.value = c.name;
+    optReport.innerText = c.name;
+    reportSel.appendChild(optReport);
 
-  document.getElementById("display_counselor_share").innerText = formatToman(counselorShare);
-  document.getElementById("display_clinic_share").innerText = formatToman(clinicShare);
+    const optCal = document.createElement("option");
+    optCal.value = c.name;
+    optCal.innerText = c.name;
+    if (idx === 0) optCal.selected = true;
+    calFilter.appendChild(optCal);
+
+    const optSched = document.createElement("option");
+    optSched.value = c.name;
+    optSched.innerText = c.name;
+    if (idx === 0) optSched.selected = true;
+    schedSel.appendChild(optSched);
+  });
+  
+  loadCounselorScheduleUI();
+  renderWeeklyCalendar();
 }
 
-// ثبت تراکنش در شیت
-document.getElementById("form_reception_transaction").addEventListener("submit", async function(e) {
-  e.preventDefault();
-  const btn = document.getElementById("btn_save_trans");
-  btn.disabled = true;
-  btn.innerText = "در حال ذخیره...";
+function loadCounselorScheduleUI() {
+  const counselor = document.getElementById("schedule_counselor_select").value;
+  if (!counselor) return;
 
-  const total = Number(document.getElementById("t_total_amount").value) || 0;
-  const deposit = Number(document.getElementById("t_deposit").value) || 0;
-  const cSel = document.getElementById("t_counselor");
-  const pct = parseFloat(cSel.options[cSel.selectedIndex].dataset.percent) || 70;
-  const cShare = Math.round(total * (pct / 100));
-  const clinicShare = total - cShare;
+  const current = state.dutySchedules[counselor] || {
+    days: ["شنبه", "یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنجشنبه"],
+    start: "09:00",
+    end: "21:00"
+  };
 
+  document.querySelectorAll(".duty-day-checkbox").forEach(cb => {
+    cb.checked = current.days.includes(cb.value);
+  });
+  document.getElementById("schedule_start_hour").value = current.start;
+  document.getElementById("schedule_end_hour").value = current.end;
+}
+
+// ذخیره دوطرفه برنامه هفتگی مشاور در شیت و مرورگر
+async function saveCounselorSchedule() {
+  const counselor = document.getElementById("schedule_counselor_select").value;
+  if (!counselor) {
+    alert("لطفاً ابتدا مشاور را انتخاب کنید.");
+    return;
+  }
+
+  const selectedDays = [];
+  document.querySelectorAll(".duty-day-checkbox:checked").forEach(cb => {
+    selectedDays.push(cb.value);
+  });
+
+  const startH = document.getElementById("schedule_start_hour").value;
+  const endH = document.getElementById("schedule_end_hour").value;
+
+  const scheduleObj = {
+    days: selectedDays,
+    start: startH,
+    end: endH
+  };
+
+  state.dutySchedules[counselor] = scheduleObj;
+
+  try {
+    await fetch(SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "saveCounselorSchedule",
+        counselor: counselor,
+        schedule: scheduleObj
+      })
+    });
+    alert(`برنامه کاری مشاور "${counselor}" ذخیره شد و در پرتال مراجعین نیز فعال گردید.`);
+    renderWeeklyCalendar();
+  } catch(e) {
+    alert("خطا در ارسال تنظیمات به گوگل‌شیت.");
+  }
+}
+
+function changeWeek(direction) {
+  state.currentWeekOffset = direction === 0 ? 0 : state.currentWeekOffset + direction;
+  renderWeeklyCalendar();
+}
+
+function getWeekDates(offsetWeeks = 0) {
   const now = new Date();
-  const shamsiToday = new Intl.DateTimeFormat('fa-IR', { year: 'numeric', month: '2-digit', day: '2-digit' }).format(now);
+  const currentDayOfWeek = now.getDay();
+  const distanceToSaturday = (currentDayOfWeek + 1) % 7;
+  
+  const saturday = new Date(now);
+  saturday.setDate(now.getDate() - distanceToSaturday + (offsetWeeks * 7));
+
+  const weekDays = [];
+  const dayNames = ["شنبه", "یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنجشنبه", "جمعه"];
+
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(saturday);
+    d.setDate(saturday.getDate() + i);
+
+    const shamsiStr = new Intl.DateTimeFormat('fa-IR', { year: 'numeric', month: '2-digit', day: '2-digit' }).format(d);
+    weekDays.push({
+      dayName: dayNames[i],
+      shamsiDate: shamsiStr
+    });
+  }
+  return weekDays;
+}
+
+async function fetchAppointments() {
+  const indicator = document.getElementById("loading-indicator");
+  indicator.style.display = "block";
+  try {
+    const res = await fetch(SCRIPT_URL + "?action=getAppointments");
+    const data = await res.json();
+    if (data.status === "success") {
+      state.appointmentsList = (data.appointments || []).map(a => {
+        a.clientPhone = normalizePhoneNumber(a.clientPhone);
+        return a;
+      });
+      buildClientsDirectory();
+      renderWeeklyCalendar();
+    }
+  } catch (err) {
+    console.error("خطا در دریافت نوبت‌ها:", err);
+  } finally {
+    indicator.style.display = "none";
+  }
+}
+
+function renderWeeklyCalendar() {
+  const selectedCounselor = document.getElementById("cal_counselor_filter").value;
+  const weekDays = getWeekDates(state.currentWeekOffset);
+
+  document.getElementById("cal_week_range_display").innerText = 
+    `هفته: ${weekDays[0].shamsiDate} تا ${weekDays[6].shamsiDate}`;
+
+  const headerRow = document.getElementById("cal_table_header");
+  headerRow.innerHTML = '<th class="day-col">روز و تاریخ</th>';
+
+  TIME_SLOTS.forEach(slot => {
+    headerRow.innerHTML += `<th>${slot.label}</th>`;
+  });
+
+  const tbody = document.getElementById("cal_table_body");
+  tbody.innerHTML = "";
+
+  const sched = state.dutySchedules[selectedCounselor] || null;
+
+  weekDays.forEach(day => {
+    const dayClean = day.shamsiDate.replace(/[\u200B-\u200D\uFEFF\u200E\u200F']/g, "").trim();
+
+    const isDayBlocked = state.appointmentsList.some(a => 
+      a.counselor === selectedCounselor &&
+      a.appointmentDate.replace(/[\u200B-\u200D\uFEFF\u200E\u200F']/g, "").trim() === dayClean &&
+      a.slotType === "blocked_day"
+    );
+
+    let actionBtn = isDayBlocked 
+      ? `<br><button class="btn-unblock-day" onclick="unblockDay('${day.shamsiDate}', '${selectedCounselor}')">🔓 بازگشایی</button>`
+      : `<br><button class="btn-block-day" onclick="openBlockDayModal('${day.shamsiDate}', '${selectedCounselor}')">🔒 بستن روز</button>`;
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td class="day-col">
+        <div>${day.dayName}</div>
+        <div style="font-size:0.72rem; color:var(--text-muted);">${day.shamsiDate}</div>
+        ${actionBtn}
+      </td>
+    `;
+
+    let isDayInDuty = true;
+    if (sched && sched.days) {
+      isDayInDuty = sched.days.includes(day.dayName);
+    }
+
+    TIME_SLOTS.forEach(slot => {
+      const td = document.createElement("td");
+      td.className = "cal-cell";
+
+      if (isDayBlocked) {
+        td.classList.add("blocked-day-cell");
+        td.innerHTML = `<div style="font-size:0.75rem; color:var(--danger); font-weight:bold;">🔒 روز مسدود</div>`;
+        tr.appendChild(td);
+        return;
+      }
+
+      let isHourInDuty = true;
+      if (sched) {
+        if (sched.start && slot.start < sched.start) isHourInDuty = false;
+        if (sched.end && slot.end > sched.end) isHourInDuty = false;
+      }
+
+      if (!isDayInDuty || !isHourInDuty) {
+        td.classList.add("off-duty-cell");
+        td.innerHTML = `<div class="off-duty-label">عدم حضور</div>`;
+        tr.appendChild(td);
+        return;
+      }
+
+      const fullApp = state.appointmentsList.find(a => 
+        a.counselor === selectedCounselor &&
+        a.appointmentDate.replace(/[\u200B-\u200D\uFEFF\u200E\u200F']/g, "").trim() === dayClean &&
+        a.appointmentTime === slot.label &&
+        (a.slotType === "full" || a.slotType === "meeting") &&
+        a.status !== "کنسل شده"
+      );
+
+      const half1App = state.appointmentsList.find(a => 
+        a.counselor === selectedCounselor &&
+        a.appointmentDate.replace(/[\u200B-\u200D\uFEFF\u200E\u200F']/g, "").trim() === dayClean &&
+        a.appointmentTime === slot.h1 &&
+        a.slotType === "half1" &&
+        a.status !== "کنسل شده"
+      );
+
+      const half2App = state.appointmentsList.find(a => 
+        a.counselor === selectedCounselor &&
+        a.appointmentDate.replace(/[\u200B-\u200D\uFEFF\u200E\u200F']/g, "").trim() === dayClean &&
+        a.appointmentTime === slot.h2 &&
+        a.slotType === "half2" &&
+        a.status !== "کنسل شده"
+      );
+
+      if (fullApp) {
+        let bClass = "status-reserved";
+        if (fullApp.slotType === "meeting") bClass = "status-meeting";
+        if (fullApp.status === "برگزار شده") bClass = "status-completed";
+
+        td.innerHTML = `
+          <div class="cal-badge ${bClass}" onclick="openAppDetailsModal('${fullApp.id}')">
+            <strong>${fullApp.clientName}</strong>
+            <span style="font-size:0.65rem; opacity:0.85;">${fullApp.slotType === 'meeting' ? 'جلسه کاری' : fullApp.status}</span>
+          </div>
+        `;
+      } else if (half1App || half2App) {
+        const splitBox = document.createElement("div");
+        splitBox.className = "slot-split-container";
+
+        if (half1App) {
+          const h1Badge = document.createElement("div");
+          h1Badge.className = "cal-badge status-reserved";
+          h1Badge.onclick = () => openAppDetailsModal(half1App.id);
+          h1Badge.innerHTML = `<strong>${half1App.clientName}</strong><span style="font-size:0.6rem;">نیمه اول</span>`;
+          splitBox.appendChild(h1Badge);
+        } else {
+          const h1Btn = document.createElement("button");
+          h1Btn.type = "button";
+          h1Btn.className = "slot-half-btn";
+          h1Btn.innerText = "+ نیم اول";
+          h1Btn.onclick = () => openBookingModal(selectedCounselor, day.shamsiDate, slot.h1, 'client_half1');
+          splitBox.appendChild(h1Btn);
+        }
+
+        if (half2App) {
+          const h2Badge = document.createElement("div");
+          h2Badge.className = "cal-badge status-reserved";
+          h2Badge.onclick = () => openAppDetailsModal(half2App.id);
+          h2Badge.innerHTML = `<strong>${half2App.clientName}</strong><span style="font-size:0.6rem;">نیمه دوم</span>`;
+          splitBox.appendChild(h2Badge);
+        } else {
+          const h2Btn = document.createElement("button");
+          h2Btn.type = "button";
+          h2Btn.className = "slot-half-btn";
+          h2Btn.innerText = "+ نیم دوم";
+          h2Btn.onclick = () => openBookingModal(selectedCounselor, day.shamsiDate, slot.h2, 'client_half2');
+          splitBox.appendChild(h2Btn);
+        }
+
+        td.appendChild(splitBox);
+      } else {
+        const bookBtn = document.createElement("button");
+        bookBtn.type = "button";
+        bookBtn.className = "slot-full-btn";
+        bookBtn.innerText = "+ رزرو";
+        bookBtn.onclick = () => openBookingModal(selectedCounselor, day.shamsiDate, slot.label, 'client_full');
+        td.appendChild(bookBtn);
+      }
+
+      tr.appendChild(td);
+    });
+
+    tbody.appendChild(tr);
+  });
+}
+
+function openBookingModal(counselor, date, time, prefillType = "client_full") {
+  const cInput = document.getElementById("bm_counselor");
+  const cText = document.getElementById("bm_counselor_text");
+  const dInput = document.getElementById("bm_date");
+  const dText = document.getElementById("bm_date_text");
+  const tInput = document.getElementById("bm_time");
+  const tText = document.getElementById("bm_time_text");
+  const typeSelect = document.getElementById("bm_booking_type");
+  const nameInput = document.getElementById("bm_client_name");
+  const phoneInput = document.getElementById("bm_client_phone");
+  const depositInput = document.getElementById("bm_deposit");
+  const modal = document.getElementById("booking_modal");
+
+  if (cInput) cInput.value = counselor || "";
+  if (cText) cText.innerText = counselor || "-";
+  if (dInput) dInput.value = date || "";
+  if (dText) dText.innerText = date || "-";
+  if (tInput) tInput.value = time || "";
+  if (tText) tText.innerText = time || "-";
+
+  if (typeSelect) typeSelect.value = prefillType;
+  handleBookingTypeChange();
+
+  if (nameInput) nameInput.value = "";
+  if (phoneInput) phoneInput.value = "";
+  if (depositInput) depositInput.value = 0;
+
+  if (modal) modal.style.display = "flex";
+}
+
+function handleBookingTypeChange() {
+  const typeSelect = document.getElementById("bm_booking_type");
+  const bType = typeSelect ? typeSelect.value : "client_full";
+  const nameLabel = document.getElementById("bm_name_label");
+  const nameInput = document.getElementById("bm_client_name");
+  const phoneGroup = document.getElementById("bm_phone_group");
+  const depositGroup = document.getElementById("bm_deposit_group");
+
+  if (bType === "meeting") {
+    if (nameLabel) nameLabel.innerText = "موضوع جلسه / با چه کسی:";
+    if (phoneGroup) phoneGroup.style.display = "none";
+    if (depositGroup) depositGroup.style.display = "none";
+    if (nameInput) nameInput.placeholder = "مثال: بررسی پرونده با همکاران";
+  } else {
+    if (nameLabel) nameLabel.innerText = "نام و نام خانوادگی مراجع:";
+    if (phoneGroup) phoneGroup.style.display = "flex";
+    if (depositGroup) depositGroup.style.display = "flex";
+    if (nameInput) nameInput.placeholder = "تایپ نام جهت پیشنهاد خودکار...";
+  }
+}
+
+function closeBookingModal() {
+  const modal = document.getElementById("booking_modal");
+  if (modal) modal.style.display = "none";
+}
+
+document.getElementById("quick_booking_form").addEventListener("submit", async function(e) {
+  e.preventDefault();
+  const btn = document.getElementById("btn_quick_book");
+  btn.disabled = true;
+  btn.innerText = "در حال رزرو...";
+
+  const bType = document.getElementById("bm_booking_type").value;
+  let slotType = "full";
+  let appTime = document.getElementById("bm_time").value;
+
+  if (bType === "meeting") {
+    slotType = "meeting";
+  } else if (bType === "client_half1") {
+    slotType = "half1";
+  } else if (bType === "client_half2") {
+    slotType = "half2";
+  }
+
+  const rawPhone = document.getElementById("bm_client_phone").value;
+  const cleanPhone = (bType === "meeting") ? "-" : normalizePhoneNumber(rawPhone);
 
   const payload = {
-    action: "addTransaction",
-    clientName: document.getElementById("t_client_name").value.trim(),
-    clientPhone: document.getElementById("t_client_phone").value.trim(),
-    counselor: cSel.value,
-    sessionType: document.getElementById("t_session_type").value,
-    parts: Number(document.getElementById("t_parts").value) || 1,
-    totalAmount: total,
-    counselorPercent: pct,
-    counselorShare: cShare,
-    clinicShare: clinicShare,
-    deposit: deposit,
-    depositTo: document.getElementById("t_deposit_to").value,
-    balanceTo: document.getElementById("t_balance_to").value,
-    notes: document.getElementById("t_notes").value.trim(),
-    shamsiDate: shamsiToday,
-    operator: "منشی پذیرش"
+    action: "addAppointment",
+    counselor: document.getElementById("bm_counselor").value,
+    appointmentDate: document.getElementById("bm_date").value,
+    appointmentTime: appTime,
+    clientName: document.getElementById("bm_client_name").value,
+    clientPhone: cleanPhone,
+    deposit: (bType === "meeting") ? 0 : (Number(document.getElementById("bm_deposit").value) || 0),
+    slotType: slotType,
+    status: (bType === "meeting") ? "جلسه کاری" : "رزرو شده",
+    operator: state.currentUser || "منشی"
   };
 
   try {
@@ -577,167 +1991,506 @@ document.getElementById("form_reception_transaction").addEventListener("submit",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
-
-    alert("تراکنش با موفقیت ثبت شد.");
-    document.getElementById("form_reception_transaction").reset();
-    calcSharesAndBalance();
-    setTimeout(fetchDeskInitialData, 1000);
-  } catch(err) {
-    alert("خطا در ثبت تراکنش.");
+    alert("نوبت با موفقیت ثبت شد.");
+    closeBookingModal();
+    setTimeout(fetchAppointments, 1200);
+  } catch (err) {
+    alert("خطا در رزرو نوبت");
   } finally {
     btn.disabled = false;
-    btn.innerText = "ثبت نهایی تراکنش در سیستم";
+    btn.innerText = "ثبت قطعی در تقویم";
   }
 });
 
-function renderRecentTransactions() {
-  const tbody = document.getElementById("recent_transactions_tbody");
-  tbody.innerHTML = "";
-  if (state.recentTransactions.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; color:var(--text-muted);">رکوردی یافت نشد.</td></tr>';
-    return;
+function openAppDetailsModal(appId) {
+  const app = state.appointmentsList.find(a => a.id === appId);
+  if (!app) return;
+
+  document.getElementById("adm_app_id").value = app.id;
+  document.getElementById("adm_client_name").innerText = app.clientName;
+  document.getElementById("adm_counselor").innerText = app.counselor;
+  document.getElementById("adm_datetime").innerText = `${app.appointmentDate} (ساعت ${app.appointmentTime})`;
+  document.getElementById("adm_status").innerText = app.status;
+  document.getElementById("adm_operator").innerText = app.operator || "ثبت سیستمی";
+
+  if (app.slotType === "meeting") {
+    document.getElementById("adm_phone_row").style.display = "none";
+    document.getElementById("adm_deposit_row").style.display = "none";
+    document.getElementById("btn_adm_to_desk").style.display = "none";
+  } else {
+    document.getElementById("adm_phone_row").style.display = "block";
+    document.getElementById("adm_deposit_row").style.display = "block";
+    document.getElementById("btn_adm_to_desk").style.display = "block";
+    document.getElementById("adm_client_phone").innerText = normalizePhoneNumber(app.clientPhone) || "ثبت نشده";
+    document.getElementById("adm_deposit").innerText = Number(app.deposit).toLocaleString('fa-IR') + " تومان";
   }
 
-  state.recentTransactions.forEach(t => {
-    const balanceDue = Math.max(0, (t.totalAmount || 0) - (t.deposit || 0));
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${t.id || "-"}</td>
-      <td>${t.date || "-"}</td>
-      <td><strong>${t.clientName}</strong></td>
-      <td>${t.counselor}</td>
-      <td>${formatToman(t.totalAmount)}</td>
-      <td>${formatToman(t.deposit)}</td>
-      <td style="color:var(--success); font-weight:bold;">${formatToman(balanceDue)}</td>
-      <td>${formatToman(t.counselorShare)}</td>
-      <td>${formatToman(t.clinicShare)}</td>
-    `;
-    tbody.appendChild(tr);
-  });
+  document.getElementById("app_details_modal").style.display = "flex";
 }
 
-function renderDeskAppointments() {
-  const tbody = document.getElementById("desk_appointments_tbody");
-  tbody.innerHTML = "";
-  if (state.appointments.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:var(--text-muted);">نوبتی ثبت نشده است.</td></tr>';
-    return;
+function closeAppDetailsModal() {
+  document.getElementById("app_details_modal").style.display = "none";
+}
+
+function convertModalToDesk() {
+  const appId = document.getElementById("adm_app_id").value;
+  const app = state.appointmentsList.find(a => a.id === appId);
+  if (!app) return;
+
+  document.getElementById("client_name").value = app.clientName;
+  document.getElementById("client_phone").value = normalizePhoneNumber(app.clientPhone) || "";
+  document.getElementById("counselor_select").value = app.counselor;
+  
+  if (app.slotType === "half1" || app.slotType === "half2") {
+    document.getElementById("session_type").value = "طلاق";
+    sessionTypeInput.dispatchEvent(new Event('change'));
   }
 
-  state.appointments.forEach(a => {
+  if (app.deposit > 0) {
+    depositToggle.checked = true;
+    depositWrapper.style.display = "grid";
+    depositAmountInput.value = app.deposit;
+    balanceLabel.innerText = "مانده مبلغ در مطب به حساب کی رفت؟";
+  } else {
+    depositToggle.checked = false;
+    depositWrapper.style.display = "none";
+    depositAmountInput.value = 0;
+    balanceLabel.innerText = "تسویه کل مبلغ جلسه از طریق:";
+  }
+  
+  document.getElementById("record_notes").value = `نوبت ساعت ${app.appointmentTime} - تسویه در مطب`;
+  updateSummaryBoxes();
+  updateRemainingDisplay();
+
+  changeAppStatus(appId, "برگزار شده");
+  closeAppDetailsModal();
+  switchTab('desk');
+}
+
+async function cancelAppointmentFromModal() {
+  const appId = document.getElementById("adm_app_id").value;
+  if (!confirm("آیا از لغو این نوبت اطمینان دارید؟")) return;
+  await changeAppStatus(appId, "کنسل شده");
+  closeAppDetailsModal();
+}
+
+async function changeAppStatus(appId, newStatus) {
+  try {
+    await fetch(SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "updateAppointmentStatus", id: appId, status: newStatus })
+    });
+    setTimeout(fetchAppointments, 1200);
+  } catch (e) {
+    console.error("خطا در تغییر وضعیت نوبت:", e);
+  }
+}
+
+function openBlockDayModal(date, counselor) {
+  document.getElementById("bdm_date").value = date;
+  document.getElementById("bdm_date_text").innerText = date;
+  document.getElementById("bdm_counselor").value = counselor;
+  document.getElementById("bdm_counselor_text").innerText = counselor;
+  document.getElementById("bdm_reason").value = "";
+  document.getElementById("block_day_modal").style.display = "flex";
+}
+
+function closeBlockDayModal() {
+  document.getElementById("block_day_modal").style.display = "none";
+}
+
+document.getElementById("block_day_form").addEventListener("submit", async function(e) {
+  e.preventDefault();
+  const btn = document.getElementById("btn_block_submit");
+  btn.disabled = true;
+  btn.innerText = "در حال بستن روز...";
+
+  const payload = {
+    action: "blockDay",
+    date: document.getElementById("bdm_date").value,
+    counselor: document.getElementById("bdm_counselor").value,
+    reason: document.getElementById("bdm_reason").value,
+    operator: state.currentUser || "منشی"
+  };
+
+  try {
+    await fetch(SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    alert("این روز برای مشاور با موفقیت مسدود شد.");
+    closeBlockDayModal();
+    setTimeout(fetchAppointments, 1200);
+  } catch (err) {
+    alert("خطا در مسدود کردن روز");
+  } finally {
+    btn.disabled = false;
+    btn.innerText = "مسدود کردن این روز";
+  }
+});
+
+async function unblockDay(date, counselor) {
+  if (!confirm(`آیا مطمئن هستید که می‌خواهید روز ${date} را برای مشاور بازگشایی کنید؟`)) return;
+  try {
+    await fetch(SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "unblockDay", date: date, counselor: counselor })
+    });
+    alert("روز با موفقیت بازگشایی شد.");
+    setTimeout(fetchAppointments, 1200);
+  } catch (err) {
+    alert("خطا در بازگشایی روز");
+  }
+}
+
+const sessionTypeInput = document.getElementById("session_type");
+const partsCountInput = document.getElementById("parts_count");
+const totalAmountInput = document.getElementById("total_amount");
+const counselorSelect = document.getElementById("counselor_select");
+const depositToggle = document.getElementById("has_deposit_toggle");
+const depositWrapper = document.getElementById("deposit_fields_wrapper");
+const depositAmountInput = document.getElementById("deposit_amount");
+const balanceLabel = document.getElementById("balance_label");
+const remainingBadge = document.getElementById("remaining_badge");
+
+depositToggle.addEventListener("change", function() {
+  if (this.checked) {
+    depositWrapper.style.display = "grid";
+    balanceLabel.innerText = "مانده مبلغ در مطب به حساب کی رفت؟";
+  } else {
+    depositWrapper.style.display = "none";
+    depositAmountInput.value = 0;
+    balanceLabel.innerText = "تسویه کل مبلغ جلسه از طریق:";
+  }
+  updateRemainingDisplay();
+});
+
+depositAmountInput.addEventListener("input", updateRemainingDisplay);
+
+function updateRemainingDisplay() {
+  const total = Number(totalAmountInput.value) || 0;
+  const dep = depositToggle.checked ? (Number(depositAmountInput.value) || 0) : 0;
+  const rem = Math.max(0, total - dep);
+
+  if (depositToggle.checked && total > 0) {
+    remainingBadge.innerText = `مانده تسویه: ${rem.toLocaleString('fa-IR')} تومان`;
+  } else {
+    remainingBadge.innerText = "";
+  }
+}
+
+sessionTypeInput.addEventListener("change", function() {
+  const type = this.value;
+  const partsGroup = document.getElementById("group_parts");
+  
+  if (type === "آزاد") {
+    partsGroup.style.display = "none";
+    totalAmountInput.readOnly = false;
+  } else {
+    partsGroup.style.display = "flex";
+    const conf = state.settings[type] || { defaultRate: 0 };
+    totalAmountInput.value = conf.defaultRate * Number(partsCountInput.value);
+    totalAmountInput.readOnly = true;
+  }
+  updateSummaryBoxes();
+});
+
+partsCountInput.addEventListener("input", function() {
+  const type = sessionTypeInput.value;
+  if (type !== "آزاد") {
+    const conf = state.settings[type] || { defaultRate: 0 };
+    totalAmountInput.value = conf.defaultRate * Number(this.value);
+  }
+  updateSummaryBoxes();
+});
+
+totalAmountInput.addEventListener("input", function() {
+  updateSummaryBoxes();
+  updateRemainingDisplay();
+});
+
+function updateSummaryBoxes() {
+  const total = Number(totalAmountInput.value) || 0;
+  document.getElementById("box_total").innerText = total.toLocaleString('fa-IR') + " تومان";
+}
+
+function getEffectivePercent(sType, cName) {
+  if (sType !== "آزاد" && state.settings[sType]) {
+    return state.settings[sType].percent;
+  }
+  const counselor = state.counselors.find(c => c.name === cName);
+  return counselor ? counselor.percent : 70;
+}
+
+document.getElementById("record_form").addEventListener("submit", async function(e) {
+  e.preventDefault();
+  const btn = document.getElementById("btn_submit");
+  btn.disabled = true;
+  btn.innerText = "در حال ثبت اطلاعات...";
+
+  const total = Number(totalAmountInput.value) || 0;
+  const percent = getEffectivePercent(sessionTypeInput.value, counselorSelect.value);
+  const cShare = Math.round((total * percent) / 100);
+  const clShare = total - cShare;
+  const hasDeposit = depositToggle.checked;
+  const depositVal = hasDeposit ? (Number(depositAmountInput.value) || 0) : 0;
+  const cleanPhone = normalizePhoneNumber(document.getElementById("client_phone").value);
+
+  const payload = {
+    action: "addTransaction",
+    shamsiDate: state.shamsiDate,
+    clientName: document.getElementById("client_name").value,
+    clientPhone: cleanPhone,
+    counselor: counselorSelect.value,
+    sessionType: sessionTypeInput.value,
+    parts: sessionTypeInput.value === "آزاد" ? 1 : partsCountInput.value,
+    totalAmount: total,
+    counselorPercent: percent,
+    counselorShare: cShare,
+    clinicShare: clShare,
+    deposit: depositVal,
+    depositTo: hasDeposit ? document.getElementById("deposit_to").value : "ندارد",
+    balanceTo: document.getElementById("balance_to").value,
+    notes: document.getElementById("record_notes").value,
+    operator: state.currentUser || "منشی"
+  };
+
+  try {
+    await fetch(SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    
+    alert("جلسه با موفقیت ثبت شد.");
+    document.getElementById("record_form").reset();
+    depositToggle.checked = false;
+    depositToggle.dispatchEvent(new Event('change'));
+    sessionTypeInput.dispatchEvent(new Event('change'));
+    setTimeout(fetchInitialData, 1200);
+  } catch (err) {
+    alert("خطا در ارسال اطلاعات به سرور");
+  } finally {
+    btn.disabled = false;
+    btn.innerText = "ثبت در سیستم و شیت";
+  }
+});
+
+function renderRecentTable(list) {
+  const tbody = document.getElementById("recent_table_body");
+  tbody.innerHTML = "";
+  if (!list || list.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color: var(--text-muted);">هنوز مراجعی ثبت نشده است.</td></tr>';
+    return;
+  }
+  list.forEach(r => {
     const tr = document.createElement("tr");
+    const displayDate = (r.date || "-").toString().split("T")[0];
     tr.innerHTML = `
-      <td>${a.id}</td>
-      <td>${a.appointmentDate}</td>
-      <td>${a.appointmentTime}</td>
-      <td><strong>${a.clientName}</strong></td>
-      <td>${a.clientPhone}</td>
-      <td>${a.counselor}</td>
-      <td><span style="font-size:0.75rem; padding:2px 8px; border-radius:4px; background:rgba(56,189,248,0.15); color:var(--primary);">${a.status}</span></td>
+      <td>${displayDate}</td>
+      <td>${r.clientName}</td>
+      <td>${r.counselor}</td>
+      <td>${r.sessionType}</td>
+      <td>${Number(r.totalAmount).toLocaleString('fa-IR')}</td>
+      <td>${Number(r.deposit).toLocaleString('fa-IR')}</td>
+      <td style="color: #cbd5e1; font-size: 0.78rem;">${r.operator || "-"}</td>
       <td>
-        <button class="btn-action-sm" onclick="sendToReception('${a.clientName}', '${a.clientPhone}', '${a.counselor}', ${a.deposit})">انتقال به پذیرش</button>
+        <button class="btn-edit-sm" onclick="openEditModal('${r.id}')">ویرایش</button>
+        <button class="btn-delete-c" onclick="deleteRecord('${r.id}')">حذف</button>
       </td>
     `;
     tbody.appendChild(tr);
   });
 }
 
-// انتقال مشخصات نوبت رزروشده به میز پذیرش
-function sendToReception(name, phone, counselor, deposit) {
-  switchDeskTab('reception');
-  document.getElementById("t_client_name").value = name;
-  document.getElementById("t_client_phone").value = phone;
-  document.getElementById("t_counselor").value = counselor;
-  document.getElementById("t_deposit").value = deposit || 0;
-  onSessionTypeChanged();
-  calcSharesAndBalance();
+function renderSessionRatesTable() {
+  const tbody = document.getElementById("session_rates_tbody");
+  tbody.innerHTML = "";
+  const sessionTypes = ["آزاد", "سپه", "ورزش و بهزیستی", "طلاق"];
+  
+  sessionTypes.forEach(type => {
+    const conf = state.settings[type] || { defaultRate: 0, percent: 70 };
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td style="font-weight: bold; color: var(--primary);">${type}</td>
+      <td>
+        <input type="number" class="table-input" id="rate_${type}" value="${conf.defaultRate}" ${type === 'آزاد' ? 'disabled placeholder="دستی وارد می‌شود"' : ''} style="width: 140px;"> تومان
+      </td>
+      <td>
+        <input type="number" min="0" max="100" class="table-input" id="pct_${type}" value="${conf.percent}" style="width: 75px; text-align: center;"> ٪
+      </td>
+      <td>
+        <button class="btn-action-sm" onclick="saveSessionRate('${type}')">ذخیره نرخ و درصد</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
 }
 
-// لود گزارش تسویه ماهانه
-async function loadMonthlyReport() {
-  const c = document.getElementById("settle_counselor").value;
-  const y = document.getElementById("settle_year").value.trim();
-  const m = document.getElementById("settle_month").value;
-
-  const url = `${SCRIPT_URL}?action=getMonthlyReport&counselor=${encodeURIComponent(c)}&year=${y}&month=${m}`;
-  const res = await fetch(url).then(r => r.json());
-
-  document.getElementById("receipt_counselor_name").innerText = c === "all" ? "تمامی مشاوران" : c;
-  document.getElementById("receipt_period").innerText = `${y}/${m}`;
-
-  const tbody = document.getElementById("settlement_table_tbody");
+function renderCounselorsSettingsTable() {
+  const tbody = document.getElementById("counselor_settings_tbody");
   tbody.innerHTML = "";
+  
+  state.counselors.forEach(c => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td style="font-weight: 500;">${c.name}</td>
+      <td>
+        <input type="number" min="0" max="100" class="table-input" id="pct_input_${c.name}" value="${c.percent}" style="width: 75px; text-align: center;"> ٪
+      </td>
+      <td>
+        <button class="btn-action-sm" onclick="saveCounselorPercent('${c.name}')">بروزرسانی</button>
+      </td>
+      <td>
+        <button class="btn-delete-c" onclick="removeCounselor('${c.name}')">حذف</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
 
-  if (res.status !== "success" || !res.records || res.records.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:var(--text-muted); padding:15px;">هیچ رکوردی برای این ماه یافت نشد.</td></tr>';
-    document.getElementById("sum_count").innerText = "۰";
-    document.getElementById("sum_turnover").innerText = "۰";
-    document.getElementById("sum_counselor_total").innerText = "۰";
-    document.getElementById("sum_net_payable").innerText = "۰";
-    return;
+function openEditModal(recordId) {
+  const r = state.recentList.find(item => item.id == recordId);
+  if (!r) return;
+
+  document.getElementById("edit_id").value = r.id;
+  document.getElementById("edit_client_name").value = r.clientName;
+  document.getElementById("edit_client_phone").value = normalizePhoneNumber(r.clientPhone) || "";
+  document.getElementById("edit_counselor_select").value = r.counselor;
+  document.getElementById("edit_session_type").value = r.sessionType;
+  document.getElementById("edit_parts_count").value = r.parts || 1;
+  document.getElementById("edit_total_amount").value = r.totalAmount;
+  document.getElementById("edit_record_notes").value = r.notes || "";
+
+  if (Number(r.deposit) > 0) {
+    document.getElementById("edit_has_deposit_toggle").checked = true;
+    document.getElementById("edit_deposit_fields_wrapper").style.display = "grid";
+    document.getElementById("edit_deposit_amount").value = r.deposit;
+  } else {
+    document.getElementById("edit_has_deposit_toggle").checked = false;
+    document.getElementById("edit_deposit_fields_wrapper").style.display = "none";
+    document.getElementById("edit_deposit_amount").value = 0;
   }
 
-  state.currentLoadedReport = res.records;
-  let totalTurnover = 0;
-  let totalCShare = 0;
-  let totalDirectGot = 0;
+  document.getElementById("edit_modal").style.display = "flex";
+}
 
-  res.records.forEach((r, idx) => {
-    totalTurnover += Number(r.totalAmount) || 0;
-    totalCShare += Number(r.counselorShare) || 0;
-    
-    let direct = 0;
-    if (r.deposit > 0 && r.depositTo === "مشاور") direct += Number(r.deposit);
-    if (r.balanceTo === "مشاور") direct += Math.max(0, r.totalAmount - r.deposit);
-    totalDirectGot += direct;
+function closeEditModal() {
+  document.getElementById("edit_modal").style.display = "none";
+}
+
+async function deleteRecord(id) {
+  if (!confirm("آیا از حذف این جلسه اطمینان دارید؟")) return;
+  try {
+    await fetch(SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "deleteTransaction", id: id })
+    });
+    setTimeout(fetchInitialData, 1200);
+  } catch (e) {
+    alert("خطا در حذف رکورد");
+  }
+}
+
+async function loadMonthlyReport() {
+  const counselor = document.getElementById("report_counselor_select").value;
+  const year = document.getElementById("report_year").value.trim();
+  const month = document.getElementById("report_month_select").value;
+
+  const indicator = document.getElementById("loading-indicator");
+  indicator.style.display = "block";
+
+  try {
+    const url = `${SCRIPT_URL}?action=getMonthlyReport&counselor=${encodeURIComponent(counselor)}&year=${encodeURIComponent(year)}&month=${encodeURIComponent(month)}`;
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (data.status === "success") {
+      renderMonthlyReportData(data.records, counselor);
+    }
+  } catch (err) {
+    alert("خطا در دریافت گزارش: " + err.message);
+  } finally {
+    indicator.style.display = "none";
+  }
+}
+
+function renderMonthlyReportData(records, counselor) {
+  const area = document.getElementById("report_results_area");
+  area.style.display = "block";
+
+  let totalSessions = records.length;
+  let totalTurnover = 0;
+  let counselorTotalShare = 0;
+  let counselorDirectGot = 0;
+
+  const tbody = document.getElementById("report_table_body");
+  tbody.innerHTML = "";
+
+  records.forEach(r => {
+    totalTurnover += r.totalAmount;
+    counselorTotalShare += r.counselorShare;
+
+    let directToCounselorThisSession = 0;
+    if (r.deposit > 0 && r.depositTo === "مشاور") directToCounselorThisSession += r.deposit;
+    if (r.balanceTo === "مشاور") directToCounselorThisSession += Math.max(0, r.totalAmount - (r.deposit || 0));
+    counselorDirectGot += directToCounselorThisSession;
 
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${idx + 1}</td>
-      <td>${r.date}</td>
+      <td>${(r.date || "-").toString().split("T")[0]}</td>
       <td>${r.clientName}</td>
-      <td>${r.sessionType} (${r.parts}پارت)</td>
-      <td>${formatToman(r.totalAmount)}</td>
-      <td>${formatToman(r.counselorShare)}</td>
-      <td>${formatToman(direct)}</td>
-      <td>${r.balanceTo === "مشاور" ? "دریافت شده توسط مشاور" : "واریز به کلینیک"}</td>
+      <td>${r.counselor}</td>
+      <td>${r.sessionType}</td>
+      <td>${r.totalAmount.toLocaleString('fa-IR')}</td>
+      <td style="color:var(--primary); font-weight:bold;">${r.counselorShare.toLocaleString('fa-IR')}</td>
+      <td>${(r.deposit || 0).toLocaleString('fa-IR')}</td>
+      <td>${r.depositTo || "-"}</td>
+      <td>${r.balanceTo || "کلینیک"}</td>
+      <td>${r.operator || "-"}</td>
     `;
     tbody.appendChild(tr);
   });
 
-  const netPayable = totalCShare - totalDirectGot;
-  document.getElementById("sum_count").innerText = res.records.length;
-  document.getElementById("sum_turnover").innerText = formatToman(totalTurnover);
-  document.getElementById("sum_counselor_total").innerText = formatToman(totalCShare);
-  document.getElementById("sum_net_payable").innerText = formatToman(netPayable);
-}
+  document.getElementById("kpi_sessions_count").innerText = totalSessions.toLocaleString('fa-IR');
+  document.getElementById("kpi_total_turnover").innerText = totalTurnover.toLocaleString('fa-IR') + " ت";
+  document.getElementById("kpi_counselor_total_share").innerText = counselorTotalShare.toLocaleString('fa-IR') + " ت";
+  document.getElementById("kpi_counselor_direct_got").innerText = counselorDirectGot.toLocaleString('fa-IR') + " ت";
 
-// چاپ فوق‌العاده تمیز بدون اسکرین‌شات المان‌های تب
-function printCleanReceipt() {
-  if (!state.currentLoadedReport || state.currentLoadedReport.length === 0) {
-    alert("ابتدا یک بار دکمه «مشاهده گزارش» را بزنید تا اطلاعات فیش بارگذاری شود.");
-    return;
-  }
-  window.print();
-}
+  const netSettlement = counselorTotalShare - counselorDirectGot;
+  const statusBox = document.getElementById("settlement_status_box");
+  const statusLabel = document.getElementById("settlement_status_label");
+  const statusText = document.getElementById("settlement_status_text");
+  const statusAmount = document.getElementById("settlement_status_amount");
 
-function switchDeskTab(tab) {
-  document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-  document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
-
-  if (tab === 'reception') {
-    document.querySelector(".nav-tabs button:nth-child(1)").classList.add("active");
-    document.getElementById("tab_reception").classList.add("active");
-  } else if (tab === 'calendar') {
-    document.querySelector(".nav-tabs button:nth-child(2)").classList.add("active");
-    document.getElementById("tab_calendar").classList.add("active");
+  if (counselor === "all") {
+    statusBox.className = "settlement-banner to-counselor";
+    statusLabel.innerText = "درآمد کلینیک:";
+    statusText.innerText = "مجموع سهم کلینیک";
+    statusAmount.innerText = (totalTurnover - counselorTotalShare).toLocaleString('fa-IR') + " تومان";
+  } else if (netSettlement >= 0) {
+    statusBox.className = "settlement-banner to-counselor";
+    statusLabel.innerText = "بستانکاری مشاور:";
+    statusText.innerText = `کلینیک باید این مبلغ را به "${counselor}" بپردازد`;
+    statusAmount.innerText = netSettlement.toLocaleString('fa-IR') + " تومان";
   } else {
-    document.querySelector(".nav-tabs button:nth-child(3)").classList.add("active");
-    document.getElementById("tab_settlement").classList.add("active");
+    statusBox.className = "settlement-banner to-clinic";
+    statusLabel.innerText = "بدهی مشاور:";
+    statusText.innerText = `مشاور "${counselor}" باید این مبلغ را بازگرداند`;
+    statusAmount.innerText = Math.abs(netSettlement).toLocaleString('fa-IR') + " تومان";
   }
 }
 
-initDesk();
+checkAuth();
 </script>
 </body>
 </html>
