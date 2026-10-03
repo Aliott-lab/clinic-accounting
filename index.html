@@ -3,564 +3,463 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#1B6B66">
   <title>سامانه جامع پذیرش و نوبت‌دهی تقویمی | کلینیک سپهر آرامش</title>
-  <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+  <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css">
   <style>
+    /* ---------- توکن‌های طراحی (همان پنل مراجعین) ---------- */
     :root {
-      --bg-main: #0b0f19;
-      --card-bg: #161f30;
-      --card-border: #24324a;
-      --primary: #38bdf8;
-      --primary-hover: #0284c7;
-      --success: #22c55e;
-      --danger: #ef4444;
-      --warning: #f59e0b;
-      --purple: #a855f7;
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --input-bg: #0f172a;
+      --paper: #EEF4F2;
+      --surface: #FFFFFF;
+      --sunken: #F4F8F7;
+      --ink: #10302D;
+      --ink-2: #47635F;
+      --line: #D1DEDB;
+      --brand: #1B6B66;
+      --brand-strong: #14524E;
+      --brand-ink: #FFFFFF;
+      --brand-tint: #DCEEEB;
+      --sun: #E9A94B;
+      --danger: #B23B2B;
+      --danger-tint: #FBE9E6;
+      --ok: #2B7A4B;
+      --ok-tint: #E1F3E7;
+      --warn-tint: #FDF1DC;
+      --warn: #A8660F;
+      --shadow: 0 1px 2px rgba(16,48,45,.06), 0 14px 34px -18px rgba(16,48,45,.28);
+      --r-lg: 22px;
+      --r-md: 14px;
+      --r-sm: 10px;
+      --chev: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%2347635F' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+
+      /* نام‌های قدیمی؛ برای استایل‌های درون‌خطی که اسکریپت تولید می‌کند */
+      --bg-main: var(--paper);
+      --card-bg: var(--surface);
+      --card-border: var(--line);
+      --input-bg: var(--sunken);
+      --primary: var(--brand);
+      --primary-hover: var(--brand-strong);
+      --success: var(--ok);
+      --warning: var(--warn);
+      --text-main: var(--ink);
+      --text-muted: var(--ink-2);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --paper: #0D1918;
+        --surface: #142524;
+        --sunken: #101E1D;
+        --ink: #E7F2F0;
+        --ink-2: #9DB8B4;
+        --line: #284240;
+        --brand: #5CC4BB;
+        --brand-strong: #86D8D0;
+        --brand-ink: #09201E;
+        --brand-tint: #1A3634;
+        --sun: #E9B25F;
+        --danger: #F08A79;
+        --danger-tint: #3A1F1B;
+        --ok: #7BD39B;
+        --ok-tint: #173023;
+        --warn-tint: #3A2F16;
+        --warn: #E9B25F;
+        --shadow: 0 1px 2px rgba(0,0,0,.3), 0 14px 34px -18px rgba(0,0,0,.6);
+        --chev: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%239DB8B4' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      }
     }
 
-    * { box-sizing: border-box; font-family: 'Vazirmatn', sans-serif; }
-    body { background-color: var(--bg-main); color: var(--text-main); margin: 0; padding: 15px 10px; line-height: 1.6; }
-    .container { max-width: 1400px; margin: 0 auto; }
-
-    #login_overlay {
-      position: fixed;
-      inset: 0;
-      background: var(--bg-main);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 2000;
-      padding: 15px;
+    /* ---------- پایه ---------- */
+    *, *::before, *::after { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      font-family: 'Vazirmatn', system-ui, Tahoma, sans-serif;
+      font-size: 1rem;
+      line-height: 1.8;
+      color: var(--ink);
+      background:
+        radial-gradient(90% 340px at 50% -120px, color-mix(in srgb, var(--sun) 24%, transparent), transparent 70%),
+        var(--paper);
+      background-repeat: no-repeat;
+      min-height: 100vh;
+      font-variant-numeric: tabular-nums;
     }
-    .login-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 20px;
-      padding: 35px 25px;
-      max-width: 400px;
-      width: 100%;
-      text-align: center;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.6);
-    }
-    .login-logo { width: 65px; height: 65px; object-fit: contain; margin-bottom: 12px; }
-    .login-title { margin: 0 0 5px 0; font-size: 1.3rem; color: #fff; }
-    .login-sub { margin: 0 0 25px 0; font-size: 0.85rem; color: var(--primary); }
+    h1, h2, h3, p { margin: 0; }
+    button, input, select { font: inherit; color: inherit; }
+    :focus-visible { outline: 3px solid color-mix(in srgb, var(--brand) 55%, transparent); outline-offset: 2px; }
+    @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; scroll-behavior: auto !important; } }
 
-    .header-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 16px;
-      padding: 16px 22px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 15px;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-    .clinic-info { display: flex; align-items: center; gap: 12px; }
-    .clinic-logo { width: 40px; height: 40px; object-fit: contain; }
-    .clinic-title { margin: 0; font-size: 1.2rem; color: #fff; }
-    .clinic-sub { margin: 0; font-size: 0.8rem; color: var(--primary); }
+    .shell { max-width: 1240px; margin: 0 auto; padding: 0 16px 56px; }
 
-    .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+    /* ---------- هدر ---------- */
+    .topbar {
+      position: relative;
+      display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;
+      padding: 18px 0 16px;
+      margin-bottom: 22px;
+    }
+    .topbar::after {
+      content: ""; position: absolute; inset-inline: 0; bottom: 0; height: 2px; border-radius: 2px;
+      background: linear-gradient(90deg, transparent, var(--sun) 30%, var(--brand) 70%, transparent);
+      opacity: .75;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .logo { width: 46px; height: 46px; object-fit: contain; flex: none; }
+    .brand h1 { font-size: 1.12rem; font-weight: 700; line-height: 1.5; }
+    .brand p { font-size: .82rem; color: var(--ink-2); }
+    .who { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-size: .88rem; color: var(--ink-2); }
+    .who strong { color: var(--ink); font-weight: 600; }
+    .who .date { color: var(--brand); font-weight: 600; }
+    .link-btn {
+      background: none; border: 0; padding: 4px 2px; cursor: pointer;
+      color: var(--brand); font-weight: 600; text-decoration: underline; text-underline-offset: 4px;
+    }
+    .link-btn.danger { color: var(--danger); }
+
+    /* ---------- تب‌ها ---------- */
+    .tabs {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 4px; padding: 4px; margin-bottom: 20px;
+      background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md);
+    }
     .tab-btn {
-      flex: 1;
-      min-width: 150px;
-      padding: 12px;
-      background: rgba(22, 31, 48, 0.6);
-      border: 1px solid var(--card-border);
-      color: var(--text-muted);
-      border-radius: 12px;
-      font-size: 0.95rem;
-      font-weight: bold;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: 0.2s;
+      border: 0; background: transparent; cursor: pointer; padding: 10px 8px;
+      display: flex; align-items: center; justify-content: center; text-align: center; line-height: 1.5;
+      border-radius: 10px; font-weight: 600; font-size: .92rem; color: var(--ink-2); transition: background .15s, color .15s;
     }
-    .tab-btn.active {
-      background: var(--card-bg);
-      color: var(--primary);
-      border-color: var(--primary);
-      box-shadow: 0 4px 15px rgba(56, 189, 248, 0.15);
-    }
-
+    .tab-btn:hover { color: var(--ink); }
+    .tab-btn.active { background: var(--brand-tint); color: var(--brand-strong); }
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
+    /* ---------- سطح‌ها ---------- */
     .card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 16px;
-      padding: 22px;
-      margin-bottom: 20px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+      background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg);
+      box-shadow: var(--shadow); padding: 22px; margin-bottom: 20px;
     }
+    .card-accent { border-color: color-mix(in srgb, var(--brand) 45%, var(--line)); }
     .card-title {
-      margin-top: 0;
-      margin-bottom: 16px;
-      font-size: 1.1rem;
-      color: var(--primary);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      font-size: 1.02rem; font-weight: 700; margin-bottom: 14px; color: var(--ink);
+      display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;
     }
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0 14px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 0 14px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+    .align-end { align-items: flex-end; }
+    .mb0 { margin-bottom: 0 !important; }
+    .mb14 { margin-bottom: 14px; }
+    .mb16 { margin-bottom: 16px; }
+    .mt10 { margin-top: 10px; }
+    .ta-c { text-align: center; }
+    .grow1 { flex: 1; }
+    .grow2 { flex: 2; }
+    .fw { font-weight: 700; }
+    .t-brand { color: var(--brand); }
+    .t-ok { color: var(--ok); }
+    .t-warn { color: var(--warn); }
+    .t-danger { color: var(--danger); }
+    .t-ink { color: var(--ink); }
 
-    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
-    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; }
-    .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
-
-    .form-group { display: flex; flex-direction: column; margin-bottom: 12px; }
-    .form-group label { font-size: 0.85rem; margin-bottom: 6px; color: var(--text-muted); }
-    .form-group input, .form-group select {
-      padding: 10px 12px;
-      background: var(--input-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 8px;
-      font-size: 0.95rem;
-      color: #fff;
-      outline: none;
-      transition: 0.2s;
+    /* ---------- فرم ---------- */
+    .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+    .form-group label, .lbl { font-size: .86rem; color: var(--ink-2); font-weight: 500; }
+    .lbl { display: block; margin-bottom: 8px; }
+    .form-group input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
+    .form-group select, .input, .cal-filter {
+      width: 100%; padding: 11px 14px; background: var(--sunken); color: var(--ink);
+      border: 1px solid var(--line); border-radius: 12px; outline: none; transition: border-color .15s, box-shadow .15s;
     }
-    .form-group input:focus, .form-group select:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+    .form-group input::placeholder, .input::placeholder { color: color-mix(in srgb, var(--ink-2) 70%, transparent); }
+    .form-group input:focus, .form-group select:focus, .input:focus, .cal-filter:focus, .table-input:focus {
+      border-color: var(--brand); box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand) 22%, transparent);
     }
+    .form-group select, select.input, .cal-filter {
+      appearance: none; -webkit-appearance: none; cursor: pointer;
+      background-image: var(--chev); background-repeat: no-repeat; background-position: left 14px center;
+      padding-left: 38px;
+    }
+    .cal-filter { width: auto; min-width: 190px; font-weight: 700; }
+    input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--brand); cursor: pointer; flex: none; }
+    .check { display: flex; align-items: center; gap: 8px; font-size: .92rem; font-weight: 500; color: var(--ink); cursor: pointer; }
+    .form-error {
+      margin: 0 0 12px; padding: 10px 12px; border-radius: var(--r-sm); font-size: .88rem;
+      background: var(--danger-tint); color: var(--danger); border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent);
+    }
+    .hint-note { font-size: .78rem; color: var(--ink-2); }
+    .badge-note { font-size: .85rem; color: var(--brand); font-weight: 700; }
 
+    /* ---------- دکمه‌ها ---------- */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      border: 1px solid transparent; border-radius: 12px; padding: 12px 18px; cursor: pointer;
+      font-weight: 700; transition: background .15s, transform .05s, opacity .15s, border-color .15s, color .15s;
+    }
+    .btn:active:not(:disabled) { transform: translateY(1px); }
+    button:disabled { opacity: .6; cursor: not-allowed; }
+    .btn-primary { background: var(--brand); color: var(--brand-ink); }
+    .btn-primary:hover:not(:disabled) { background: var(--brand-strong); }
+    .btn-quiet, .btn-action-sm {
+      background: transparent; border: 1px solid var(--line); color: var(--ink-2);
+      padding: 7px 14px; font-weight: 600; font-size: .85rem; border-radius: 12px; cursor: pointer; transition: border-color .15s, color .15s;
+    }
+    .btn-quiet:hover:not(:disabled), .btn-action-sm:hover:not(:disabled) { border-color: var(--brand); color: var(--brand); }
+    .btn-md { padding: 11px 18px; font-size: .92rem; }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-danger:hover:not(:disabled) { filter: brightness(.92); }
+    .btn-danger-soft { background: var(--danger-tint); color: var(--danger); border-color: color-mix(in srgb, var(--danger) 40%, transparent); }
+    .btn-danger-soft:hover:not(:disabled) { background: var(--danger); color: #fff; }
+    .btn-block { width: 100%; }
+    .btn-edit-sm, .btn-delete-c {
+      border: 1px solid transparent; padding: 3px 10px; border-radius: 8px; cursor: pointer; font-size: .78rem; font-weight: 700;
+    }
+    .btn-edit-sm { background: var(--brand-tint); color: var(--brand-strong); margin-inline-end: 4px; }
+    .btn-delete-c { background: var(--danger-tint); color: var(--danger); }
+    .btn-edit-sm:hover { border-color: var(--brand); }
+    .btn-delete-c:hover { border-color: var(--danger); }
+
+    .actions { display: flex; gap: 10px; margin-top: 15px; }
+    .stack { display: flex; flex-direction: column; gap: 8px; }
+    .inline-row { display: flex; align-items: center; gap: 10px; }
+    .row-gap8 { display: flex; gap: 8px; }
+    .add-row { display: flex; gap: 10px; max-width: 560px; flex-wrap: wrap; }
+    .add-row .input { flex: 2; min-width: 180px; }
+    .add-row .w130 { flex: none; width: 130px; text-align: center; }
+    .duty-days { display: flex; gap: 10px 18px; flex-wrap: wrap; margin-bottom: 16px; }
+    .duty-days label { display: flex; align-items: center; gap: 6px; font-size: .9rem; cursor: pointer; }
+
+    /* ---------- ماژول پرداخت و خلاصه ---------- */
     .payment-module {
-      background: rgba(15, 23, 42, 0.5);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 16px;
+      background: var(--sunken); border: 1px dashed var(--line); border-radius: var(--r-md);
+      padding: 16px; margin-bottom: 16px;
     }
-    .deposit-toggle-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-    }
+    .deposit-toggle-bar { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
     .deposit-details-grid {
-      display: none;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 12px;
-      padding: 12px;
-      background: rgba(0, 0, 0, 0.3);
-      border-radius: 8px;
-      margin-bottom: 12px;
+      display: none; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0 14px;
+      padding: 14px 14px 2px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sm); margin-bottom: 14px;
     }
-
     .summary-box {
-      background: rgba(15, 23, 42, 0.7);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      padding: 14px;
-      margin: 16px 0;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 10px;
-      text-align: center;
+      margin: 0 0 16px; padding: 14px 16px; border-radius: var(--r-md); background: var(--sunken); border: 1px dashed var(--line);
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; text-align: center;
     }
-    .summary-item .label { font-size: 0.85rem; color: var(--text-muted); display: block; }
-    .summary-item .val { font-size: 1.2rem; font-weight: bold; margin-top: 4px; display: block; }
-    .val-total { color: #f8fafc; }
+    .summary-item .label { font-size: .85rem; color: var(--ink-2); display: block; }
+    .summary-item .val { font-size: 1.2rem; font-weight: 700; margin-top: 2px; display: block; }
+    .val-total { color: var(--ink); }
 
+    .info-box {
+      padding: 12px 14px; border-radius: var(--r-md); background: var(--sunken); border: 1px dashed var(--line);
+      margin-bottom: 14px; font-size: .9rem;
+    }
+    .info-box > div + div { margin-top: 2px; }
+    .info-box strong { color: var(--ink-2); font-weight: 500; margin-inline-end: 4px; }
+    .info-box.roomy { line-height: 2; }
+    .toggle-row {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+      padding: 12px 16px; margin-top: 4px; border-radius: var(--r-md); background: var(--sunken); border: 1px dashed var(--line);
+    }
+
+    /* ---------- شاخص‌ها و تسویه ---------- */
     .kpi-card {
-      background: rgba(15, 23, 42, 0.6);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      padding: 16px;
-      text-align: center;
+      background: var(--sunken); border: 1px solid var(--line); border-radius: var(--r-md);
+      padding: 16px; text-align: center;
     }
-    .kpi-title { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px; }
-    .kpi-value { font-size: 1.3rem; font-weight: bold; }
-
+    .kpi-title { font-size: .82rem; color: var(--ink-2); margin-bottom: 4px; }
+    .kpi-value { font-size: 1.3rem; font-weight: 700; }
+    .kpi-small { font-size: .95rem; margin-top: 5px; }
     .settlement-banner {
-      border-radius: 12px;
-      padding: 18px 20px;
-      margin: 18px 0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border: 1px solid transparent;
+      border-radius: var(--r-md); padding: 18px 20px; margin: 18px 0;
+      display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;
+      border: 1px solid transparent; border-inline-start-width: 4px;
     }
-    .settlement-banner.to-counselor {
-      background: rgba(34, 197, 94, 0.12);
-      border-color: rgba(34, 197, 94, 0.3);
-      color: var(--success);
-    }
-    .settlement-banner.to-clinic {
-      background: rgba(239, 68, 68, 0.12);
-      border-color: rgba(239, 68, 68, 0.3);
-      color: var(--danger);
-    }
+    .settlement-banner.to-counselor { background: var(--ok-tint); border-color: color-mix(in srgb, var(--ok) 40%, transparent); color: var(--ok); }
+    .settlement-banner.to-clinic { background: var(--danger-tint); border-color: color-mix(in srgb, var(--danger) 40%, transparent); color: var(--danger); }
 
-    button.btn-submit {
-      width: 100%;
-      padding: 13px;
-      background: linear-gradient(135deg, #0284c7, #0ea5e9);
-      color: white;
-      border: none;
-      border-radius: 10px;
-      font-size: 1rem;
-      font-weight: bold;
-      cursor: pointer;
-      transition: 0.2s;
+    /* ---------- جدول‌ها ---------- */
+    .table-wrapper {
+      overflow-x: auto; margin-top: 4px; background: var(--surface);
+      border: 1px solid var(--line); border-radius: var(--r-md);
     }
-    button.btn-submit:hover { opacity: 0.9; }
-    button:disabled { opacity: 0.5; cursor: not-allowed; }
-
-    .counselor-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; }
-    .counselor-table th, .counselor-table td { padding: 10px 12px; border-bottom: 1px solid var(--card-border); text-align: right; }
-    .counselor-table th { color: var(--text-muted); background: rgba(15, 23, 42, 0.4); }
-    
+    table.data-table, table.counselor-table { width: 100%; border-collapse: collapse; font-size: .86rem; text-align: right; }
+    table.data-table th, table.data-table td, table.counselor-table th, table.counselor-table td {
+      padding: 11px 12px; border-bottom: 1px solid var(--line); text-align: right;
+    }
+    table.data-table th, table.data-table td { white-space: nowrap; }
+    table.data-table th, table.counselor-table th { background: var(--sunken); color: var(--ink-2); font-weight: 700; font-size: .8rem; }
+    table.data-table tbody tr:last-child td, table.counselor-table tbody tr:last-child td { border-bottom: 0; }
+    table.data-table tbody tr:hover td, table.counselor-table tbody tr:hover td { background: color-mix(in srgb, var(--brand-tint) 40%, transparent); }
     .table-input {
-      padding: 6px 10px;
-      background: var(--input-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 6px;
-      color: #fff;
-      font-weight: bold;
-      outline: none;
+      padding: 6px 10px; background: var(--sunken); border: 1px solid var(--line); border-radius: 10px;
+      color: var(--ink); font-weight: 700; outline: none; transition: border-color .15s, box-shadow .15s;
     }
-    .btn-action-sm {
-      background: rgba(56, 189, 248, 0.15);
-      color: var(--primary);
-      border: 1px solid var(--primary);
-      padding: 6px 14px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 0.85rem;
-      transition: 0.2s;
-    }
-    .btn-action-sm:hover { background: var(--primary); color: #000; }
-    .btn-edit-sm {
-      background: rgba(56, 189, 248, 0.15);
-      color: var(--primary);
-      border: 1px solid var(--primary);
-      padding: 3px 8px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.75rem;
-      margin-left: 4px;
-    }
-    .btn-delete-c {
-      background: rgba(239, 68, 68, 0.15);
-      color: var(--danger);
-      border: 1px solid var(--danger);
-      padding: 3px 8px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.75rem;
-    }
+    .table-input:disabled { opacity: .6; }
 
-    .table-wrapper { overflow-x: auto; margin-top: 10px; }
-    table.data-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: right; }
-    table.data-table th, table.data-table td { padding: 10px 8px; border-bottom: 1px solid var(--card-border); white-space: nowrap; }
-    table.data-table th { color: var(--text-muted); background: rgba(15, 23, 42, 0.4); }
-
+    /* ---------- تقویم ---------- */
     .calendar-controls {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
-      background: rgba(15, 23, 42, 0.6);
-      padding: 14px 18px;
-      border-radius: 12px;
-      border: 1px solid var(--card-border);
-      margin-bottom: 16px;
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
+      background: var(--sunken); padding: 12px 16px; border-radius: var(--r-md); border: 1px solid var(--line); margin-bottom: 16px;
     }
+    .week-range { font-weight: 700; font-size: .92rem; }
+    .legend { display: flex; gap: 8px 16px; margin-bottom: 12px; font-size: .8rem; color: var(--ink-2); flex-wrap: wrap; }
+    .lg-item { display: flex; align-items: center; gap: 6px; }
+    .lg-dot { width: 12px; height: 12px; border-radius: 4px; border: 1px solid; flex: none; }
+    .lg-reserved { background: var(--brand-tint); border-color: var(--brand); }
+    .lg-meeting { background: var(--warn-tint); border-color: var(--sun); }
+    .lg-done { background: var(--ok-tint); border-color: var(--ok); }
+    .lg-off { background: var(--danger-tint); border-color: var(--danger); border-style: dashed; }
     .calendar-table-wrapper {
-      width: 100%;
-      overflow-x: auto;
-      border-radius: 12px;
-      border: 1px solid var(--card-border);
-      background: var(--input-bg);
+      width: 100%; overflow-x: auto; border-radius: var(--r-md); border: 1px solid var(--line); background: var(--surface);
     }
-    table.calendar-grid {
-      width: 100%;
-      border-collapse: separate;
-      border-spacing: 0;
-      min-width: 1250px;
-      background: var(--input-bg);
-    }
+    table.calendar-grid { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 1250px; background: var(--surface); }
     table.calendar-grid th, table.calendar-grid td {
-      border-bottom: 1px solid var(--card-border);
-      border-left: 1px solid var(--card-border);
-      text-align: center;
-      padding: 0;
+      border-bottom: 1px solid var(--line); border-left: 1px solid var(--line); text-align: center; padding: 0;
     }
     table.calendar-grid th {
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      background: #1e293b;
-      color: var(--primary);
-      font-size: 0.8rem;
-      font-weight: bold;
-      padding: 10px 6px;
-      white-space: nowrap;
+      position: sticky; top: 0; z-index: 10; background: var(--sunken); color: var(--brand-strong);
+      font-size: .8rem; font-weight: 700; padding: 10px 6px; white-space: nowrap;
     }
     .day-col {
-      width: 140px;
-      min-width: 140px;
-      background: #111827 !important;
-      color: #fff;
-      font-size: 0.85rem;
-      font-weight: bold;
-      vertical-align: middle;
-      position: sticky;
-      right: 0;
-      z-index: 5;
-      border-right: 1px solid var(--card-border);
-      padding: 8px !important;
-      text-align: center;
+      width: 140px; min-width: 140px; background: var(--surface) !important; color: var(--ink);
+      font-size: .85rem; font-weight: 700; vertical-align: middle; position: sticky; right: 0; z-index: 5;
+      border-right: 1px solid var(--line); padding: 8px !important; text-align: center;
     }
-    table.calendar-grid th.day-col { z-index: 15; }
-
-    .btn-block-day {
-      display: inline-block;
-      margin-top: 4px;
-      padding: 2px 6px;
-      font-size: 0.68rem;
-      border-radius: 4px;
-      cursor: pointer;
-      background: rgba(239, 68, 68, 0.2);
-      border: 1px solid var(--danger);
-      color: #fca5a5;
+    table.calendar-grid th.day-col { z-index: 15; background: var(--sunken) !important; color: var(--brand-strong); }
+    .btn-block-day, .btn-unblock-day {
+      display: inline-block; margin-top: 4px; padding: 2px 10px; font-size: .7rem; font-weight: 700;
+      border-radius: 999px; cursor: pointer; border: 1px solid transparent; font-family: inherit;
     }
-    .btn-unblock-day {
-      display: inline-block;
-      margin-top: 4px;
-      padding: 2px 6px;
-      font-size: 0.68rem;
-      border-radius: 4px;
-      cursor: pointer;
-      background: rgba(34, 197, 94, 0.2);
-      border: 1px solid var(--success);
-      color: #86efac;
-    }
-
-    .cal-cell {
-      height: 70px;
-      vertical-align: middle;
-      position: relative;
-      min-width: 95px;
-    }
-    .cal-cell.blocked-day-cell {
-      background: rgba(239, 68, 68, 0.15) !important;
-      cursor: not-allowed;
-    }
-    
+    .btn-block-day { background: var(--danger-tint); border-color: color-mix(in srgb, var(--danger) 40%, transparent); color: var(--danger); }
+    .btn-unblock-day { background: var(--ok-tint); border-color: color-mix(in srgb, var(--ok) 40%, transparent); color: var(--ok); }
+    .cal-cell { height: 70px; vertical-align: middle; position: relative; min-width: 95px; padding: 3px !important; }
+    .cal-cell.blocked-day-cell { background: var(--danger-tint) !important; cursor: not-allowed; }
     .cal-cell.off-duty-cell {
-      background: rgba(239, 68, 68, 0.08) !important;
-      border: 1px dashed rgba(239, 68, 68, 0.3) !important;
-      cursor: not-allowed;
+      background: color-mix(in srgb, var(--danger-tint) 55%, transparent) !important;
+      border: 1px dashed color-mix(in srgb, var(--danger) 35%, transparent) !important; cursor: not-allowed;
     }
     .off-duty-label {
-      font-size: 0.72rem;
-      color: #f87171;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100%;
-      user-select: none;
+      font-size: .72rem; color: var(--danger); font-weight: 600; display: flex; align-items: center; justify-content: center;
+      height: 100%; user-select: none;
     }
-
     .slot-full-btn {
-      height: 100%;
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: 0.15s;
-      background: transparent;
-      border: none;
-      color: #64748b;
-      font-size: 0.75rem;
-      font-weight: bold;
+      height: 100%; width: 100%; display: flex; align-items: center; justify-content: center; cursor: pointer;
+      transition: background .15s, color .15s; background: transparent; border: none; border-radius: 8px;
+      color: color-mix(in srgb, var(--ink-2) 60%, transparent); font-size: .75rem; font-weight: 700; font-family: inherit;
     }
-    .slot-full-btn:hover {
-      background: rgba(56, 189, 248, 0.15);
-      color: var(--primary);
-    }
-
-    .slot-split-container {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      width: 100%;
-    }
+    .slot-full-btn:hover { background: var(--brand-tint); color: var(--brand-strong); }
+    .slot-split-container { display: flex; flex-direction: column; height: 100%; width: 100%; gap: 2px; }
     .slot-half-btn {
-      flex: 1;
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      padding: 2px;
-      border: none;
-      border-bottom: 1px dashed rgba(255,255,255,0.08);
-      background: transparent;
-      color: #64748b;
-      font-size: 0.65rem;
-      transition: 0.15s;
+      flex: 1; width: 100%; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 2px;
+      border: none; border-radius: 6px; background: transparent; font-family: inherit;
+      color: color-mix(in srgb, var(--ink-2) 60%, transparent); font-size: .65rem; transition: background .15s, color .15s;
     }
-    .slot-half-btn:last-child { border-bottom: none; }
-    .slot-half-btn:hover {
-      background: rgba(56, 189, 248, 0.15);
-      color: var(--primary);
-    }
-
+    .slot-half-btn:hover { background: var(--brand-tint); color: var(--brand-strong); }
     .cal-badge {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      width: 100%;
-      height: 100%;
-      border-radius: 5px;
-      padding: 2px 4px;
-      font-size: 0.72rem;
-      text-align: center;
-      cursor: pointer;
+      display: flex; flex-direction: column; justify-content: center; width: 100%; height: 100%;
+      border-radius: 8px; padding: 2px 4px; font-size: .72rem; text-align: center; cursor: pointer; line-height: 1.5;
+      border: 1px solid transparent;
     }
-    .cal-badge.status-reserved {
-      background: rgba(56, 189, 248, 0.22);
-      border: 1px solid var(--primary);
-      color: #fff;
-    }
-    .cal-badge.status-completed {
-      background: rgba(34, 197, 94, 0.2);
-      border: 1px solid var(--success);
-      color: #fff;
-    }
-    .cal-badge.status-meeting {
-      background: rgba(168, 85, 247, 0.25);
-      border: 1px solid var(--purple);
-      color: #e9d5ff;
-    }
+    .slot-split-container .cal-badge { border-radius: 6px; }
+    .cal-badge.status-reserved { background: var(--brand-tint); border-color: var(--brand); color: var(--brand-strong); }
+    .cal-badge.status-completed { background: var(--ok-tint); border-color: var(--ok); color: var(--ok); }
+    .cal-badge.status-meeting { background: var(--warn-tint); border-color: var(--sun); color: var(--warn); }
+    .badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: .76rem; font-weight: 700; }
+    .badge-upcoming { background: var(--brand-tint); color: var(--brand-strong); }
 
+    /* ---------- پنجره‌ها ---------- */
     .modal-backdrop {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.75);
-      backdrop-filter: blur(4px);
-      z-index: 1000;
-      justify-content: center;
-      align-items: center;
-      padding: 15px;
+      display: none; position: fixed; inset: 0; background: rgba(6, 18, 17, .55); backdrop-filter: blur(3px);
+      z-index: 1000; justify-content: center; align-items: center; padding: 15px;
     }
     .modal-content {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 16px;
-      max-width: 600px;
-      width: 100%;
-      max-height: 90vh;
-      overflow-y: auto;
-      padding: 24px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: var(--r-lg);
+      max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 24px; box-shadow: var(--shadow);
     }
     .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 18px;
-      border-bottom: 1px solid var(--card-border);
-      padding-bottom: 12px;
+      display: flex; justify-content: space-between; align-items: center; gap: 10px;
+      margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px dashed var(--line);
     }
+    .modal-title { font-size: 1.05rem; font-weight: 700; color: var(--ink); }
     .modal-close-btn {
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      font-size: 1.5rem;
-      cursor: pointer;
-      line-height: 1;
+      background: transparent; border: 0; color: var(--ink-2); font-size: 1.6rem; cursor: pointer; line-height: 1;
+      width: 34px; height: 34px; border-radius: 10px; transition: background .15s, color .15s;
     }
+    .modal-close-btn:hover { background: var(--sunken); color: var(--ink); }
 
     #loading-indicator {
-      display: none;
-      text-align: center;
-      padding: 8px;
-      font-size: 0.85rem;
-      color: var(--primary);
+      display: none; text-align: center; padding: 10px 14px; margin-bottom: 16px; font-size: .88rem; font-weight: 600;
+      color: var(--brand-strong); background: var(--brand-tint); border-radius: var(--r-md);
     }
 
-    .app-version-badge {
-      position: fixed;
-      bottom: 10px;
-      left: 12px;
-      z-index: 3000;
-      background: rgba(15, 23, 42, 0.75);
-      border: 1px solid var(--card-border);
-      color: var(--text-muted);
-      font-size: 0.72rem;
-      font-weight: bold;
-      padding: 3px 8px;
-      border-radius: 6px;
-      backdrop-filter: blur(4px);
-      user-select: none;
-      pointer-events: none;
-      letter-spacing: 0.5px;
-      direction: ltr;
+    /* ---------- ورود ---------- */
+    .auth {
+      position: fixed; inset: 0; z-index: 2000; overflow: auto; display: flex; justify-content: center; align-items: center; padding: 16px;
+      background:
+        radial-gradient(120% 55% at 50% 112%, color-mix(in srgb, var(--sun) 38%, transparent), transparent 62%),
+        var(--paper);
+    }
+    .auth-card {
+      width: 100%; max-width: 420px; background: var(--surface); border: 1px solid var(--line);
+      border-radius: 26px; box-shadow: var(--shadow); padding: 30px 26px 24px;
+    }
+    .auth-head { text-align: center; margin-bottom: 22px; display: grid; justify-items: center; gap: 4px; }
+    .auth-head .logo { width: 60px; height: 60px; margin-bottom: 6px; }
+    .auth-head h2 { font-size: 1.2rem; font-weight: 700; }
+    .auth-head .sub { font-size: .88rem; color: var(--brand); font-weight: 600; }
+
+    .footer { text-align: center; margin-top: 28px; font-size: .75rem; color: var(--ink-2); direction: ltr; opacity: .8; }
+
+    @media (max-width: 480px) {
+      .card { padding: 18px 16px; border-radius: 20px; }
+      .auth-card { padding: 26px 20px 20px; }
+      .tab-btn { font-size: .84rem; }
+      .modal-content { padding: 20px 16px; }
     }
   </style>
 </head>
 <body>
 
-<div class="app-version-badge">v2.6.2</div>
+<!-- ============== ورود ============== -->
+<div id="login_overlay" class="auth">
+  <div class="auth-card">
+    <div class="auth-head">
+      <img src="https://cdn.imgurl.ir/uploads/l39464_et_1s.png" class="logo" alt="لوگو">
+      <h2>کلینیک سپهر آرامش</h2>
+      <p class="sub">سامانه پذیرش و مدیریت مراجعین</p>
+    </div>
 
-<div id="login_overlay">
-  <div class="login-card">
-    <img src="https://cdn.imgurl.ir/uploads/l39464_et_1s.png" class="login-logo" alt="لوگو">
-    <h2 class="login-title">کلینیک سپهر آرامش</h2>
-    <p class="login-sub">سامانه پذیرش و مدیریت مراجعین</p>
-    
     <form id="login_form">
-      <div class="form-group" style="text-align: right;">
+      <div class="form-group">
         <label>نام کاربری:</label>
         <input type="text" id="login_username" required placeholder="مثلاً: admin" dir="ltr">
       </div>
-      <div class="form-group" style="text-align: right;">
+      <div class="form-group">
         <label>رمز عبور:</label>
         <input type="password" id="login_password" required placeholder="••••••••" dir="ltr">
       </div>
-      <button type="submit" id="btn_login" class="btn-submit" style="margin-top: 10px;">ورود به سامانه</button>
-      <div id="login_error" style="color: var(--danger); font-size: 0.85rem; margin-top: 12px; display: none;"></div>
+      <div id="login_error" class="form-error" role="alert" style="display: none;"></div>
+      <button type="submit" id="btn_login" class="btn btn-primary btn-block">ورود به سامانه</button>
     </form>
   </div>
 </div>
 
-<div class="container" id="main_app" style="display: none;">
+<!-- ============== برنامه‌ی اصلی ============== -->
+<div class="shell" id="main_app" style="display: none;">
 
-  <div class="header-card">
-    <div class="clinic-info">
-      <img src="https://cdn.imgurl.ir/uploads/l39464_et_1s.png" class="clinic-logo" alt="لوگو">
+  <header class="topbar">
+    <div class="brand">
+      <img src="https://cdn.imgurl.ir/uploads/l39464_et_1s.png" class="logo" alt="لوگو">
       <div>
-        <h1 class="clinic-title">کلینیک روان‌شناسی سپهر آرامش</h1>
-        <p class="clinic-sub">سامانه هوشمند پذیرش، نوبت‌دهی تقویمی و حسابداری</p>
+        <h1>کلینیک روان‌شناسی سپهر آرامش</h1>
+        <p>سامانه هوشمند پذیرش، نوبت‌دهی تقویمی و حسابداری</p>
       </div>
     </div>
-    
-    <div style="display: flex; align-items: center; gap: 15px;">
-      <div style="font-size: 0.85rem; color: var(--primary);" id="current_date_display">در حال بارگذاری...</div>
-      <div style="background: rgba(15, 23, 42, 0.8); border: 1px solid var(--card-border); padding: 5px 12px; border-radius: 8px; font-size: 0.82rem; display: flex; align-items: center; gap: 8px;">
-        <span>کاربر: <strong id="active_user_badge" style="color: #fff;">-</strong></span>
-        <button onclick="logout()" style="background: transparent; border: none; color: var(--danger); cursor: pointer; font-weight: bold; font-size: 0.8rem; padding: 0 4px;">(خروج)</button>
-      </div>
+    <div class="who">
+      <span class="date" id="current_date_display">در حال بارگذاری...</span>
+      <span>کاربر: <strong id="active_user_badge">-</strong></span>
+      <button type="button" class="link-btn danger" onclick="logout()">خروج</button>
     </div>
-  </div>
+  </header>
 
-  <div class="nav-tabs">
+  <div class="tabs" role="tablist" aria-label="بخش‌های سامانه">
     <button class="tab-btn active" id="btn_tab_desk" onclick="switchTab('desk')">میز پذیرش و صندوق</button>
     <button class="tab-btn" id="btn_tab_appointments" onclick="switchTab('appointments')">تقویم و نوبت‌دهی هفتگی</button>
     <button class="tab-btn" id="btn_tab_report" onclick="switchTab('report')">گزارش و تسویه ماهانه</button>
@@ -618,19 +517,19 @@
 
         <div class="payment-module">
           <div class="deposit-toggle-bar">
-            <label style="font-weight: 500; color: #fff; cursor: pointer; display: flex; align-items: center; gap: 8px;">
-              <input type="checkbox" id="has_deposit_toggle" style="width: 17px; height: 17px; accent-color: var(--primary); cursor: pointer;">
+            <label class="check">
+              <input type="checkbox" id="has_deposit_toggle">
               این مراجع بیعانه پرداخت کرده است
             </label>
-            <span id="remaining_badge" style="font-size: 0.85rem; color: var(--primary); font-weight: bold;"></span>
+            <span id="remaining_badge" class="badge-note"></span>
           </div>
 
           <div id="deposit_fields_wrapper" class="deposit-details-grid">
-            <div class="form-group" style="margin-bottom: 0;">
+            <div class="form-group mb0">
               <label>مبلغ بیعانه دریافتی (تومان):</label>
               <input type="number" id="deposit_amount" value="0" placeholder="مثال: ۲۰۰,۰۰۰">
             </div>
-            <div class="form-group" style="margin-bottom: 0;">
+            <div class="form-group mb0">
               <label>بیعانه به حساب چه کسی رفته است؟</label>
               <select id="deposit_to">
                 <option value="مشاور">مستقیم به کارت مشاور</option>
@@ -639,7 +538,7 @@
             </div>
           </div>
 
-          <div class="form-group" style="margin-bottom: 0;">
+          <div class="form-group mb0">
             <label id="balance_label">تسویه کل مبلغ جلسه از طریق:</label>
             <select id="balance_to">
               <option value="کلینیک">کارت‌خوان کلینیک</option>
@@ -658,13 +557,13 @@
             <span class="label">مبلغ کل جلسه</span>
             <span class="val val-total" id="box_total">۰ تومان</span>
           </div>
-          <div class="summary-item" style="border-right: 1px solid var(--card-border);">
+          <div class="summary-item">
             <span class="label">مبلغ باقیمانده قابل دریافت (کارتخوان مطب)</span>
-            <span class="val" id="box_remaining_due" style="color: var(--success);">۰ تومان</span>
+            <span class="val t-ok" id="box_remaining_due">۰ تومان</span>
           </div>
         </div>
 
-        <button type="submit" id="btn_submit" class="btn-submit">ثبت در سیستم و شیت</button>
+        <button type="submit" id="btn_submit" class="btn btn-primary btn-block">ثبت در سیستم و شیت</button>
       </form>
     </div>
 
@@ -697,29 +596,29 @@
   <div id="tab_appointments" class="tab-content">
     <div class="card">
       <div class="calendar-controls">
-        <div style="display: flex; align-items: center; gap: 10px;">
-          <label style="font-weight: bold; color: var(--primary);">مشاور:</label>
-          <select id="cal_counselor_filter" style="padding: 8px 12px; background: var(--input-bg); border: 1px solid var(--card-border); color: #fff; border-radius: 8px; font-weight: bold;" onchange="renderWeeklyCalendar()">
+        <div class="inline-row">
+          <label class="t-brand fw">مشاور:</label>
+          <select id="cal_counselor_filter" onchange="renderWeeklyCalendar()" class="cal-filter">
             <option value="" disabled selected>در حال بارگذاری...</option>
           </select>
         </div>
 
-        <div style="display: flex; align-items: center; gap: 8px;">
+        <div class="inline-row">
           <button type="button" class="btn-action-sm" onclick="changeWeek(-1)">« هفته قبل</button>
           <button type="button" class="btn-action-sm" onclick="changeWeek(0)">هفته جاری</button>
           <button type="button" class="btn-action-sm" onclick="changeWeek(1)">هفته بعد »</button>
         </div>
 
-        <div id="cal_week_range_display" style="font-weight: bold; color: #fff; font-size: 0.9rem;">
+        <div id="cal_week_range_display" class="week-range">
           در حال بارگذاری تاریخ‌ها...
         </div>
       </div>
 
-      <div style="display: flex; gap: 14px; margin-bottom: 12px; font-size: 0.8rem; color: var(--text-muted); flex-wrap: wrap;">
-        <span style="display: flex; align-items: center; gap: 5px;"><span style="width: 12px; height: 12px; background: rgba(56, 189, 248, 0.4); border: 1px solid var(--primary); border-radius: 3px;"></span> نوبت رزرو شده</span>
-        <span style="display: flex; align-items: center; gap: 5px;"><span style="width: 12px; height: 12px; background: rgba(168, 85, 247, 0.4); border: 1px solid var(--purple); border-radius: 3px;"></span> جلسه کاری</span>
-        <span style="display: flex; align-items: center; gap: 5px;"><span style="width: 12px; height: 12px; background: rgba(34, 197, 94, 0.4); border: 1px solid var(--success); border-radius: 3px;"></span> برگزار / تسویه شده</span>
-        <span style="display: flex; align-items: center; gap: 5px;"><span style="width: 12px; height: 12px; background: rgba(239, 68, 68, 0.15); border: 1px dashed var(--danger); border-radius: 3px;"></span> عدم حضور مشاور (قرمز)</span>
+      <div class="legend">
+        <span class="lg-item"><span class="lg-dot lg-reserved"></span> نوبت رزرو شده</span>
+        <span class="lg-item"><span class="lg-dot lg-meeting"></span> جلسه کاری</span>
+        <span class="lg-item"><span class="lg-dot lg-done"></span> برگزار / تسویه شده</span>
+        <span class="lg-item"><span class="lg-dot lg-off"></span> عدم حضور مشاور (قرمز)</span>
       </div>
 
       <div class="calendar-table-wrapper">
@@ -746,7 +645,7 @@
         </div>
         <div class="form-group">
           <label>سال شمسی:</label>
-          <input type="text" id="report_year" value="1405" style="text-align: center;">
+          <input type="text" id="report_year" value="1405" class="ta-c">
         </div>
         <div class="form-group">
           <label>ماه شمسی:</label>
@@ -768,38 +667,38 @@
       </div>
 
       <!-- گزینه انتخابی ریز جلسات در فیش پرینت -->
-      <div style="background: rgba(15, 23, 42, 0.5); padding: 12px 16px; border-radius: 8px; border: 1px solid var(--card-border); margin-top: 10px; display: flex; align-items: center; justify-content: space-between;">
-        <label style="color: #fff; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 8px;">
-          <input type="checkbox" id="include_details_toggle" checked style="width: 17px; height: 17px; accent-color: var(--primary); cursor: pointer;">
+      <div class="toggle-row">
+        <label class="check">
+          <input type="checkbox" id="include_details_toggle" checked>
           شامل جدول ریز جلسات در فیش چاپی
         </label>
-        <span style="font-size: 0.78rem; color: var(--text-muted);">(در صورت برداشتن تیک، فقط جدول تفکیک مبالغ و واریزی‌ها و نتیجه تسویه چاپ می‌شود)</span>
+        <span class="hint-note">(در صورت برداشتن تیک، فقط جدول تفکیک مبالغ و واریزی‌ها و نتیجه تسویه چاپ می‌شود)</span>
       </div>
 
-      <div style="display: flex; gap: 10px; margin-top: 14px;">
-        <button type="button" class="btn-submit" style="flex: 2;" onclick="loadMonthlyReport()">مشاهده و محاسبه تسویه</button>
-        <button type="button" class="btn-action-sm" style="flex: 1; padding: 10px; font-size: 0.95rem;" onclick="printCleanSettlementReceipt()">چاپ فیش تسویه</button>
+      <div class="actions">
+        <button type="button" class="btn btn-primary btn-block grow2" onclick="loadMonthlyReport()">مشاهده و محاسبه تسویه</button>
+        <button type="button" class="btn-action-sm grow1 btn-md" onclick="printCleanSettlementReceipt()">چاپ فیش تسویه</button>
       </div>
     </div>
 
     <div id="report_results_area" style="display: none;">
       <!-- خلاصه‌های کل در پنل -->
-      <div class="grid-4" style="margin-bottom: 16px;">
+      <div class="grid-4 mb16">
         <div class="kpi-card">
           <div class="kpi-title">تعداد کل جلسات</div>
-          <div class="kpi-value" id="kpi_sessions_count" style="color: var(--primary);">۰</div>
+          <div class="kpi-value t-brand" id="kpi_sessions_count">۰</div>
         </div>
         <div class="kpi-card">
           <div class="kpi-title">گردش مالی کل جلسات</div>
-          <div class="kpi-value" id="kpi_total_turnover" style="color: #fff;">۰ ت</div>
+          <div class="kpi-value t-ink" id="kpi_total_turnover">۰ ت</div>
         </div>
         <div class="kpi-card">
           <div class="kpi-title">سهم استحقاقی مشاور</div>
-          <div class="kpi-value" id="kpi_counselor_total_share" style="color: var(--primary);">۰ ت</div>
+          <div class="kpi-value t-brand" id="kpi_counselor_total_share">۰ ت</div>
         </div>
         <div class="kpi-card">
           <div class="kpi-title">دریافت مستقیم توسط مشاور</div>
-          <div class="kpi-value" id="kpi_counselor_direct_got" style="color: var(--warning);">۰ ت</div>
+          <div class="kpi-value t-warn" id="kpi_counselor_direct_got">۰ ت</div>
         </div>
       </div>
 
@@ -812,8 +711,8 @@
       </div>
 
       <!-- جدول تفکیک نوع جلسات در پنل -->
-      <div class="card" style="border: 1px solid var(--primary); background: rgba(15, 23, 42, 0.45);">
-        <h2 class="card-title" style="color: var(--primary); font-size: 1.05rem;">
+      <div class="card card-accent">
+        <h2 class="card-title">
           گزارش تفکیکی بر اساس نوع جلسه و محل واریز مبالغ
         </h2>
         <div class="table-wrapper">
@@ -863,39 +762,39 @@
   <div id="tab_history" class="tab-content">
     <div class="card">
       <h2 class="card-title">جستجوی سوابق و پرونده مراجع</h2>
-      <div class="grid-3" style="align-items: flex-end;">
-        <div class="form-group" style="margin-bottom: 0;">
+      <div class="grid-3 align-end">
+        <div class="form-group mb0">
           <label>نام مراجع (با پیشنهاد خودکار):</label>
           <input type="text" id="sh_client_name" placeholder="مثال: علی رضایی..." list="clients_name_datalist" oninput="onHistoryNameInput(this.value)">
         </div>
-        <div class="form-group" style="margin-bottom: 0;">
+        <div class="form-group mb0">
           <label>شماره تماس مراجع:</label>
           <input type="tel" id="sh_client_phone" placeholder="۰۹۱۲..." dir="ltr" list="clients_phone_datalist" oninput="onHistoryPhoneInput(this.value)">
         </div>
-        <div style="display: flex; gap: 8px;">
-          <button type="button" class="btn-submit" style="padding: 11px;" onclick="searchClientHistory()">جستجو پرونده</button>
+        <div class="row-gap8">
+          <button type="button" class="btn btn-primary btn-block" onclick="searchClientHistory()">جستجو پرونده</button>
           <button type="button" class="btn-action-sm" onclick="clearHistorySearch()">پاک‌سازی</button>
         </div>
       </div>
     </div>
 
     <div id="history_results_area" style="display: none;">
-      <div class="grid-4" style="margin-bottom: 16px;">
+      <div class="grid-4 mb16">
         <div class="kpi-card">
           <div class="kpi-title">تعداد جلسات برگزارشده (صندوق)</div>
-          <div class="kpi-value" id="hp_total_sessions" style="color: var(--primary);">۰</div>
+          <div class="kpi-value t-brand" id="hp_total_sessions">۰</div>
         </div>
         <div class="kpi-card">
           <div class="kpi-title">مجموع کل مبالغ پرداخت‌شده</div>
-          <div class="kpi-value" id="hp_total_paid" style="color: var(--success);">۰ ت</div>
+          <div class="kpi-value t-ok" id="hp_total_paid">۰ ت</div>
         </div>
         <div class="kpi-card">
           <div class="kpi-title">مجموع بیعانه‌های پرداخت شده</div>
-          <div class="kpi-value" id="hp_total_deposit" style="color: var(--warning);">۰ ت</div>
+          <div class="kpi-value t-warn" id="hp_total_deposit">۰ ت</div>
         </div>
         <div class="kpi-card">
           <div class="kpi-title">مشاورین مراجعه‌شده</div>
-          <div class="kpi-value" id="hp_counselors_list" style="font-size: 0.95rem; color: #fff; margin-top: 5px;">-</div>
+          <div class="kpi-value kpi-small" id="hp_counselors_list">-</div>
         </div>
       </div>
 
@@ -946,7 +845,7 @@
   <div id="tab_settings" class="tab-content">
     <div class="card">
       <h2 class="card-title">برنامه حضور هفتگی مشاوران (روزها و ساعت‌ها)</h2>
-      <div class="grid-3" style="margin-bottom: 14px;">
+      <div class="grid-3 mb14">
         <div class="form-group">
           <label>انتخاب مشاور:</label>
           <select id="schedule_counselor_select" onchange="loadCounselorScheduleUI()">
@@ -977,26 +876,26 @@
         </div>
       </div>
 
-      <label style="font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 8px;">روزهای حضور مشاور در کلینیک:</label>
-      <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 16px;">
-        <label style="display:flex; align-items:center; gap:6px; font-size:0.9rem; cursor:pointer;"><input type="checkbox" class="duty-day-checkbox" value="شنبه"> شنبه</label>
-        <label style="display:flex; align-items:center; gap:6px; font-size:0.9rem; cursor:pointer;"><input type="checkbox" class="duty-day-checkbox" value="یکشنبه"> یکشنبه</label>
-        <label style="display:flex; align-items:center; gap:6px; font-size:0.9rem; cursor:pointer;"><input type="checkbox" class="duty-day-checkbox" value="دوشنبه"> دوشنبه</label>
-        <label style="display:flex; align-items:center; gap:6px; font-size:0.9rem; cursor:pointer;"><input type="checkbox" class="duty-day-checkbox" value="سه‌شنبه"> سه‌شنبه</label>
-        <label style="display:flex; align-items:center; gap:6px; font-size:0.9rem; cursor:pointer;"><input type="checkbox" class="duty-day-checkbox" value="چهارشنبه"> چهارشنبه</label>
-        <label style="display:flex; align-items:center; gap:6px; font-size:0.9rem; cursor:pointer;"><input type="checkbox" class="duty-day-checkbox" value="پنجشنبه"> پنجشنبه</label>
-        <label style="display:flex; align-items:center; gap:6px; font-size:0.9rem; cursor:pointer;"><input type="checkbox" class="duty-day-checkbox" value="جمعه"> جمعه</label>
+      <label class="lbl">روزهای حضور مشاور در کلینیک:</label>
+      <div class="duty-days">
+        <label><input type="checkbox" class="duty-day-checkbox" value="شنبه"> شنبه</label>
+        <label><input type="checkbox" class="duty-day-checkbox" value="یکشنبه"> یکشنبه</label>
+        <label><input type="checkbox" class="duty-day-checkbox" value="دوشنبه"> دوشنبه</label>
+        <label><input type="checkbox" class="duty-day-checkbox" value="سه‌شنبه"> سه‌شنبه</label>
+        <label><input type="checkbox" class="duty-day-checkbox" value="چهارشنبه"> چهارشنبه</label>
+        <label><input type="checkbox" class="duty-day-checkbox" value="پنجشنبه"> پنجشنبه</label>
+        <label><input type="checkbox" class="duty-day-checkbox" value="جمعه"> جمعه</label>
       </div>
 
-      <button type="button" class="btn-action-sm" style="padding: 10px 18px; font-size: 0.9rem;" onclick="saveCounselorSchedule()">ذخیره برنامه حضور این مشاور در سیستم و پرتال مراجعین</button>
+      <button type="button" class="btn-action-sm btn-md" onclick="saveCounselorSchedule()">ذخیره برنامه حضور این مشاور در سیستم و پرتال مراجعین</button>
     </div>
 
     <div class="card">
       <h2 class="card-title">افزودن مشاور جدید</h2>
-      <div style="display: flex; gap: 10px; max-width: 550px; flex-wrap: wrap;">
-        <input type="text" id="new_counselor_name" placeholder="نام و نام خانوادگی مشاور..." style="flex: 2; padding: 10px; background: var(--input-bg); border: 1px solid var(--card-border); border-radius: 8px; color: #fff;">
-        <input type="number" id="new_counselor_percent" placeholder="درصد سهم (مثلاً ۷۰)" value="70" style="width: 130px; padding: 10px; background: var(--input-bg); border: 1px solid var(--card-border); border-radius: 8px; color: #fff; text-align: center;">
-        <button type="button" id="btn_add_counselor" style="background: var(--primary); color: #000; border: none; border-radius: 8px; padding: 0 18px; font-weight: bold; cursor: pointer;">افزودن</button>
+      <div class="add-row">
+        <input type="text" id="new_counselor_name" placeholder="نام و نام خانوادگی مشاور..." class="input grow2">
+        <input type="number" id="new_counselor_percent" placeholder="درصد سهم (مثلاً ۷۰)" value="70" class="input w130">
+        <button type="button" id="btn_add_counselor" class="btn btn-primary">افزودن</button>
       </div>
     </div>
 
@@ -1039,21 +938,22 @@
     </div>
   </div>
 
+  <p class="footer">v2.6.2</p>
 </div>
 
 <!-- پاپ‌آپ ۱: ثبت نوبت -->
 <div id="booking_modal" class="modal-backdrop">
   <div class="modal-content" style="max-width: 500px;">
     <div class="modal-header">
-      <h3 style="margin: 0; color: var(--primary); font-size: 1.1rem;">رزرو نوبت / جلسه در تقویم</h3>
+      <h3 class="modal-title">رزرو نوبت / جلسه در تقویم</h3>
       <button type="button" class="modal-close-btn" onclick="closeBookingModal()">&times;</button>
     </div>
 
     <form id="quick_booking_form">
-      <div style="background: rgba(15, 23, 42, 0.6); padding: 12px; border-radius: 8px; margin-bottom: 14px; border: 1px solid var(--card-border); font-size: 0.9rem;">
-        <div style="margin-bottom: 6px;"><strong>مشاور:</strong> <span id="bm_counselor_text" style="color: var(--primary);">-</span></div>
-        <div style="margin-bottom: 6px;"><strong>تاریخ نوبت:</strong> <span id="bm_date_text" style="color: #fff;">-</span></div>
-        <div><strong>ساعت پارت:</strong> <span id="bm_time_text" style="color: var(--success);">-</span></div>
+      <div class="info-box">
+        <div><strong>مشاور:</strong> <span id="bm_counselor_text" class="t-brand">-</span></div>
+        <div><strong>تاریخ نوبت:</strong> <span id="bm_date_text" class="t-ink">-</span></div>
+        <div><strong>ساعت پارت:</strong> <span id="bm_time_text" class="t-ok">-</span></div>
       </div>
 
       <input type="hidden" id="bm_counselor">
@@ -1086,9 +986,9 @@
         <input type="number" id="bm_deposit" value="0">
       </div>
 
-      <div style="display: flex; gap: 10px; margin-top: 15px;">
-        <button type="submit" id="btn_quick_book" class="btn-submit" style="flex: 2; background: linear-gradient(135deg, #10b981, #059669);">ثبت قطعی در تقویم</button>
-        <button type="button" onclick="closeBookingModal()" style="flex: 1; background: #334155; color: #fff; border: none; border-radius: 10px; cursor: pointer; font-weight: bold;">انصراف</button>
+      <div class="actions">
+        <button type="submit" id="btn_quick_book" class="btn btn-primary btn-block grow2">ثبت قطعی در تقویم</button>
+        <button type="button" onclick="closeBookingModal()" class="btn btn-quiet grow1">انصراف</button>
       </div>
     </form>
   </div>
@@ -1098,25 +998,25 @@
 <div id="app_details_modal" class="modal-backdrop">
   <div class="modal-content" style="max-width: 480px;">
     <div class="modal-header">
-      <h3 style="margin: 0; color: var(--primary); font-size: 1.1rem;">جزئیات نوبت / جلسه</h3>
+      <h3 class="modal-title">جزئیات نوبت / جلسه</h3>
       <button type="button" class="modal-close-btn" onclick="closeAppDetailsModal()">&times;</button>
     </div>
 
-    <div style="background: rgba(15, 23, 42, 0.6); padding: 14px; border-radius: 8px; margin-bottom: 14px; border: 1px solid var(--card-border); font-size: 0.9rem; line-height: 2;">
-      <div><strong>عنوان / مراجع:</strong> <span id="adm_client_name" style="color: #fff; font-weight: bold;">-</span></div>
-      <div id="adm_phone_row"><strong>شماره تماس:</strong> <span id="adm_client_phone" style="color: var(--primary);">-</span></div>
+    <div class="info-box roomy">
+      <div><strong>عنوان / مراجع:</strong> <span id="adm_client_name" class="t-ink fw">-</span></div>
+      <div id="adm_phone_row"><strong>شماره تماس:</strong> <span id="adm_client_phone" class="t-brand">-</span></div>
       <div><strong>مشاور:</strong> <span id="adm_counselor">-</span></div>
-      <div><strong>زمان نوبت:</strong> <span id="adm_datetime" style="color: var(--warning);">-</span></div>
-      <div id="adm_deposit_row"><strong>بیعانه پرداختی:</strong> <span id="adm_deposit" style="color: var(--success); font-weight: bold;">-</span></div>
+      <div><strong>زمان نوبت:</strong> <span id="adm_datetime" class="t-warn">-</span></div>
+      <div id="adm_deposit_row"><strong>بیعانه پرداختی:</strong> <span id="adm_deposit" class="t-ok fw">-</span></div>
       <div><strong>وضعیت:</strong> <span id="adm_status">-</span></div>
-      <div><strong>ثبت شده توسط:</strong> <span id="adm_operator" style="color: var(--primary); font-weight: bold;">-</span></div>
+      <div><strong>ثبت شده توسط:</strong> <span id="adm_operator" class="t-brand fw">-</span></div>
     </div>
 
     <input type="hidden" id="adm_app_id">
 
-    <div style="display: flex; flex-direction: column; gap: 8px;">
-      <button type="button" id="btn_adm_to_desk" class="btn-submit" style="background: linear-gradient(135deg, #0284c7, #0ea5e9);" onclick="convertModalToDesk()">انتقال مراجع به میز پذیرش و صندوق</button>
-      <button type="button" style="background: rgba(239, 68, 68, 0.2); color: var(--danger); border: 1px solid var(--danger); padding: 10px; border-radius: 10px; font-weight: bold; cursor: pointer;" onclick="cancelAppointmentFromModal()">لغو / کنسلی نوبت (آزاد شدن این ساعت)</button>
+    <div class="stack">
+      <button type="button" id="btn_adm_to_desk" class="btn btn-primary btn-block" onclick="convertModalToDesk()">انتقال مراجع به میز پذیرش و صندوق</button>
+      <button type="button" onclick="cancelAppointmentFromModal()" class="btn btn-danger-soft">لغو / کنسلی نوبت (آزاد شدن این ساعت)</button>
     </div>
   </div>
 </div>
@@ -1125,7 +1025,7 @@
 <div id="block_day_modal" class="modal-backdrop">
   <div class="modal-content" style="max-width: 440px;">
     <div class="modal-header">
-      <h3 style="margin: 0; color: var(--danger); font-size: 1.1rem;">مسدود کردن کل روز برای مشاور</h3>
+      <h3 class="modal-title">مسدود کردن کل روز برای مشاور</h3>
       <button type="button" class="modal-close-btn" onclick="closeBlockDayModal()">&times;</button>
     </div>
 
@@ -1133,9 +1033,9 @@
       <input type="hidden" id="bdm_date">
       <input type="hidden" id="bdm_counselor">
 
-      <div style="background: rgba(15, 23, 42, 0.6); padding: 12px; border-radius: 8px; margin-bottom: 14px; border: 1px solid var(--card-border); font-size: 0.9rem;">
-        <div style="margin-bottom: 6px;"><strong>مشاور:</strong> <span id="bdm_counselor_text" style="color: var(--primary);">-</span></div>
-        <div><strong>تاریخ روز:</strong> <span id="bdm_date_text" style="color: #fff;">-</span></div>
+      <div class="info-box">
+        <div><strong>مشاور:</strong> <span id="bdm_counselor_text" class="t-brand">-</span></div>
+        <div><strong>تاریخ روز:</strong> <span id="bdm_date_text" class="t-ink">-</span></div>
       </div>
 
       <div class="form-group">
@@ -1143,9 +1043,9 @@
         <input type="text" id="bdm_reason" required placeholder="مثال: مرخصی / مسافرت">
       </div>
 
-      <div style="display: flex; gap: 10px; margin-top: 15px;">
-        <button type="submit" id="btn_block_submit" class="btn-submit" style="flex: 2; background: linear-gradient(135deg, #ef4444, #dc2626);">مسدود کردن این روز</button>
-        <button type="button" onclick="closeBlockDayModal()" style="flex: 1; background: #334155; color: #fff; border: none; border-radius: 10px; cursor: pointer; font-weight: bold;">انصراف</button>
+      <div class="actions">
+        <button type="submit" id="btn_block_submit" class="btn btn-danger grow2">مسدود کردن این روز</button>
+        <button type="button" onclick="closeBlockDayModal()" class="btn btn-quiet grow1">انصراف</button>
       </div>
     </form>
   </div>
@@ -1155,7 +1055,7 @@
 <div id="edit_modal" class="modal-backdrop">
   <div class="modal-content">
     <div class="modal-header">
-      <h3 style="margin: 0; color: var(--primary); font-size: 1.15rem;">ویرایش جلسه مراجع</h3>
+      <h3 class="modal-title">ویرایش جلسه مراجع</h3>
       <button type="button" class="modal-close-btn" onclick="closeEditModal()">&times;</button>
     </div>
 
@@ -1202,19 +1102,19 @@
 
       <div class="payment-module">
         <div class="deposit-toggle-bar">
-          <label style="font-weight: 500; color: #fff; cursor: pointer; display: flex; align-items: center; gap: 8px;">
-            <input type="checkbox" id="edit_has_deposit_toggle" style="width: 17px; height: 17px; accent-color: var(--primary); cursor: pointer;">
+          <label class="check">
+            <input type="checkbox" id="edit_has_deposit_toggle">
             بیعانه پرداخت شده است
           </label>
-          <span id="edit_remaining_badge" style="font-size: 0.85rem; color: var(--primary); font-weight: bold;"></span>
+          <span id="edit_remaining_badge" class="badge-note"></span>
         </div>
 
         <div id="edit_deposit_fields_wrapper" class="deposit-details-grid">
-          <div class="form-group" style="margin-bottom: 0;">
+          <div class="form-group mb0">
             <label>مبلغ بیعانه (تومان):</label>
             <input type="number" id="edit_deposit_amount" value="0">
           </div>
-          <div class="form-group" style="margin-bottom: 0;">
+          <div class="form-group mb0">
             <label>بیعانه به حساب کی رفت؟</label>
             <select id="edit_deposit_to">
               <option value="مشاور">مستقیم به کارت مشاور</option>
@@ -1223,7 +1123,7 @@
           </div>
         </div>
 
-        <div class="form-group" style="margin-bottom: 0;">
+        <div class="form-group mb0">
           <label id="edit_balance_label">تسویه کل مبلغ از طریق:</label>
           <select id="edit_balance_to">
             <option value="کلینیک">کارت‌خوان کلینیک</option>
@@ -1237,9 +1137,9 @@
         <input type="text" id="edit_record_notes">
       </div>
 
-      <div style="display: flex; gap: 10px; margin-top: 15px;">
-        <button type="submit" id="btn_edit_submit" class="btn-submit" style="flex: 2;">ذخیره تغییرات در شیت</button>
-        <button type="button" onclick="closeEditModal()" style="flex: 1; background: #334155; color: #fff; border: none; border-radius: 10px; cursor: pointer; font-weight: bold;">انصراف</button>
+      <div class="actions">
+        <button type="submit" id="btn_edit_submit" class="btn btn-primary btn-block grow2">ذخیره تغییرات در شیت</button>
+        <button type="button" onclick="closeEditModal()" class="btn btn-quiet grow1">انصراف</button>
       </div>
     </form>
   </div>
@@ -1247,6 +1147,48 @@
 
 <script>
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwQNRp6anbyhNDlTXGnvHnSwHUHy7RTqQhQ6oNodgZVwCQiM8Lx9MOAVCZce2_NWUNZ/exec";
+const STAFF_SESSION_KEY = "sepehr_staff_session";
+
+function getStaffSessionToken() {
+  return localStorage.getItem(STAFF_SESSION_KEY) || "";
+}
+
+function clearStaffSession() {
+  localStorage.removeItem(STAFF_SESSION_KEY);
+  localStorage.removeItem("sepehr_user");
+  localStorage.removeItem("sepehr_username");
+  state.currentUser = "";
+  state.currentUsername = "";
+}
+
+function handleAuthFailure() {
+  clearStaffSession();
+  alert("نشست شما منقضی یا نامعتبر شده است. لطفاً دوباره وارد شوید.");
+  location.reload();
+}
+
+async function apiGet(action, params = {}) {
+  const token = getStaffSessionToken();
+  if (!token) { handleAuthFailure(); throw new Error("AUTH_REQUIRED"); }
+  const query = new URLSearchParams({ action, sessionToken: token, ...params });
+  const res = await fetch(`${SCRIPT_URL}?${query.toString()}`);
+  const data = await res.json();
+  if (data.code === "AUTH_REQUIRED") { handleAuthFailure(); throw new Error("AUTH_REQUIRED"); }
+  return data;
+}
+
+async function apiPost(payload) {
+  const token = getStaffSessionToken();
+  if (!token) { handleAuthFailure(); throw new Error("AUTH_REQUIRED"); }
+  const res = await fetch(SCRIPT_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify({ ...payload, sessionToken: token })
+  });
+  const data = await res.json();
+  if (data.code === "AUTH_REQUIRED") { handleAuthFailure(); throw new Error("AUTH_REQUIRED"); }
+  return data;
+}
 
 let state = {
   settings: {},
@@ -1294,9 +1236,11 @@ function normalizePhoneNumber(phone) {
 }
 
 function checkAuth() {
+  const token = getStaffSessionToken();
   const savedUser = localStorage.getItem("sepehr_user");
   const savedUsername = localStorage.getItem("sepehr_username");
-  if (savedUser) {
+
+  if (token && savedUser) {
     state.currentUser = savedUser;
     state.currentUsername = savedUsername || "";
     document.getElementById("active_user_badge").innerText = savedUser + (savedUsername ? ` (${savedUsername})` : "");
@@ -1305,6 +1249,7 @@ function checkAuth() {
     applyRolePermissions();
     fetchInitialData();
   } else {
+    clearStaffSession();
     document.getElementById("login_overlay").style.display = "flex";
     document.getElementById("main_app").style.display = "none";
   }
@@ -1344,6 +1289,10 @@ document.getElementById("login_form").addEventListener("submit", async function(
       state.currentUser = data.operatorName;
       state.currentUsername = (data.username || user).toLowerCase();
 
+      if (!data.sessionToken) {
+        throw new Error("سرور نشست امن ایجاد نکرد.");
+      }
+      localStorage.setItem(STAFF_SESSION_KEY, data.sessionToken);
       localStorage.setItem("sepehr_user", data.operatorName);
       localStorage.setItem("sepehr_username", state.currentUsername);
 
@@ -1367,10 +1316,7 @@ document.getElementById("login_form").addEventListener("submit", async function(
 
 function logout() {
   if (!confirm("آیا قصد خروج از حساب کاربری را دارید؟")) return;
-  localStorage.removeItem("sepehr_user");
-  localStorage.removeItem("sepehr_username");
-  state.currentUser = "";
-  state.currentUsername = "";
+  clearStaffSession();
   location.reload();
 }
 
@@ -1422,8 +1368,7 @@ initDates();
 async function fetchInitialData() {
   document.getElementById("loading-indicator").style.display = "block";
   try {
-    const res = await fetch(SCRIPT_URL + "?action=getInitialData");
-    const data = await res.json();
+    const data = await apiGet("getInitialData");
     if (data.status === "success") {
       state.settings = data.settings;
       state.counselors = data.counselors;
@@ -1613,7 +1558,7 @@ function searchClientHistory() {
         <td>${Number(t.totalAmount).toLocaleString('fa-IR')}</td>
         <td>${Number(t.deposit || 0).toLocaleString('fa-IR')}</td>
         <td>${t.balanceTo || "کلینیک"}</td>
-        <td style="color:#cbd5e1; font-size:0.75rem;">${t.operator || "-"}</td>
+        <td style="color:var(--ink-2); font-size:0.75rem;">${t.operator || "-"}</td>
         <td style="font-size:0.8rem; color:var(--text-muted);">${t.notes || "-"}</td>
       `;
       tBodyTrans.appendChild(tr);
@@ -1632,8 +1577,8 @@ function searchClientHistory() {
         <td style="font-weight:bold; color:var(--warning);">${a.appointmentTime}</td>
         <td>${a.counselor}</td>
         <td>${Number(a.deposit || 0).toLocaleString('fa-IR')} ت</td>
-        <td><span style="background:rgba(56,189,248,0.15); padding:2px 8px; border-radius:4px; color:var(--primary); font-size:0.75rem;">رزرو شده (پیش‌رو)</span></td>
-        <td style="color:#cbd5e1; font-size:0.75rem;">${a.operator || "-"}</td>
+        <td><span class="badge badge-upcoming">رزرو شده (پیش‌رو)</span></td>
+        <td style="color:var(--ink-2); font-size:0.75rem;">${a.operator || "-"}</td>
       `;
       tBodyApps.appendChild(tr);
     });
@@ -1729,16 +1674,12 @@ async function saveCounselorSchedule() {
   state.dutySchedules[counselor] = scheduleObj;
 
   try {
-    await fetch(SCRIPT_URL, {
-      method: "POST",
-      mode: "no-cors",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: "saveCounselorSchedule",
-        counselor: counselor,
-        schedule: scheduleObj
-      })
+    const result = await apiPost({
+      action: "saveCounselorSchedule",
+      counselor: counselor,
+      schedule: scheduleObj
     });
+    if (result.status !== "success") throw new Error(result.message || "ذخیره برنامه انجام نشد");
     alert(`برنامه کاری مشاور "${counselor}" ذخیره شد و در پرتال مراجعین نیز فعال گردید.`);
     renderWeeklyCalendar();
   } catch(e) {
@@ -1779,8 +1720,7 @@ async function fetchAppointments() {
   const indicator = document.getElementById("loading-indicator");
   indicator.style.display = "block";
   try {
-    const res = await fetch(SCRIPT_URL + "?action=getAppointments");
-    const data = await res.json();
+    const data = await apiGet("getAppointments");
     if (data.status === "success") {
       state.appointmentsList = (data.appointments || []).map(a => {
         a.clientPhone = normalizePhoneNumber(a.clientPhone);
@@ -2043,12 +1983,8 @@ document.getElementById("quick_booking_form").addEventListener("submit", async f
   };
 
   try {
-    await fetch(SCRIPT_URL, {
-      method: "POST",
-      mode: "no-cors",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
+    const result = await apiPost(payload);
+    if (result.status !== "success") throw new Error(result.message || "رزرو نوبت انجام نشد");
     alert("نوبت با موفقیت ثبت شد.");
     closeBookingModal();
     setTimeout(fetchAppointments, 1200);
@@ -2134,12 +2070,8 @@ async function cancelAppointmentFromModal() {
 
 async function changeAppStatus(appId, newStatus) {
   try {
-    await fetch(SCRIPT_URL, {
-      method: "POST",
-      mode: "no-cors",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "updateAppointmentStatus", id: appId, status: newStatus })
-    });
+    const result = await apiPost({ action: "updateAppointmentStatus", id: appId, status: newStatus });
+    if (result.status !== "success") throw new Error(result.message || "تغییر وضعیت انجام نشد");
     setTimeout(fetchAppointments, 1200);
   } catch (e) {
     console.error("خطا در تغییر وضعیت نوبت:", e);
@@ -2174,12 +2106,8 @@ document.getElementById("block_day_form").addEventListener("submit", async funct
   };
 
   try {
-    await fetch(SCRIPT_URL, {
-      method: "POST",
-      mode: "no-cors",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
+    const result = await apiPost(payload);
+    if (result.status !== "success") throw new Error(result.message || "مسدود کردن روز انجام نشد");
     alert("این روز برای مشاور با موفقیت مسدود شد.");
     closeBlockDayModal();
     setTimeout(fetchAppointments, 1200);
@@ -2194,12 +2122,8 @@ document.getElementById("block_day_form").addEventListener("submit", async funct
 async function unblockDay(date, counselor) {
   if (!confirm(`آیا مطمئن هستید که می‌خواهید روز ${date} را برای مشاور بازگشایی کنید؟`)) return;
   try {
-    await fetch(SCRIPT_URL, {
-      method: "POST",
-      mode: "no-cors",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "unblockDay", date: date, counselor: counselor })
-    });
+    const result = await apiPost({ action: "unblockDay", date: date, counselor: counselor });
+    if (result.status !== "success") throw new Error(result.message || "بازگشایی روز انجام نشد");
     alert("روز با موفقیت بازگشایی شد.");
     setTimeout(fetchAppointments, 1200);
   } catch (err) {
@@ -2331,13 +2255,8 @@ document.getElementById("record_form").addEventListener("submit", async function
   };
 
   try {
-    await fetch(SCRIPT_URL, {
-      method: "POST",
-      mode: "no-cors",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-    
+    const result = await apiPost(payload);
+    if (result.status !== "success") throw new Error(result.message || "ثبت جلسه انجام نشد");
     alert("جلسه با موفقیت ثبت شد.");
     document.getElementById("record_form").reset();
     depositToggle.checked = false;
@@ -2369,7 +2288,7 @@ function renderRecentTable(list) {
       <td>${r.sessionType}</td>
       <td>${Number(r.totalAmount).toLocaleString('fa-IR')}</td>
       <td>${Number(r.deposit).toLocaleString('fa-IR')}</td>
-      <td style="color: #cbd5e1; font-size: 0.78rem;">${r.operator || "-"}</td>
+      <td style="color: var(--ink-2); font-size: 0.78rem;">${r.operator || "-"}</td>
       <td>
         <button class="btn-edit-sm" onclick="openEditModal('${r.id}')">ویرایش</button>
         <button class="btn-delete-c" onclick="deleteRecord('${r.id}')">حذف</button>
@@ -2458,12 +2377,8 @@ function closeEditModal() {
 async function deleteRecord(id) {
   if (!confirm("آیا از حذف این جلسه اطمینان دارید؟")) return;
   try {
-    await fetch(SCRIPT_URL, {
-      method: "POST",
-      mode: "no-cors",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "deleteTransaction", id: id })
-    });
+    const result = await apiPost({ action: "deleteTransaction", id: id });
+    if (result.status !== "success") throw new Error(result.message || "حذف رکورد انجام نشد");
     setTimeout(fetchInitialData, 1200);
   } catch (e) {
     alert("خطا در حذف رکورد");
@@ -2479,9 +2394,7 @@ async function loadMonthlyReport() {
   indicator.style.display = "block";
 
   try {
-    const url = `${SCRIPT_URL}?action=getMonthlyReport&counselor=${encodeURIComponent(counselor)}&year=${encodeURIComponent(year)}&month=${encodeURIComponent(month)}`;
-    const res = await fetch(url);
-    const data = await res.json();
+    const data = await apiGet("getMonthlyReport", { counselor, year, month });
 
     if (data.status === "success") {
       state.currentLoadedReport = data.records || [];
@@ -2625,8 +2538,8 @@ function renderBreakdownTable(breakdown) {
       <td>${b.totalAmount.toLocaleString('fa-IR')} تومان</td>
       <td style="color:var(--primary);">${b.counselorShare.toLocaleString('fa-IR')} تومان</td>
       <td style="color:var(--success); font-weight:bold;">${b.clinicShare.toLocaleString('fa-IR')} تومان</td>
-      <td style="color:#38bdf8;">${b.paidToClinic.toLocaleString('fa-IR')} تومان</td>
-      <td style="color:#f59e0b;">${b.paidToCounselor.toLocaleString('fa-IR')} تومان</td>
+      <td style="color:var(--brand);">${b.paidToClinic.toLocaleString('fa-IR')} تومان</td>
+      <td style="color:var(--warn);">${b.paidToCounselor.toLocaleString('fa-IR')} تومان</td>
     `;
     tbody.appendChild(tr);
   });
