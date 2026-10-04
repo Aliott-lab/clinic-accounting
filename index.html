@@ -2,6 +2,11 @@
 <html lang="fa" dir="rtl">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-wU5XXA5KjgxgBvdM4ptl2nMwTCUgBSJf83vP2eDkMDA=' 'sha256-1+Uylts3hkWXEvMoECgHzT0qS21ID2rD5QWV1EfsmSs='; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; font-src https://cdn.jsdelivr.net; img-src 'self' data: https://cdn.imgurl.ir; connect-src https://script.google.com https://script.googleusercontent.com; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta name="referrer" content="no-referrer">
+  <script>
+if (window.top !== window.self) { document.documentElement.style.display = 'none'; try { window.top.location = window.self.location; } catch (e) {} }
+</script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="light dark">
   <meta name="theme-color" content="#1B6B66">
@@ -418,7 +423,7 @@
 <body>
 
 <!-- ============== ورود ============== -->
-<div id="login_overlay" class="auth">
+<div id="login_overlay" class="auth" style="display: none;">
   <div class="auth-card">
     <div class="auth-head">
       <img src="https://cdn.imgurl.ir/uploads/l39464_et_1s.png" class="logo" alt="لوگو">
@@ -429,11 +434,11 @@
     <form id="login_form">
       <div class="form-group">
         <label>نام کاربری:</label>
-        <input type="text" id="login_username" required placeholder="مثلاً: admin" dir="ltr">
+        <input type="text" id="login_username" required placeholder="مثلاً: admin" dir="ltr" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="64">
       </div>
       <div class="form-group">
         <label>رمز عبور:</label>
-        <input type="password" id="login_password" required placeholder="••••••••" dir="ltr">
+        <input type="password" id="login_password" required placeholder="••••••••" dir="ltr" autocomplete="current-password" maxlength="200">
       </div>
       <div id="login_error" class="form-error" role="alert" style="display: none;"></div>
       <button type="submit" id="btn_login" class="btn btn-primary btn-block">ورود به سامانه</button>
@@ -455,16 +460,16 @@
     <div class="who">
       <span class="date" id="current_date_display">در حال بارگذاری...</span>
       <span>کاربر: <strong id="active_user_badge">-</strong></span>
-      <button type="button" class="link-btn danger" onclick="logout()">خروج</button>
+      <button type="button" class="link-btn danger" data-act="logout">خروج</button>
     </div>
   </header>
 
   <div class="tabs" role="tablist" aria-label="بخش‌های سامانه">
-    <button class="tab-btn active" id="btn_tab_desk" onclick="switchTab('desk')">میز پذیرش و صندوق</button>
-    <button class="tab-btn" id="btn_tab_appointments" onclick="switchTab('appointments')">تقویم و نوبت‌دهی هفتگی</button>
-    <button class="tab-btn" id="btn_tab_report" onclick="switchTab('report')">گزارش و تسویه ماهانه</button>
-    <button class="tab-btn" id="btn_tab_history" onclick="switchTab('history')">سوابق و پرونده مراجع</button>
-    <button class="tab-btn" id="btn_tab_settings" onclick="switchTab('settings')">تنظیمات، نرخ‌ها و مشاوران</button>
+    <button class="tab-btn active" id="btn_tab_desk" data-act="tab" data-arg="desk">میز پذیرش و صندوق</button>
+    <button class="tab-btn" id="btn_tab_appointments" data-act="tab" data-arg="appointments">تقویم و نوبت‌دهی هفتگی</button>
+    <button class="tab-btn" id="btn_tab_report" data-act="tab" data-arg="report">گزارش و تسویه ماهانه</button>
+    <button class="tab-btn" id="btn_tab_history" data-act="tab" data-arg="history">سوابق و پرونده مراجع</button>
+    <button class="tab-btn" id="btn_tab_settings" data-act="tab" data-arg="settings">تنظیمات، نرخ‌ها و مشاوران</button>
   </div>
 
   <div id="loading-indicator">در حال همگام‌سازی اطلاعات با سرور...</div>
@@ -476,16 +481,17 @@
   <div id="tab_desk" class="tab-content active">
     <div class="card">
       <h2 class="card-title">ثبت پذیرش و تسویه مالی جلسه</h2>
+      <div id="pending_app_banner" style="display:none; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px; padding:10px 14px; border-radius:10px; background:var(--warning-bg, #fff7e6); border:1px solid var(--warning, #d98a00); font-size:0.85rem;"><span id="pending_app_text"></span><button type="button" class="btn-edit-sm" data-act="unlinkApp">لغو ارتباط با نوبت</button></div>
       <form id="record_form">
         
         <div class="grid-3">
           <div class="form-group">
             <label>نام و نام خانوادگی مراجع (با سابقه قبلی):</label>
-            <input type="text" id="client_name" required placeholder="تایپ نام جهت پیشنهاد خودکار..." list="clients_name_datalist" oninput="onClientNameInput(this.value)">
+            <input type="text" id="client_name" maxlength="80" required placeholder="تایپ نام جهت پیشنهاد خودکار..." list="clients_name_datalist">
           </div>
           <div class="form-group">
             <label>شماره تماس مراجع:</label>
-            <input type="tel" id="client_phone" placeholder="۰۹۱۲..." dir="ltr" list="clients_phone_datalist" oninput="onClientPhoneInput(this.value)">
+            <input type="tel" id="client_phone" placeholder="۰۹۱۲..." dir="ltr" list="clients_phone_datalist">
           </div>
           <div class="form-group">
             <label>مشاور:</label>
@@ -511,7 +517,7 @@
           </div>
           <div class="form-group">
             <label>مبلغ کل جلسه (تومان):</label>
-            <input type="number" id="total_amount" required value="0">
+            <input type="number" id="total_amount" min="0" max="1000000000" required value="0">
           </div>
         </div>
 
@@ -527,7 +533,7 @@
           <div id="deposit_fields_wrapper" class="deposit-details-grid">
             <div class="form-group mb0">
               <label>مبلغ بیعانه دریافتی (تومان):</label>
-              <input type="number" id="deposit_amount" value="0" placeholder="مثال: ۲۰۰,۰۰۰">
+              <input type="number" id="deposit_amount" min="0" max="1000000000" value="0" placeholder="مثال: ۲۰۰,۰۰۰">
             </div>
             <div class="form-group mb0">
               <label>بیعانه به حساب چه کسی رفته است؟</label>
@@ -549,7 +555,7 @@
 
         <div class="form-group">
           <label>توضیحات (اختیاری):</label>
-          <input type="text" id="record_notes" placeholder="یادداشت منشی...">
+          <input type="text" id="record_notes" maxlength="300" placeholder="یادداشت منشی...">
         </div>
 
         <div class="summary-box">
@@ -598,15 +604,15 @@
       <div class="calendar-controls">
         <div class="inline-row">
           <label class="t-brand fw">مشاور:</label>
-          <select id="cal_counselor_filter" onchange="renderWeeklyCalendar()" class="cal-filter">
+          <select id="cal_counselor_filter" class="cal-filter">
             <option value="" disabled selected>در حال بارگذاری...</option>
           </select>
         </div>
 
         <div class="inline-row">
-          <button type="button" class="btn-action-sm" onclick="changeWeek(-1)">« هفته قبل</button>
-          <button type="button" class="btn-action-sm" onclick="changeWeek(0)">هفته جاری</button>
-          <button type="button" class="btn-action-sm" onclick="changeWeek(1)">هفته بعد »</button>
+          <button type="button" class="btn-action-sm" data-act="week" data-arg="-1">« هفته قبل</button>
+          <button type="button" class="btn-action-sm" data-act="week" data-arg="0">هفته جاری</button>
+          <button type="button" class="btn-action-sm" data-act="week" data-arg="1">هفته بعد »</button>
         </div>
 
         <div id="cal_week_range_display" class="week-range">
@@ -676,8 +682,8 @@
       </div>
 
       <div class="actions">
-        <button type="button" class="btn btn-primary btn-block grow2" onclick="loadMonthlyReport()">مشاهده و محاسبه تسویه</button>
-        <button type="button" class="btn-action-sm grow1 btn-md" onclick="printCleanSettlementReceipt()">چاپ فیش تسویه</button>
+        <button type="button" class="btn btn-primary btn-block grow2" data-act="loadReport">مشاهده و محاسبه تسویه</button>
+        <button type="button" class="btn-action-sm grow1 btn-md" data-act="printReceipt">چاپ فیش تسویه</button>
       </div>
     </div>
 
@@ -765,15 +771,15 @@
       <div class="grid-3 align-end">
         <div class="form-group mb0">
           <label>نام مراجع (با پیشنهاد خودکار):</label>
-          <input type="text" id="sh_client_name" placeholder="مثال: علی رضایی..." list="clients_name_datalist" oninput="onHistoryNameInput(this.value)">
+          <input type="text" id="sh_client_name" placeholder="مثال: علی رضایی..." list="clients_name_datalist">
         </div>
         <div class="form-group mb0">
           <label>شماره تماس مراجع:</label>
-          <input type="tel" id="sh_client_phone" placeholder="۰۹۱۲..." dir="ltr" list="clients_phone_datalist" oninput="onHistoryPhoneInput(this.value)">
+          <input type="tel" id="sh_client_phone" placeholder="۰۹۱۲..." dir="ltr" list="clients_phone_datalist">
         </div>
         <div class="row-gap8">
-          <button type="button" class="btn btn-primary btn-block" onclick="searchClientHistory()">جستجو پرونده</button>
-          <button type="button" class="btn-action-sm" onclick="clearHistorySearch()">پاک‌سازی</button>
+          <button type="button" class="btn btn-primary btn-block" data-act="searchHistory">جستجو پرونده</button>
+          <button type="button" class="btn-action-sm" data-act="clearHistory">پاک‌سازی</button>
         </div>
       </div>
     </div>
@@ -848,7 +854,7 @@
       <div class="grid-3 mb14">
         <div class="form-group">
           <label>انتخاب مشاور:</label>
-          <select id="schedule_counselor_select" onchange="loadCounselorScheduleUI()">
+          <select id="schedule_counselor_select">
             <option value="" disabled selected>انتخاب مشاور...</option>
           </select>
         </div>
@@ -876,6 +882,7 @@
         </div>
       </div>
 
+      <p id="schedule_default_hint" style="display:none; margin:0 0 12px; padding:8px 12px; border-radius:8px; background:var(--warning-bg, #fff7e6); font-size:0.82rem;"></p>
       <label class="lbl">روزهای حضور مشاور در کلینیک:</label>
       <div class="duty-days">
         <label><input type="checkbox" class="duty-day-checkbox" value="شنبه"> شنبه</label>
@@ -887,13 +894,13 @@
         <label><input type="checkbox" class="duty-day-checkbox" value="جمعه"> جمعه</label>
       </div>
 
-      <button type="button" class="btn-action-sm btn-md" onclick="saveCounselorSchedule()">ذخیره برنامه حضور این مشاور در سیستم و پرتال مراجعین</button>
+      <button type="button" class="btn-action-sm btn-md" data-act="saveSchedule">ذخیره برنامه حضور این مشاور در سیستم و پرتال مراجعین</button>
     </div>
 
     <div class="card">
       <h2 class="card-title">افزودن مشاور جدید</h2>
       <div class="add-row">
-        <input type="text" id="new_counselor_name" placeholder="نام و نام خانوادگی مشاور..." class="input grow2">
+        <input type="text" id="new_counselor_name" maxlength="60" placeholder="نام و نام خانوادگی مشاور..." class="input grow2">
         <input type="number" id="new_counselor_percent" placeholder="درصد سهم (مثلاً ۷۰)" value="70" class="input w130">
         <button type="button" id="btn_add_counselor" class="btn btn-primary">افزودن</button>
       </div>
@@ -919,7 +926,8 @@
     </div>
 
     <div class="card">
-      <h2 class="card-title">تنظیم نرخ و درصد جلسات سازمانی و آزاد</h2>
+      <h2 class="card-title">تنظیم نرخ و درصد جلسات سازمانی</h2>
+      <p style="font-size:0.82rem; color:var(--text-muted); margin:0 0 12px;">جلسات «آزاد» نرخ و درصد ثابت ندارند: مبلغ را منشی وارد می‌کند و درصد از روی «درصد اختصاصی هر مشاور» (جدول بالا) محاسبه می‌شود.</p>
       <div class="table-wrapper">
         <table class="counselor-table">
           <thead>
@@ -938,7 +946,7 @@
     </div>
   </div>
 
-  <p class="footer">v2.6.2</p>
+  <p class="footer">v2.7.0</p>
 </div>
 
 <!-- پاپ‌آپ ۱: ثبت نوبت -->
@@ -946,7 +954,7 @@
   <div class="modal-content" style="max-width: 500px;">
     <div class="modal-header">
       <h3 class="modal-title">رزرو نوبت / جلسه در تقویم</h3>
-      <button type="button" class="modal-close-btn" onclick="closeBookingModal()">&times;</button>
+      <button type="button" class="modal-close-btn" data-act="closeBooking">&times;</button>
     </div>
 
     <form id="quick_booking_form">
@@ -963,7 +971,7 @@
 
       <div class="form-group">
         <label>نوع ثبت زمان:</label>
-        <select id="bm_booking_type" onchange="handleBookingTypeChange()">
+        <select id="bm_booking_type">
           <option value="client_full">مراجع عادی (جلسه کامل ۱ ساعته)</option>
           <option value="client_half1">مراجع طلاق (نیم‌ساعت اول پارت)</option>
           <option value="client_half2">مراجع طلاق (نیم‌ساعت دوم پارت)</option>
@@ -973,22 +981,22 @@
 
       <div class="form-group" id="bm_name_group">
         <label id="bm_name_label">نام و نام خانوادگی مراجع:</label>
-        <input type="text" id="bm_client_name" required placeholder="تایپ نام جهت پیشنهاد خودکار..." list="clients_name_datalist" oninput="onQuickNameInput(this.value)">
+        <input type="text" id="bm_client_name" maxlength="80" required placeholder="تایپ نام جهت پیشنهاد خودکار..." list="clients_name_datalist">
       </div>
 
       <div class="form-group" id="bm_phone_group">
         <label>شماره تماس مراجع:</label>
-        <input type="tel" id="bm_client_phone" placeholder="۰۹۱۲..." dir="ltr" list="clients_phone_datalist" oninput="onQuickPhoneInput(this.value)">
+        <input type="tel" id="bm_client_phone" placeholder="۰۹۱۲..." dir="ltr" list="clients_phone_datalist">
       </div>
 
       <div class="form-group" id="bm_deposit_group">
         <label>بیعانه اولیه پرداختی (تومان):</label>
-        <input type="number" id="bm_deposit" value="0">
+        <input type="number" id="bm_deposit" min="0" max="1000000000" value="0">
       </div>
 
       <div class="actions">
         <button type="submit" id="btn_quick_book" class="btn btn-primary btn-block grow2">ثبت قطعی در تقویم</button>
-        <button type="button" onclick="closeBookingModal()" class="btn btn-quiet grow1">انصراف</button>
+        <button type="button" data-act="closeBooking" class="btn btn-quiet grow1">انصراف</button>
       </div>
     </form>
   </div>
@@ -999,7 +1007,7 @@
   <div class="modal-content" style="max-width: 480px;">
     <div class="modal-header">
       <h3 class="modal-title">جزئیات نوبت / جلسه</h3>
-      <button type="button" class="modal-close-btn" onclick="closeAppDetailsModal()">&times;</button>
+      <button type="button" class="modal-close-btn" data-act="closeDetails">&times;</button>
     </div>
 
     <div class="info-box roomy">
@@ -1015,8 +1023,8 @@
     <input type="hidden" id="adm_app_id">
 
     <div class="stack">
-      <button type="button" id="btn_adm_to_desk" class="btn btn-primary btn-block" onclick="convertModalToDesk()">انتقال مراجع به میز پذیرش و صندوق</button>
-      <button type="button" onclick="cancelAppointmentFromModal()" class="btn btn-danger-soft">لغو / کنسلی نوبت (آزاد شدن این ساعت)</button>
+      <button type="button" id="btn_adm_to_desk" class="btn btn-primary btn-block" data-act="toDesk">انتقال مراجع به میز پذیرش و صندوق</button>
+      <button type="button" data-act="cancelApp" class="btn btn-danger-soft">لغو / کنسلی نوبت (آزاد شدن این ساعت)</button>
     </div>
   </div>
 </div>
@@ -1026,7 +1034,7 @@
   <div class="modal-content" style="max-width: 440px;">
     <div class="modal-header">
       <h3 class="modal-title">مسدود کردن کل روز برای مشاور</h3>
-      <button type="button" class="modal-close-btn" onclick="closeBlockDayModal()">&times;</button>
+      <button type="button" class="modal-close-btn" data-act="closeBlock">&times;</button>
     </div>
 
     <form id="block_day_form">
@@ -1040,12 +1048,12 @@
 
       <div class="form-group">
         <label>علت عدم حضور مشاور:</label>
-        <input type="text" id="bdm_reason" required placeholder="مثال: مرخصی / مسافرت">
+        <input type="text" id="bdm_reason" maxlength="100" required placeholder="مثال: مرخصی / مسافرت">
       </div>
 
       <div class="actions">
         <button type="submit" id="btn_block_submit" class="btn btn-danger grow2">مسدود کردن این روز</button>
-        <button type="button" onclick="closeBlockDayModal()" class="btn btn-quiet grow1">انصراف</button>
+        <button type="button" data-act="closeBlock" class="btn btn-quiet grow1">انصراف</button>
       </div>
     </form>
   </div>
@@ -1056,7 +1064,7 @@
   <div class="modal-content">
     <div class="modal-header">
       <h3 class="modal-title">ویرایش جلسه مراجع</h3>
-      <button type="button" class="modal-close-btn" onclick="closeEditModal()">&times;</button>
+      <button type="button" class="modal-close-btn" data-act="closeEdit">&times;</button>
     </div>
 
     <form id="edit_record_form">
@@ -1065,7 +1073,7 @@
       <div class="grid-2">
         <div class="form-group">
           <label>نام و نام خانوادگی مراجع:</label>
-          <input type="text" id="edit_client_name" required>
+          <input type="text" id="edit_client_name" maxlength="80" required>
         </div>
         <div class="form-group">
           <label>شماره تماس مراجع:</label>
@@ -1096,7 +1104,7 @@
         </div>
         <div class="form-group">
           <label>مبلغ کل جلسه (تومان):</label>
-          <input type="number" id="edit_total_amount" required>
+          <input type="number" id="edit_total_amount" min="0" max="1000000000" required>
         </div>
       </div>
 
@@ -1112,7 +1120,7 @@
         <div id="edit_deposit_fields_wrapper" class="deposit-details-grid">
           <div class="form-group mb0">
             <label>مبلغ بیعانه (تومان):</label>
-            <input type="number" id="edit_deposit_amount" value="0">
+            <input type="number" id="edit_deposit_amount" min="0" max="1000000000" value="0">
           </div>
           <div class="form-group mb0">
             <label>بیعانه به حساب کی رفت؟</label>
@@ -1134,76 +1142,128 @@
 
       <div class="form-group">
         <label>توضیحات یا یادداشت:</label>
-        <input type="text" id="edit_record_notes">
+        <input type="text" id="edit_record_notes" maxlength="300">
       </div>
 
       <div class="actions">
         <button type="submit" id="btn_edit_submit" class="btn btn-primary btn-block grow2">ذخیره تغییرات در شیت</button>
-        <button type="button" onclick="closeEditModal()" class="btn btn-quiet grow1">انصراف</button>
+        <button type="button" data-act="closeEdit" class="btn btn-quiet grow1">انصراف</button>
       </div>
     </form>
   </div>
 </div>
 
 <script>
+(() => {
+'use strict';
+
+/* =========================================================
+   تنظیمات
+   ========================================================= */
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwQNRp6anbyhNDlTXGnvHnSwHUHy7RTqQhQ6oNodgZVwCQiM8Lx9MOAVCZce2_NWUNZ/exec";
-const STAFF_SESSION_KEY = "sepehr_staff_session";
+/* false = توکن فقط تا بسته‌شدن تب می‌ماند (پیشنهادی برای رایانه‌ی مشترک پذیرش).
+   true  = توکن در localStorage می‌ماند و بعد از بستن مرورگر هم تا ۳ ساعت معتبر است. */
+const PERSIST_SESSION = false;
+const KEY_SESSION = "sepehr_staff_session";
+const KEY_NOTICE = "sepehr_staff_notice";
+const LEGACY_KEYS = ["sepehr_staff_session", "sepehr_user", "sepehr_username"];   // نسخه‌ی قبلی توکن و نام کاربری را در localStorage نگه می‌داشت
+const REQUEST_TIMEOUT_MS = 25 * 1000;
+const IDLE_LIMIT_MS = 60 * 60 * 1000;      // خروج خودکار بعد از ۱ ساعت عدم فعالیت
+const MAX_MONEY = 1000000000;
+const SESSION_TYPES = ["آزاد", "سپه", "ورزش و بهزیستی", "طلاق"];
+const RATE_TYPES = ["سپه", "ورزش و بهزیستی", "طلاق"];   // «آزاد» نرخ و درصد ثابت ندارد: مبلغ دستی و درصد از روی خودِ مشاور
+const COUNSELOR_NAME_RE = /^[\u0600-\u06FFA-Za-z][\u0600-\u06FF\u200C A-Za-z.\-]{1,59}$/;   // هم‌خوان با بک‌اند
+const MOBILE_RE = /^09\d{9}$/;
 
-function getStaffSessionToken() {
-  return localStorage.getItem(STAFF_SESSION_KEY) || "";
-}
+/* =========================================================
+   ابزارهای کمکی (همه‌ی رندرها بدون innerHTML و با textContent)
+   ========================================================= */
+const $ = id => document.getElementById(id);
+const INVISIBLE = /[\u200B-\u200F\u202A-\u202E\u2066-\u2069\uFEFF]/g;
+const toEn = s => String(s ?? "")
+  .replace(/[۰-۹]/g, w => String.fromCharCode(w.charCodeAt(0) - 1728))
+  .replace(/[٠-٩]/g, w => String.fromCharCode(w.charCodeAt(0) - 1584));
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const nf = n => (Number(n) || 0).toLocaleString("fa-IR");
+const normDate = s => toEn(String(s ?? "")).replace(INVISIBLE, "").replace(/'/g, "").trim();
+const normTime = s => toEn(String(s ?? "")).replace(INVISIBLE, "").replace(/\s+/g, "");
+const sameName = (a, b) => String(a ?? "").trim() === String(b ?? "").trim();
+const dayDisplay = s => String(s ?? "-").split("T")[0];
+const dict = obj => Object.assign(Object.create(null), obj || {});
 
-function clearStaffSession() {
-  localStorage.removeItem(STAFF_SESSION_KEY);
-  localStorage.removeItem("sepehr_user");
-  localStorage.removeItem("sepehr_username");
-  state.currentUser = "";
-  state.currentUsername = "";
-}
-
-function handleAuthFailure() {
-  clearStaffSession();
-  alert("نشست شما منقضی یا نامعتبر شده است. لطفاً دوباره وارد شوید.");
-  location.reload();
-}
-
-async function apiGet(action, params = {}) {
-  const token = getStaffSessionToken();
-  if (!token) { handleAuthFailure(); throw new Error("AUTH_REQUIRED"); }
-  const query = new URLSearchParams({ action, sessionToken: token, ...params });
-  const res = await fetch(`${SCRIPT_URL}?${query.toString()}`);
-  const data = await res.json();
-  if (data.code === "AUTH_REQUIRED") { handleAuthFailure(); throw new Error("AUTH_REQUIRED"); }
-  return data;
-}
-
-async function apiPost(payload) {
-  const token = getStaffSessionToken();
-  if (!token) { handleAuthFailure(); throw new Error("AUTH_REQUIRED"); }
-  const res = await fetch(SCRIPT_URL, {
-    method: "POST",
-    headers: { "Content-Type": "text/plain;charset=utf-8" },
-    body: JSON.stringify({ ...payload, sessionToken: token })
+/* سازنده‌ی امن‌ DOM: متن همیشه به‌صورت text گذاشته می‌شود، نه HTML */
+function h(tag, props, ...kids) {
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(props || {})) {
+    if (v === null || v === undefined || v === false) continue;
+    if (k === "class") el.className = v;
+    else if (k === "style") el.style.cssText = v;
+    else if (k === "text") el.textContent = String(v);
+    else if (k.startsWith("on") && typeof v === "function") el.addEventListener(k.slice(2), v);
+    else el.setAttribute(k, v === true ? "" : String(v));
+  }
+  kids.flat().forEach(c => {
+    if (c === null || c === undefined || c === false) return;
+    el.append(c instanceof Node ? c : document.createTextNode(String(c)));
   });
-  const data = await res.json();
-  if (data.code === "AUTH_REQUIRED") { handleAuthFailure(); throw new Error("AUTH_REQUIRED"); }
-  return data;
+  return el;
+}
+const emptyRow = (cols, msg) => h("tr", null, h("td", { colspan: cols, style: "text-align:center; color:var(--text-muted);", text: msg }));
+const cell = (txt, style) => h("td", style ? { style, text: txt } : { text: txt });
+
+function fillSelect(sel, items, { placeholder = null, selectFirst = false } = {}) {
+  sel.replaceChildren();
+  if (placeholder !== null) {
+    const ph = new Option(placeholder, "", true, true);
+    ph.disabled = true;
+    sel.add(ph);
+  }
+  items.forEach((it, i) => {
+    const o = new Option(it.label, it.value);
+    if (selectFirst && i === 0) o.selected = true;
+    sel.add(o);
+  });
 }
 
-let state = {
-  settings: {},
+function normalizePhoneNumber(phone) {
+  if (!phone) return "";
+  let p = toEn(String(phone).replace(INVISIBLE, "")).replace(/\D/g, "").trim();
+  if (p.length === 10 && p.startsWith("9")) p = "0" + p;
+  return p;
+}
+
+/* ذخیره‌سازی: فقط توکن؛ نام و نقش کاربر همیشه از سرور خوانده می‌شود */
+const webStore = (() => { try { return PERSIST_SESSION ? localStorage : sessionStorage; } catch { return null; } })();
+const store = {
+  get(k) { try { return webStore ? webStore.getItem(k) : null; } catch { return null; } },
+  set(k, v) { try { if (webStore) webStore.setItem(k, v); } catch { /* ignore */ } },
+  del(k) { try { if (webStore) webStore.removeItem(k); } catch { /* ignore */ } }
+};
+if (!PERSIST_SESSION) { try { LEGACY_KEYS.forEach(k => localStorage.removeItem(k)); } catch { /* ignore */ } }
+else { try { ["sepehr_user", "sepehr_username"].forEach(k => localStorage.removeItem(k)); } catch { /* ignore */ } }
+
+const fmtShamsi = new Intl.DateTimeFormat("fa-IR", { timeZone: "Asia/Tehran", year: "numeric", month: "2-digit", day: "2-digit" });
+const fmtShamsiLatn = new Intl.DateTimeFormat("fa-IR-u-nu-latn", { timeZone: "Asia/Tehran", year: "numeric", month: "2-digit" });
+const currentShamsi = () => fmtShamsi.format(new Date());
+
+/* =========================================================
+   وضعیت برنامه
+   ========================================================= */
+const state = {
+  settings: dict(),
   counselors: [],
   shamsiDate: "",
   recentList: [],
   appointmentsList: [],
   currentWeekOffset: 0,
-  currentUser: "",
-  currentUsername: "",
-  dutySchedules: {},
-  clientsDirectory: {},
+  user: null,                       // { name, username, isAdmin } — از سرور
+  dutySchedules: dict(),
+  clientsDirectory: dict(),
+  pendingAppointment: null,         // نوبتی که به میز پذیرش منتقل شده و بعد از ثبت موفق صندوق «برگزار شده» می‌شود
   currentLoadedReport: [],
-  currentBreakdownData: {}
+  currentBreakdownData: dict()
 };
+const isAdmin = () => Boolean(state.user && state.user.isAdmin);
 
 const TIME_SLOTS = [
   { label: "۰۹:۰۰ - ۱۰:۰۰", start: "09:00", end: "10:00", h1: "۰۹:۰۰ - ۰۹:۳۰", h2: "۰۹:۳۰ - ۱۰:۰۰" },
@@ -1220,164 +1280,214 @@ const TIME_SLOTS = [
   { label: "۲۰:۰۰ - ۲۱:۰۰", start: "20:00", end: "21:00", h1: "۲۰:۰۰ - ۲۰:۳۰", h2: "۲۰:۳۰ - ۲۱:۰۰" }
 ];
 
-function normalizePhoneNumber(phone) {
-  if (!phone) return "";
-  let p = String(phone)
-    .replace(/[\u200B-\u200D\uFEFF\u200E\u200F]/g, "")
-    .replace(/[۰-۹]/g, w => String.fromCharCode(w.charCodeAt(0) - 1728))
-    .replace(/[٠-٩]/g, w => String.fromCharCode(w.charCodeAt(0) - 1584))
-    .replace(/\D/g, "")
-    .trim();
-  
-  if (p.length === 10 && p.startsWith("9")) {
-    p = "0" + p;
-  }
-  return p;
+/* =========================================================
+   ارتباط با سرور — فقط POST؛ توکن هرگز در URL نمی‌آید
+   ========================================================= */
+class ApiError extends Error {
+  constructor(message, code) { super(message); this.code = code || ""; }
 }
 
-function checkAuth() {
-  const token = getStaffSessionToken();
-  const savedUser = localStorage.getItem("sepehr_user");
-  const savedUsername = localStorage.getItem("sepehr_username");
+async function rawPost(body) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), REQUEST_TIMEOUT_MS);
+  let res;
+  try {
+    res = await fetch(SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(body),
+      credentials: "omit",
+      cache: "no-store",
+      referrerPolicy: "no-referrer",
+      signal: ctrl.signal
+    });
+  } finally { clearTimeout(timer); }
+  if (!res.ok) throw new Error("HTTP " + res.status);
+  let data;
+  try { data = await res.json(); } catch { throw new Error("پاسخ نامعتبر از سرور دریافت شد."); }
+  if (!data || typeof data !== "object") throw new Error("پاسخ نامعتبر از سرور دریافت شد.");
+  return data;
+}
 
-  if (token && savedUser) {
-    state.currentUser = savedUser;
-    state.currentUsername = savedUsername || "";
-    document.getElementById("active_user_badge").innerText = savedUser + (savedUsername ? ` (${savedUsername})` : "");
-    document.getElementById("login_overlay").style.display = "none";
-    document.getElementById("main_app").style.display = "block";
-    applyRolePermissions();
-    fetchInitialData();
-  } else {
-    clearStaffSession();
-    document.getElementById("login_overlay").style.display = "flex";
-    document.getElementById("main_app").style.display = "none";
-  }
+let authFailing = false;
+function handleAuthFailure() {
+  if (authFailing) return;
+  authFailing = true;
+  forceLogout("نشست شما منقضی یا نامعتبر شده است. لطفاً دوباره وارد شوید.");
+}
+
+async function apiPost(payload) {
+  const token = store.get(KEY_SESSION) || "";
+  if (!token) { handleAuthFailure(); throw new ApiError("AUTH_REQUIRED", "AUTH_REQUIRED"); }
+  const data = await rawPost({ ...payload, sessionToken: token });
+  if (data.code === "AUTH_REQUIRED") { handleAuthFailure(); throw new ApiError(data.message || "نشست منقضی شده است.", "AUTH_REQUIRED"); }
+  if (data.code === "FORBIDDEN") throw new ApiError(data.message || "شما اجازه‌ی این کار را ندارید.", "FORBIDDEN");
+  return data;
+}
+
+/* موفقیت را الزامی می‌کند؛ پیام اعتبارسنجی سرور در خطا می‌ماند */
+async function apiCall(payload, fallback) {
+  const data = await apiPost(payload);
+  if (data.status !== "success") throw new ApiError(data.message || fallback || "عملیات انجام نشد.", data.code || "");
+  return data;
+}
+const userMsg = (err, fallback) => (err instanceof ApiError && err.code !== "AUTH_REQUIRED" && err.message) ? err.message : fallback;
+
+/* =========================================================
+   ورود، نقش‌ها و خروج
+   ========================================================= */
+function takeNotice() {
+  try { const n = sessionStorage.getItem(KEY_NOTICE) || ""; sessionStorage.removeItem(KEY_NOTICE); return n; } catch { return ""; }
+}
+
+function showLoginScreen(notice) {
+  $("main_app").style.display = "none";
+  $("login_overlay").style.display = "flex";
+  const box = $("login_error");
+  if (notice) { box.textContent = notice; box.style.display = "block"; }
+}
+
+function showApp() {
+  const u = state.user;
+  $("active_user_badge").textContent = u.name + (u.username ? ` (${u.username})` : "");
+  $("login_overlay").style.display = "none";
+  $("main_app").style.display = "block";
+  applyRolePermissions();
 }
 
 function applyRolePermissions() {
-  const reportTabBtn = document.getElementById("btn_tab_report");
-  const username = (state.currentUsername || "").trim().toLowerCase();
-
-  if (username === "aliott") {
-    reportTabBtn.style.display = "flex";
-  } else {
-    reportTabBtn.style.display = "none";
-  }
+  // تنها تفاوت نقش‌ها: تب «گزارش و تسویه ماهانه» فقط برای ادمین است. بقیه‌ی بخش‌ها برای منشی و ادمین یکسان است.
+  $("btn_tab_report").style.display = isAdmin() ? "flex" : "none";
 }
 
-document.getElementById("login_form").addEventListener("submit", async function(e) {
-  e.preventDefault();
-  const btn = document.getElementById("btn_login");
-  const errBox = document.getElementById("login_error");
-  btn.disabled = true;
-  btn.innerText = "در حال بررسی...";
-  errBox.style.display = "none";
+function setUserFromServer(r) {
+  state.user = { name: String(r.operatorName || ""), username: String(r.username || "").toLowerCase(), isAdmin: r.isAdmin === true };
+}
 
-  const user = document.getElementById("login_username").value.trim();
-  const pass = document.getElementById("login_password").value.trim();
-
-  try {
-    const res = await fetch(SCRIPT_URL, {
-      method: "POST",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify({ action: "login", username: user, password: pass })
-    });
-    const data = await res.json();
-
-    if (data.status === "success") {
-      state.currentUser = data.operatorName;
-      state.currentUsername = (data.username || user).toLowerCase();
-
-      if (!data.sessionToken) {
-        throw new Error("سرور نشست امن ایجاد نکرد.");
+async function checkAuth() {
+  const notice = takeNotice();
+  const token = store.get(KEY_SESSION);
+  if (token) {
+    try {
+      const r = await rawPost({ action: "staffSession", sessionToken: token });
+      if (r.status === "success") {
+        setUserFromServer(r);
+        showApp();
+        fetchInitialData();
+        return;
       }
-      localStorage.setItem(STAFF_SESSION_KEY, data.sessionToken);
-      localStorage.setItem("sepehr_user", data.operatorName);
-      localStorage.setItem("sepehr_username", state.currentUsername);
-
-      document.getElementById("active_user_badge").innerText = data.operatorName + ` (${state.currentUsername})`;
-      document.getElementById("login_overlay").style.display = "none";
-      document.getElementById("main_app").style.display = "block";
-      applyRolePermissions();
-      fetchInitialData();
-    } else {
-      errBox.innerText = data.message || "اطلاعات ورود نامعتبر است.";
-      errBox.style.display = "block";
-    }
-  } catch (err) {
-    errBox.innerText = "خطا در ارتباط با سرور کلینیک.";
-    errBox.style.display = "block";
-  } finally {
-    btn.disabled = false;
-    btn.innerText = "ورود به سامانه";
+    } catch { /* به صفحه‌ی ورود می‌رویم */ }
+    store.del(KEY_SESSION);
   }
-});
+  showLoginScreen(notice);
+}
 
-function logout() {
-  if (!confirm("آیا قصد خروج از حساب کاربری را دارید؟")) return;
-  clearStaffSession();
+/* خروج و پاک‌سازی کامل صفحه (داده‌های مالی در DOM نمی‌مانند) */
+async function forceLogout(notice, { server = true } = {}) {
+  const token = store.get(KEY_SESSION);
+  if (server && token) {
+    try { await Promise.race([rawPost({ action: "staffLogout", sessionToken: token }), new Promise(r => setTimeout(r, 1500))]); } catch { /* ignore */ }
+  }
+  store.del(KEY_SESSION);
+  try { if (notice) sessionStorage.setItem(KEY_NOTICE, notice); } catch { /* ignore */ }
   location.reload();
 }
 
+function logout() {
+  if (!confirm("آیا قصد خروج از حساب کاربری را دارید؟")) return;
+  forceLogout("", { server: true });
+}
+
+$("login_form").addEventListener("submit", async function(e) {
+  e.preventDefault();
+  const btn = $("btn_login");
+  const errBox = $("login_error");
+  btn.disabled = true;
+  btn.textContent = "در حال بررسی...";
+  errBox.style.display = "none";
+
+  const user = $("login_username").value.trim();
+  const pass = $("login_password").value.trim();
+
+  try {
+    const data = await rawPost({ action: "login", username: user, password: pass });
+    if (data.status === "success") {
+      if (!data.sessionToken) throw new Error("سرور نشست امن ایجاد نکرد.");
+      store.set(KEY_SESSION, data.sessionToken);
+      setUserFromServer(data);
+      $("login_form").reset();
+      lastActivity = Date.now();
+      showApp();
+      fetchInitialData();
+    } else {
+      errBox.textContent = data.message || "اطلاعات ورود نامعتبر است.";
+      errBox.style.display = "block";
+    }
+  } catch {
+    errBox.textContent = "خطا در ارتباط با سرور کلینیک.";
+    errBox.style.display = "block";
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "ورود به سامانه";
+  }
+});
+
+/* خروج خودکار بعد از عدم فعالیت */
+let lastActivity = Date.now();
+["click", "keydown", "touchstart", "mousemove", "scroll"].forEach(evt =>
+  window.addEventListener(evt, () => { lastActivity = Date.now(); }, { passive: true })
+);
+setInterval(() => {
+  if (state.user && Date.now() - lastActivity > IDLE_LIMIT_MS) {
+    forceLogout("به دلیل یک ساعت عدم فعالیت، از سامانه خارج شدید.");
+  }
+}, 30 * 1000);
+
+const TAB_IDS = {
+  desk: ["btn_tab_desk", "tab_desk"],
+  appointments: ["btn_tab_appointments", "tab_appointments"],
+  report: ["btn_tab_report", "tab_report"],
+  history: ["btn_tab_history", "tab_history"],
+  settings: ["btn_tab_settings", "tab_settings"]
+};
+
 function switchTab(tabName) {
-  if (tabName === 'report' && (state.currentUsername || "").trim().toLowerCase() !== "aliott") {
-    alert("دسترسی به بخش گزارشات و تسویه مالی فقط برای مدیریت (aliott) مجاز است.");
+  if (!TAB_IDS[tabName]) return;
+  if (tabName === "report" && !isAdmin()) {
+    alert("دسترسی به بخش گزارشات و تسویه مالی فقط برای مدیریت مجاز است.");
     return;
   }
-
-  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-  
-  if (tabName === 'desk') {
-    document.getElementById('btn_tab_desk').classList.add('active');
-    document.getElementById('tab_desk').classList.add('active');
-  } else if (tabName === 'appointments') {
-    document.getElementById('btn_tab_appointments').classList.add('active');
-    document.getElementById('tab_appointments').classList.add('active');
-    fetchAppointments();
-  } else if (tabName === 'report') {
-    document.getElementById('btn_tab_report').classList.add('active');
-    document.getElementById('tab_report').classList.add('active');
-  } else if (tabName === 'history') {
-    document.getElementById('btn_tab_history').classList.add('active');
-    document.getElementById('tab_history').classList.add('active');
-    if (state.appointmentsList.length === 0) fetchAppointments();
-  } else {
-    document.getElementById('btn_tab_settings').classList.add('active');
-    document.getElementById('tab_settings').classList.add('active');
-  }
+  document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
+  document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+  $(TAB_IDS[tabName][0]).classList.add("active");
+  $(TAB_IDS[tabName][1]).classList.add("active");
+  if (tabName === "appointments") fetchAppointments();
+  if (tabName === "history" && state.appointmentsList.length === 0) fetchAppointments();
 }
 
 function initDates() {
-  const d = new Date();
-  state.shamsiDate = new Intl.DateTimeFormat('fa-IR', { year: 'numeric', month: '2-digit', day: '2-digit' }).format(d);
-  document.getElementById("current_date_display").innerText = "تاریخ امروز: " + state.shamsiDate;
-
-  const engParts = new Intl.DateTimeFormat('fa-IR-u-nu-latn', { year: 'numeric', month: '2-digit' }).format(d)
-    .replace(/[\u200B-\u200D\uFEFF\u200E\u200F]/g, "")
-    .split('/');
-  
-  if (engParts.length >= 2) {
-    document.getElementById("report_year").value = engParts[0].trim();
-    document.getElementById("report_month_select").value = engParts[1].trim();
+  state.shamsiDate = currentShamsi();
+  $("current_date_display").textContent = "تاریخ امروز: " + state.shamsiDate;
+  const parts = fmtShamsiLatn.format(new Date()).replace(INVISIBLE, "").split("/");
+  if (parts.length >= 2) {
+    $("report_year").value = parts[0].trim();
+    $("report_month_select").value = parts[1].trim();
   }
 }
 initDates();
 
+/* =========================================================
+   دریافت داده‌ها
+   ========================================================= */
 async function fetchInitialData() {
-  document.getElementById("loading-indicator").style.display = "block";
+  $("loading-indicator").style.display = "block";
   try {
-    const data = await apiGet("getInitialData");
+    const data = await apiPost({ action: "getInitialData" });
     if (data.status === "success") {
-      state.settings = data.settings;
-      state.counselors = data.counselors;
-      state.dutySchedules = data.dutySchedules || {};
-      
-      state.recentList = (data.recent || []).map(r => {
-        r.clientPhone = normalizePhoneNumber(r.clientPhone);
-        return r;
-      });
+      state.settings = dict(data.settings);
+      state.counselors = Array.isArray(data.counselors) ? data.counselors : [];
+      state.dutySchedules = dict(data.dutySchedules);
+      state.recentList = (data.recent || []).map(r => { r.clientPhone = normalizePhoneNumber(r.clientPhone); return r; });
 
       buildClientsDirectory();
       renderCounselorSelect();
@@ -1388,344 +1498,17 @@ async function fetchInitialData() {
   } catch (err) {
     console.error("خطا در ارتباط با سرور:", err);
   } finally {
-    document.getElementById("loading-indicator").style.display = "none";
+    $("loading-indicator").style.display = "none";
   }
-}
-
-function buildClientsDirectory() {
-  state.clientsDirectory = {};
-  const namesDatalist = document.getElementById("clients_name_datalist");
-  const phonesDatalist = document.getElementById("clients_phone_datalist");
-  namesDatalist.innerHTML = "";
-  phonesDatalist.innerHTML = "";
-
-  const processEntry = (name, phone) => {
-    if (!name || name === "-" || String(name).length < 2) return;
-    const cleanPhone = normalizePhoneNumber(phone);
-    const cleanName = String(name).trim();
-    
-    if (!state.clientsDirectory[cleanName] && cleanPhone) {
-      state.clientsDirectory[cleanName] = cleanPhone;
-    }
-    if (cleanPhone && !state.clientsDirectory[cleanPhone]) {
-      state.clientsDirectory[cleanPhone] = cleanName;
-    }
-  };
-
-  (state.recentList || []).forEach(r => processEntry(r.clientName, r.clientPhone));
-  (state.appointmentsList || []).forEach(a => processEntry(a.clientName, a.clientPhone));
-
-  const uniqueNames = new Set();
-  const uniquePhones = new Set();
-
-  for (let key in state.clientsDirectory) {
-    if (/^09\d{9}$/.test(key) || /^\d{7,}$/.test(key)) {
-      uniquePhones.add(key);
-    } else {
-      uniqueNames.add(key);
-    }
-  }
-
-  uniqueNames.forEach(n => {
-    const opt = document.createElement("option");
-    opt.value = n;
-    namesDatalist.appendChild(opt);
-  });
-
-  uniquePhones.forEach(p => {
-    const opt = document.createElement("option");
-    opt.value = p;
-    phonesDatalist.appendChild(opt);
-  });
-}
-
-function onClientNameInput(val) {
-  val = (val || "").trim();
-  if (state.clientsDirectory[val]) {
-    const phoneInput = document.getElementById("client_phone");
-    phoneInput.value = state.clientsDirectory[val];
-  }
-}
-
-function onClientPhoneInput(val) {
-  val = normalizePhoneNumber(val);
-  if (state.clientsDirectory[val]) {
-    const nameInput = document.getElementById("client_name");
-    if (!nameInput.value) nameInput.value = state.clientsDirectory[val];
-  }
-}
-
-function onQuickNameInput(val) {
-  val = (val || "").trim();
-  if (state.clientsDirectory[val]) {
-    const phoneInput = document.getElementById("bm_client_phone");
-    phoneInput.value = state.clientsDirectory[val];
-  }
-}
-
-function onQuickPhoneInput(val) {
-  val = normalizePhoneNumber(val);
-  if (state.clientsDirectory[val]) {
-    const nameInput = document.getElementById("bm_client_name");
-    if (!nameInput.value) nameInput.value = state.clientsDirectory[val];
-  }
-}
-
-function onHistoryNameInput(val) {
-  val = (val || "").trim();
-  if (state.clientsDirectory[val]) {
-    document.getElementById("sh_client_phone").value = state.clientsDirectory[val];
-  }
-}
-
-function onHistoryPhoneInput(val) {
-  val = normalizePhoneNumber(val);
-  if (state.clientsDirectory[val]) {
-    document.getElementById("sh_client_name").value = state.clientsDirectory[val];
-  }
-}
-
-function clearHistorySearch() {
-  document.getElementById("sh_client_name").value = "";
-  document.getElementById("sh_client_phone").value = "";
-  document.getElementById("history_results_area").style.display = "none";
-}
-
-function searchClientHistory() {
-  const nameQuery = String(document.getElementById("sh_client_name").value || "").trim().toLowerCase();
-  const phoneQuery = normalizePhoneNumber(document.getElementById("sh_client_phone").value || "");
-
-  if (!nameQuery && !phoneQuery) {
-    alert("لطفاً نام یا شماره تماس مراجع را وارد کنید.");
-    return;
-  }
-
-  const matchedTrans = (state.recentList || []).filter(r => {
-    const rName = String(r.clientName || "").trim().toLowerCase();
-    const rPhone = normalizePhoneNumber(r.clientPhone);
-
-    const mName = nameQuery && rName.includes(nameQuery);
-    const mPhone = phoneQuery && rPhone.includes(phoneQuery);
-    return mName || mPhone;
-  });
-
-  const matchedFutureApps = (state.appointmentsList || []).filter(a => {
-    const aName = String(a.clientName || "").trim().toLowerCase();
-    const aPhone = normalizePhoneNumber(a.clientPhone);
-
-    const mName = nameQuery && aName.includes(nameQuery);
-    const mPhone = phoneQuery && aPhone.includes(phoneQuery);
-    return (mName || mPhone) && a.status === "رزرو شده";
-  });
-
-  if (matchedTrans.length === 0 && matchedFutureApps.length === 0) {
-    alert("هیچ سابقه یا نوبت فعالی برای این مراجع پیدا نشد.");
-    document.getElementById("history_results_area").style.display = "none";
-    return;
-  }
-
-  let totalPaid = 0;
-  let totalDeposit = 0;
-  const counselorsSet = new Set();
-
-  matchedTrans.forEach(t => {
-    totalPaid += Number(t.totalAmount) || 0;
-    totalDeposit += Number(t.deposit) || 0;
-    if (t.counselor) counselorsSet.add(t.counselor);
-  });
-
-  matchedFutureApps.forEach(a => {
-    if (a.counselor) counselorsSet.add(a.counselor);
-  });
-
-  document.getElementById("hp_total_sessions").innerText = matchedTrans.length.toLocaleString('fa-IR');
-  document.getElementById("hp_total_paid").innerText = totalPaid.toLocaleString('fa-IR') + " ت";
-  document.getElementById("hp_total_deposit").innerText = totalDeposit.toLocaleString('fa-IR') + " ت";
-  document.getElementById("hp_counselors_list").innerText = Array.from(counselorsSet).join("، ") || "-";
-
-  const tBodyTrans = document.getElementById("hp_transactions_tbody");
-  tBodyTrans.innerHTML = "";
-  if (matchedTrans.length === 0) {
-    tBodyTrans.innerHTML = `<tr><td colspan="9" style="text-align:center; color:var(--text-muted);">جلسه نهایی در صندوق ثبت نشده است.</td></tr>`;
-  } else {
-    matchedTrans.forEach(t => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${(t.date || "-").toString().split("T")[0]}</td>
-        <td style="color:var(--primary); font-weight:bold;">${t.counselor}</td>
-        <td>${t.sessionType}</td>
-        <td>${t.parts || 1}</td>
-        <td>${Number(t.totalAmount).toLocaleString('fa-IR')}</td>
-        <td>${Number(t.deposit || 0).toLocaleString('fa-IR')}</td>
-        <td>${t.balanceTo || "کلینیک"}</td>
-        <td style="color:var(--ink-2); font-size:0.75rem;">${t.operator || "-"}</td>
-        <td style="font-size:0.8rem; color:var(--text-muted);">${t.notes || "-"}</td>
-      `;
-      tBodyTrans.appendChild(tr);
-    });
-  }
-
-  const tBodyApps = document.getElementById("hp_appointments_tbody");
-  tBodyApps.innerHTML = "";
-  if (matchedFutureApps.length === 0) {
-    tBodyApps.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">هیچ نوبت رزروشده‌ای برای آینده وجود ندارد.</td></tr>`;
-  } else {
-    matchedFutureApps.forEach(a => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${a.appointmentDate}</td>
-        <td style="font-weight:bold; color:var(--warning);">${a.appointmentTime}</td>
-        <td>${a.counselor}</td>
-        <td>${Number(a.deposit || 0).toLocaleString('fa-IR')} ت</td>
-        <td><span class="badge badge-upcoming">رزرو شده (پیش‌رو)</span></td>
-        <td style="color:var(--ink-2); font-size:0.75rem;">${a.operator || "-"}</td>
-      `;
-      tBodyApps.appendChild(tr);
-    });
-  }
-
-  document.getElementById("history_results_area").style.display = "block";
-}
-
-function renderCounselorSelect() {
-  const sel = document.getElementById("counselor_select");
-  const editSel = document.getElementById("edit_counselor_select");
-  const reportSel = document.getElementById("report_counselor_select");
-  const calFilter = document.getElementById("cal_counselor_filter");
-  const schedSel = document.getElementById("schedule_counselor_select");
-  
-  sel.innerHTML = '<option value="" disabled selected>انتخاب مشاور...</option>';
-  editSel.innerHTML = '';
-  reportSel.innerHTML = '<option value="all">همه مشاوران (کل کلینیک)</option>';
-  calFilter.innerHTML = '';
-  schedSel.innerHTML = '<option value="" disabled selected>انتخاب مشاور...</option>';
-  
-  state.counselors.forEach((c, idx) => {
-    const opt = document.createElement("option");
-    opt.value = c.name;
-    opt.innerText = c.name;
-    sel.appendChild(opt);
-
-    const optEdit = document.createElement("option");
-    optEdit.value = c.name;
-    optEdit.innerText = c.name;
-    editSel.appendChild(optEdit);
-
-    const optReport = document.createElement("option");
-    optReport.value = c.name;
-    optReport.innerText = c.name;
-    reportSel.appendChild(optReport);
-
-    const optCal = document.createElement("option");
-    optCal.value = c.name;
-    optCal.innerText = c.name;
-    if (idx === 0) optCal.selected = true;
-    calFilter.appendChild(optCal);
-
-    const optSched = document.createElement("option");
-    optSched.value = c.name;
-    optSched.innerText = c.name;
-    if (idx === 0) optSched.selected = true;
-    schedSel.appendChild(optSched);
-  });
-  
-  loadCounselorScheduleUI();
-  renderWeeklyCalendar();
-}
-
-function loadCounselorScheduleUI() {
-  const counselor = document.getElementById("schedule_counselor_select").value;
-  if (!counselor) return;
-
-  const current = state.dutySchedules[counselor] || {
-    days: ["شنبه", "یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنجشنبه"],
-    start: "09:00",
-    end: "21:00"
-  };
-
-  document.querySelectorAll(".duty-day-checkbox").forEach(cb => {
-    cb.checked = current.days.includes(cb.value);
-  });
-  document.getElementById("schedule_start_hour").value = current.start;
-  document.getElementById("schedule_end_hour").value = current.end;
-}
-
-async function saveCounselorSchedule() {
-  const counselor = document.getElementById("schedule_counselor_select").value;
-  if (!counselor) {
-    alert("لطفاً ابتدا مشاور را انتخاب کنید.");
-    return;
-  }
-
-  const selectedDays = [];
-  document.querySelectorAll(".duty-day-checkbox:checked").forEach(cb => {
-    selectedDays.push(cb.value);
-  });
-
-  const startH = document.getElementById("schedule_start_hour").value;
-  const endH = document.getElementById("schedule_end_hour").value;
-
-  const scheduleObj = {
-    days: selectedDays,
-    start: startH,
-    end: endH
-  };
-
-  state.dutySchedules[counselor] = scheduleObj;
-
-  try {
-    const result = await apiPost({
-      action: "saveCounselorSchedule",
-      counselor: counselor,
-      schedule: scheduleObj
-    });
-    if (result.status !== "success") throw new Error(result.message || "ذخیره برنامه انجام نشد");
-    alert(`برنامه کاری مشاور "${counselor}" ذخیره شد و در پرتال مراجعین نیز فعال گردید.`);
-    renderWeeklyCalendar();
-  } catch(e) {
-    alert("خطا در ارسال تنظیمات به گوگل‌شیت.");
-  }
-}
-
-function changeWeek(direction) {
-  state.currentWeekOffset = direction === 0 ? 0 : state.currentWeekOffset + direction;
-  renderWeeklyCalendar();
-}
-
-function getWeekDates(offsetWeeks = 0) {
-  const now = new Date();
-  const currentDayOfWeek = now.getDay();
-  const distanceToSaturday = (currentDayOfWeek + 1) % 7;
-  
-  const saturday = new Date(now);
-  saturday.setDate(now.getDate() - distanceToSaturday + (offsetWeeks * 7));
-
-  const weekDays = [];
-  const dayNames = ["شنبه", "یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنجشنبه", "جمعه"];
-
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(saturday);
-    d.setDate(saturday.getDate() + i);
-
-    const shamsiStr = new Intl.DateTimeFormat('fa-IR', { year: 'numeric', month: '2-digit', day: '2-digit' }).format(d);
-    weekDays.push({
-      dayName: dayNames[i],
-      shamsiDate: shamsiStr
-    });
-  }
-  return weekDays;
 }
 
 async function fetchAppointments() {
-  const indicator = document.getElementById("loading-indicator");
+  const indicator = $("loading-indicator");
   indicator.style.display = "block";
   try {
-    const data = await apiGet("getAppointments");
+    const data = await apiPost({ action: "getAppointments" });
     if (data.status === "success") {
-      state.appointmentsList = (data.appointments || []).map(a => {
-        a.clientPhone = normalizePhoneNumber(a.clientPhone);
-        return a;
-      });
+      state.appointmentsList = (data.appointments || []).map(a => { a.clientPhone = normalizePhoneNumber(a.clientPhone); return a; });
       buildClientsDirectory();
       renderWeeklyCalendar();
     }
@@ -1736,59 +1519,263 @@ async function fetchAppointments() {
   }
 }
 
-function renderWeeklyCalendar() {
-  const selectedCounselor = document.getElementById("cal_counselor_filter").value;
-  const weekDays = getWeekDates(state.currentWeekOffset);
+/* =========================================================
+   دایرکتوری مراجعین و پیشنهاد خودکار
+   ========================================================= */
+function buildClientsDirectory() {
+  state.clientsDirectory = dict();
+  const namesDatalist = $("clients_name_datalist");
+  const phonesDatalist = $("clients_phone_datalist");
+  namesDatalist.replaceChildren();
+  phonesDatalist.replaceChildren();
 
-  document.getElementById("cal_week_range_display").innerText = 
-    `هفته: ${weekDays[0].shamsiDate} تا ${weekDays[6].shamsiDate}`;
+  const processEntry = (name, phone) => {
+    if (!name || name === "-" || String(name).length < 2) return;
+    const cleanPhone = normalizePhoneNumber(phone);
+    const cleanName = String(name).trim();
+    if (!state.clientsDirectory[cleanName] && cleanPhone) state.clientsDirectory[cleanName] = cleanPhone;
+    if (cleanPhone && !state.clientsDirectory[cleanPhone]) state.clientsDirectory[cleanPhone] = cleanName;
+  };
+  state.recentList.forEach(r => processEntry(r.clientName, r.clientPhone));
+  state.appointmentsList.forEach(a => processEntry(a.clientName, a.clientPhone));
 
-  const headerRow = document.getElementById("cal_table_header");
-  headerRow.innerHTML = '<th class="day-col">روز و تاریخ</th>';
+  const uniqueNames = new Set(), uniquePhones = new Set();
+  for (const key of Object.keys(state.clientsDirectory)) {
+    if (/^09\d{9}$/.test(key) || /^\d{7,}$/.test(key)) uniquePhones.add(key); else uniqueNames.add(key);
+  }
+  uniqueNames.forEach(n => { const o = document.createElement("option"); o.value = n; namesDatalist.appendChild(o); });
+  uniquePhones.forEach(p => { const o = document.createElement("option"); o.value = p; phonesDatalist.appendChild(o); });
+}
 
-  TIME_SLOTS.forEach(slot => {
-    headerRow.innerHTML += `<th>${slot.label}</th>`;
+function onClientNameInput(val) {
+  val = (val || "").trim();
+  if (state.clientsDirectory[val]) $("client_phone").value = state.clientsDirectory[val];
+}
+function onClientPhoneInput(val) {
+  val = normalizePhoneNumber(val);
+  if (state.clientsDirectory[val] && !$("client_name").value) $("client_name").value = state.clientsDirectory[val];
+}
+function onQuickNameInput(val) {
+  val = (val || "").trim();
+  if (state.clientsDirectory[val]) $("bm_client_phone").value = state.clientsDirectory[val];
+}
+function onQuickPhoneInput(val) {
+  val = normalizePhoneNumber(val);
+  if (state.clientsDirectory[val] && !$("bm_client_name").value) $("bm_client_name").value = state.clientsDirectory[val];
+}
+function onHistoryNameInput(val) {
+  val = (val || "").trim();
+  if (state.clientsDirectory[val]) $("sh_client_phone").value = state.clientsDirectory[val];
+}
+function onHistoryPhoneInput(val) {
+  val = normalizePhoneNumber(val);
+  if (state.clientsDirectory[val]) $("sh_client_name").value = state.clientsDirectory[val];
+}
+
+/* =========================================================
+   سوابق مراجع
+   ========================================================= */
+function clearHistorySearch() {
+  $("sh_client_name").value = "";
+  $("sh_client_phone").value = "";
+  $("history_results_area").style.display = "none";
+}
+
+async function searchClientHistory() {
+  const nameRaw = String($("sh_client_name").value || "").replace(INVISIBLE, "").trim();
+  const phoneQuery = normalizePhoneNumber($("sh_client_phone").value || "");
+  const nameQuery = nameRaw.toLowerCase();
+  if (!nameQuery && !phoneQuery) { alert("لطفاً نام یا شماره تماس مراجع را وارد کنید."); return; }
+
+  const indicator = $("loading-indicator");
+  indicator.style.display = "block";
+  let matchedTrans = [], truncated = false;
+  try {
+    // جستجو روی «همه‌ی» تراکنش‌ها در سرور انجام می‌شود (نه فقط چند جلسه‌ی آخر)
+    const res = await apiCall({ action: "searchClientHistory", name: nameRaw, phone: phoneQuery }, "جستجو انجام نشد");
+    matchedTrans = Array.isArray(res.records) ? res.records : [];
+    truncated = res.truncated === true;
+    if (state.appointmentsList.length === 0) await fetchAppointments();
+  } catch (err) {
+    indicator.style.display = "none";
+    if (!(err instanceof ApiError && err.code === "AUTH_REQUIRED")) alert(userMsg(err, "خطا در جستجوی سوابق."));
+    return;
+  }
+  indicator.style.display = "none";
+
+  const matches = (name, phone) => {
+    const n = String(name || "").trim().toLowerCase();
+    const p = normalizePhoneNumber(phone);
+    return Boolean((nameQuery && n.includes(nameQuery)) || (phoneQuery && p.includes(phoneQuery)));
+  };
+  const matchedFutureApps = state.appointmentsList.filter(a => matches(a.clientName, a.clientPhone) && a.status === "رزرو شده");
+
+  if (matchedTrans.length === 0 && matchedFutureApps.length === 0) {
+    alert("هیچ سابقه یا نوبت فعالی برای این مراجع پیدا نشد.");
+    $("history_results_area").style.display = "none";
+    return;
+  }
+  if (truncated) alert("تعداد نتایج زیاد است و فقط ۳۰۰ جلسه‌ی آخر نمایش داده می‌شود. جمع‌ها هم فقط روی همین نتایج است. برای دقیق‌تر شدن، نام کامل‌تری وارد کنید.");
+
+  let totalPaid = 0, totalDeposit = 0;
+  const counselorsSet = new Set();
+  matchedTrans.forEach(t => {
+    totalPaid += Number(t.totalAmount) || 0;
+    totalDeposit += Number(t.deposit) || 0;
+    if (t.counselor) counselorsSet.add(t.counselor);
   });
+  matchedFutureApps.forEach(a => { if (a.counselor) counselorsSet.add(a.counselor); });
 
-  const tbody = document.getElementById("cal_table_body");
-  tbody.innerHTML = "";
+  $("hp_total_sessions").textContent = nf(matchedTrans.length);
+  $("hp_total_paid").textContent = nf(totalPaid) + " ت";
+  $("hp_total_deposit").textContent = nf(totalDeposit) + " ت";
+  $("hp_counselors_list").textContent = Array.from(counselorsSet).join("، ") || "-";
 
-  const sched = state.dutySchedules[selectedCounselor] || null;
+  const tBodyTrans = $("hp_transactions_tbody");
+  tBodyTrans.replaceChildren();
+  if (matchedTrans.length === 0) {
+    tBodyTrans.appendChild(emptyRow(9, "جلسه نهایی در صندوق ثبت نشده است."));
+  } else {
+    matchedTrans.forEach(t => tBodyTrans.appendChild(h("tr", null,
+      cell(dayDisplay(t.date)),
+      cell(t.counselor, "color:var(--primary); font-weight:bold;"),
+      cell(t.sessionType),
+      cell(t.parts || 1),
+      cell(nf(t.totalAmount)),
+      cell(nf(t.deposit)),
+      cell(t.balanceTo || "کلینیک"),
+      cell(t.operator || "-", "color:var(--ink-2); font-size:0.75rem;"),
+      cell(t.notes || "-", "font-size:0.8rem; color:var(--text-muted);")
+    )));
+  }
+
+  const tBodyApps = $("hp_appointments_tbody");
+  tBodyApps.replaceChildren();
+  if (matchedFutureApps.length === 0) {
+    tBodyApps.appendChild(emptyRow(6, "هیچ نوبت رزروشده‌ای برای آینده وجود ندارد."));
+  } else {
+    matchedFutureApps.forEach(a => tBodyApps.appendChild(h("tr", null,
+      cell(a.appointmentDate),
+      cell(a.appointmentTime, "font-weight:bold; color:var(--warning);"),
+      cell(a.counselor),
+      cell(nf(a.deposit) + " ت"),
+      h("td", null, h("span", { class: "badge badge-upcoming", text: "رزرو شده (پیش‌رو)" })),
+      cell(a.operator || "-", "color:var(--ink-2); font-size:0.75rem;")
+    )));
+  }
+  $("history_results_area").style.display = "block";
+}
+
+/* =========================================================
+   مشاوران و برنامه‌ی حضور
+   ========================================================= */
+function renderCounselorSelect() {
+  const items = state.counselors.map(c => ({ label: c.name, value: c.name }));
+  fillSelect($("counselor_select"), items, { placeholder: "انتخاب مشاور..." });
+  fillSelect($("edit_counselor_select"), items);
+  fillSelect($("report_counselor_select"), [{ label: "همه مشاوران (کل کلینیک)", value: "all" }, ...items]);
+  fillSelect($("cal_counselor_filter"), items, { selectFirst: true });
+  fillSelect($("schedule_counselor_select"), items, { placeholder: "انتخاب مشاور...", selectFirst: true });
+  loadCounselorScheduleUI();
+  renderWeeklyCalendar();
+}
+
+function loadCounselorScheduleUI() {
+  const counselor = $("schedule_counselor_select").value;
+  if (!counselor) return;
+  const current = state.dutySchedules[counselor] || { days: ["شنبه", "یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنجشنبه"], start: "09:00", end: "21:00" };
+  const days = Array.isArray(current.days) ? current.days : [];
+  document.querySelectorAll(".duty-day-checkbox").forEach(cb => { cb.checked = days.includes(cb.value); });
+  if (current.start) $("schedule_start_hour").value = current.start;
+  if (current.end) $("schedule_end_hour").value = current.end;
+  const hint = $("schedule_default_hint");
+  const isDefault = !state.dutySchedules[counselor] || state.dutySchedules[counselor].isDefault === true;
+  hint.textContent = isDefault ? "برای این مشاور هنوز برنامه‌ی حضور ثبت نشده؛ شیفت پیش‌فرض (شنبه تا پنجشنبه، ۹ تا ۲۱) برای مراجعین اعمال می‌شود. برای تغییر، برنامه‌ی دلخواه را ذخیره کنید." : "";
+  hint.style.display = isDefault ? "block" : "none";
+}
+
+async function saveCounselorSchedule() {
+  const counselor = $("schedule_counselor_select").value;
+  if (!counselor) { alert("لطفاً ابتدا مشاور را انتخاب کنید."); return; }
+  const days = [];
+  document.querySelectorAll(".duty-day-checkbox:checked").forEach(cb => days.push(cb.value));
+  const start = $("schedule_start_hour").value;
+  const end = $("schedule_end_hour").value;
+  if (start >= end) { alert("ساعت پایان باید بعد از ساعت شروع باشد."); return; }
+  const scheduleObj = { days, start, end };
+  try {
+    await apiCall({ action: "saveCounselorSchedule", counselor, schedule: scheduleObj }, "ذخیره برنامه انجام نشد");
+    state.dutySchedules[counselor] = scheduleObj;
+    loadCounselorScheduleUI();
+    alert(`برنامه کاری مشاور "${counselor}" ذخیره شد و در پرتال مراجعین نیز فعال گردید.`);
+    renderWeeklyCalendar();
+  } catch (e) {
+    alert(userMsg(e, "خطا در ارسال تنظیمات به گوگل‌شیت."));
+  }
+}
+
+/* =========================================================
+   تقویم هفتگی
+   ========================================================= */
+function changeWeek(direction) {
+  state.currentWeekOffset = direction === 0 ? 0 : state.currentWeekOffset + direction;
+  renderWeeklyCalendar();
+}
+
+function getWeekDates(offsetWeeks = 0) {
+  const now = new Date();
+  const distanceToSaturday = (now.getDay() + 1) % 7;
+  const saturday = new Date(now);
+  saturday.setDate(now.getDate() - distanceToSaturday + (offsetWeeks * 7));
+  const dayNames = ["شنبه", "یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنجشنبه", "جمعه"];
+  return dayNames.map((dayName, i) => {
+    const d = new Date(saturday);
+    d.setDate(saturday.getDate() + i);
+    return { dayName, shamsiDate: new Intl.DateTimeFormat("fa-IR", { year: "numeric", month: "2-digit", day: "2-digit" }).format(d) };
+  });
+}
+
+function renderWeeklyCalendar() {
+  const selectedCounselor = $("cal_counselor_filter").value;
+  const weekDays = getWeekDates(state.currentWeekOffset);
+  $("cal_week_range_display").textContent = `هفته: ${weekDays[0].shamsiDate} تا ${weekDays[6].shamsiDate}`;
+
+  $("cal_table_header").replaceChildren(
+    h("th", { class: "day-col", text: "روز و تاریخ" }),
+    ...TIME_SLOTS.map(slot => h("th", { text: slot.label }))
+  );
+
+  const tbody = $("cal_table_body");
+  tbody.replaceChildren();
+  const sched = (selectedCounselor && state.dutySchedules[selectedCounselor]) || null;
+  const counselorApps = state.appointmentsList.filter(a => sameName(a.counselor, selectedCounselor));
 
   weekDays.forEach(day => {
-    const dayClean = day.shamsiDate.replace(/[\u200B-\u200D\uFEFF\u200E\u200F']/g, "").trim();
+    const dayKey = normDate(day.shamsiDate);
+    const dayApps = counselorApps.filter(a => normDate(a.appointmentDate) === dayKey);
+    const isDayBlocked = dayApps.some(a => a.slotType === "blocked_day");
 
-    const isDayBlocked = state.appointmentsList.some(a => 
-      a.counselor === selectedCounselor &&
-      a.appointmentDate.replace(/[\u200B-\u200D\uFEFF\u200E\u200F']/g, "").trim() === dayClean &&
-      a.slotType === "blocked_day"
+    const actionBtn = isDayBlocked
+      ? h("button", { type: "button", class: "btn-unblock-day", onclick: () => unblockDay(day.shamsiDate, selectedCounselor) }, "بازگشایی")
+      : h("button", { type: "button", class: "btn-block-day", onclick: () => openBlockDayModal(day.shamsiDate, selectedCounselor) }, "بستن روز");
+
+    const tr = h("tr", null,
+      h("td", { class: "day-col" },
+        h("div", { text: day.dayName }),
+        h("div", { style: "font-size:0.72rem; color:var(--text-muted);", text: day.shamsiDate }),
+        h("br"), actionBtn)
     );
 
-    let actionBtn = isDayBlocked 
-      ? `<br><button class="btn-unblock-day" onclick="unblockDay('${day.shamsiDate}', '${selectedCounselor}')">بازگشایی</button>`
-      : `<br><button class="btn-block-day" onclick="openBlockDayModal('${day.shamsiDate}', '${selectedCounselor}')">بستن روز</button>`;
-
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td class="day-col">
-        <div>${day.dayName}</div>
-        <div style="font-size:0.72rem; color:var(--text-muted);">${day.shamsiDate}</div>
-        ${actionBtn}
-      </td>
-    `;
-
-    let isDayInDuty = true;
-    if (sched && sched.days) {
-      isDayInDuty = sched.days.includes(day.dayName);
-    }
+    const isDayInDuty = !(sched && Array.isArray(sched.days)) || sched.days.includes(day.dayName);
+    const findApp = (label, types) => dayApps.find(a =>
+      normTime(a.appointmentTime) === normTime(label) && types.includes(a.slotType) && a.status !== "کنسل شده");
 
     TIME_SLOTS.forEach(slot => {
-      const td = document.createElement("td");
-      td.className = "cal-cell";
+      const td = h("td", { class: "cal-cell" });
 
       if (isDayBlocked) {
         td.classList.add("blocked-day-cell");
-        td.innerHTML = `<div style="font-size:0.75rem; color:var(--danger); font-weight:bold;">روز مسدود</div>`;
+        td.appendChild(h("div", { style: "font-size:0.75rem; color:var(--danger); font-weight:bold;", text: "روز مسدود" }));
         tr.appendChild(td);
         return;
       }
@@ -1798,271 +1785,190 @@ function renderWeeklyCalendar() {
         if (sched.start && slot.start < sched.start) isHourInDuty = false;
         if (sched.end && slot.end > sched.end) isHourInDuty = false;
       }
-
       if (!isDayInDuty || !isHourInDuty) {
         td.classList.add("off-duty-cell");
-        td.innerHTML = `<div class="off-duty-label">عدم حضور</div>`;
+        td.appendChild(h("div", { class: "off-duty-label", text: "عدم حضور" }));
         tr.appendChild(td);
         return;
       }
 
-      const fullApp = state.appointmentsList.find(a => 
-        a.counselor === selectedCounselor &&
-        a.appointmentDate.replace(/[\u200B-\u200D\uFEFF\u200E\u200F']/g, "").trim() === dayClean &&
-        a.appointmentTime === slot.label &&
-        (a.slotType === "full" || a.slotType === "meeting") &&
-        a.status !== "کنسل شده"
-      );
-
-      const half1App = state.appointmentsList.find(a => 
-        a.counselor === selectedCounselor &&
-        a.appointmentDate.replace(/[\u200B-\u200D\uFEFF\u200E\u200F']/g, "").trim() === dayClean &&
-        a.appointmentTime === slot.h1 &&
-        a.slotType === "half1" &&
-        a.status !== "کنسل شده"
-      );
-
-      const half2App = state.appointmentsList.find(a => 
-        a.counselor === selectedCounselor &&
-        a.appointmentDate.replace(/[\u200B-\u200D\uFEFF\u200E\u200F']/g, "").trim() === dayClean &&
-        a.appointmentTime === slot.h2 &&
-        a.slotType === "half2" &&
-        a.status !== "کنسل شده"
-      );
+      const fullApp = findApp(slot.label, ["full", "meeting"]);
+      const half1App = findApp(slot.h1, ["half1"]);
+      const half2App = findApp(slot.h2, ["half2"]);
 
       if (fullApp) {
         let bClass = "status-reserved";
         if (fullApp.slotType === "meeting") bClass = "status-meeting";
         if (fullApp.status === "برگزار شده") bClass = "status-completed";
-
-        td.innerHTML = `
-          <div class="cal-badge ${bClass}" onclick="openAppDetailsModal('${fullApp.id}')">
-            <strong>${fullApp.clientName}</strong>
-            <span style="font-size:0.65rem; opacity:0.85;">${fullApp.slotType === 'meeting' ? 'جلسه کاری' : fullApp.status}</span>
-          </div>
-        `;
+        td.appendChild(h("div", { class: "cal-badge " + bClass, onclick: () => openAppDetailsModal(fullApp.id) },
+          h("strong", { text: fullApp.clientName }),
+          h("span", { style: "font-size:0.65rem; opacity:0.85;", text: fullApp.slotType === "meeting" ? "جلسه کاری" : fullApp.status })));
       } else if (half1App || half2App) {
-        const splitBox = document.createElement("div");
-        splitBox.className = "slot-split-container";
-
-        if (half1App) {
-          const h1Badge = document.createElement("div");
-          h1Badge.className = "cal-badge status-reserved";
-          h1Badge.onclick = () => openAppDetailsModal(half1App.id);
-          h1Badge.innerHTML = `<strong>${half1App.clientName}</strong><span style="font-size:0.6rem;">نیمه اول</span>`;
-          splitBox.appendChild(h1Badge);
-        } else {
-          const h1Btn = document.createElement("button");
-          h1Btn.type = "button";
-          h1Btn.className = "slot-half-btn";
-          h1Btn.innerText = "+ نیم اول";
-          h1Btn.onclick = () => openBookingModal(selectedCounselor, day.shamsiDate, slot.h1, 'client_half1');
-          splitBox.appendChild(h1Btn);
-        }
-
-        if (half2App) {
-          const h2Badge = document.createElement("div");
-          h2Badge.className = "cal-badge status-reserved";
-          h2Badge.onclick = () => openAppDetailsModal(half2App.id);
-          h2Badge.innerHTML = `<strong>${half2App.clientName}</strong><span style="font-size:0.6rem;">نیمه دوم</span>`;
-          splitBox.appendChild(h2Badge);
-        } else {
-          const h2Btn = document.createElement("button");
-          h2Btn.type = "button";
-          h2Btn.className = "slot-half-btn";
-          h2Btn.innerText = "+ نیم دوم";
-          h2Btn.onclick = () => openBookingModal(selectedCounselor, day.shamsiDate, slot.h2, 'client_half2');
-          splitBox.appendChild(h2Btn);
-        }
-
+        const splitBox = h("div", { class: "slot-split-container" });
+        const half = (app, label, time, type) => app
+          ? h("div", { class: "cal-badge status-reserved", onclick: () => openAppDetailsModal(app.id) },
+              h("strong", { text: app.clientName }), h("span", { style: "font-size:0.6rem;", text: label }))
+          : h("button", { type: "button", class: "slot-half-btn", onclick: () => openBookingModal(selectedCounselor, day.shamsiDate, time, type) }, "+ " + (type === "client_half1" ? "نیم اول" : "نیم دوم"));
+        splitBox.appendChild(half(half1App, "نیمه اول", slot.h1, "client_half1"));
+        splitBox.appendChild(half(half2App, "نیمه دوم", slot.h2, "client_half2"));
         td.appendChild(splitBox);
       } else {
-        const bookBtn = document.createElement("button");
-        bookBtn.type = "button";
-        bookBtn.className = "slot-full-btn";
-        bookBtn.innerText = "+ رزرو";
-        bookBtn.onclick = () => openBookingModal(selectedCounselor, day.shamsiDate, slot.label, 'client_full');
-        td.appendChild(bookBtn);
+        td.appendChild(h("button", { type: "button", class: "slot-full-btn", onclick: () => openBookingModal(selectedCounselor, day.shamsiDate, slot.label, "client_full") }, "+ رزرو"));
       }
-
       tr.appendChild(td);
     });
-
     tbody.appendChild(tr);
   });
 }
 
+/* =========================================================
+   ثبت نوبت
+   ========================================================= */
+function validPhoneOrEmpty(raw) {
+  const p = normalizePhoneNumber(raw);
+  return p === "" || MOBILE_RE.test(p);
+}
+function parseAmount(v) {
+  const n = Number(toEn(String(v ?? "")).trim() || 0);
+  return Number.isFinite(n) && n >= 0 && n <= MAX_MONEY ? n : NaN;
+}
+
 function openBookingModal(counselor, date, time, prefillType = "client_full") {
-  const cInput = document.getElementById("bm_counselor");
-  const cText = document.getElementById("bm_counselor_text");
-  const dInput = document.getElementById("bm_date");
-  const dText = document.getElementById("bm_date_text");
-  const tInput = document.getElementById("bm_time");
-  const tText = document.getElementById("bm_time_text");
-  const typeSelect = document.getElementById("bm_booking_type");
-  const nameInput = document.getElementById("bm_client_name");
-  const phoneInput = document.getElementById("bm_client_phone");
-  const depositInput = document.getElementById("bm_deposit");
-  const modal = document.getElementById("booking_modal");
-
-  if (cInput) cInput.value = counselor || "";
-  if (cText) cText.innerText = counselor || "-";
-  if (dInput) dInput.value = date || "";
-  if (dText) dText.innerText = date || "-";
-  if (tInput) tInput.value = time || "";
-  if (tText) tText.innerText = time || "-";
-
-  if (typeSelect) typeSelect.value = prefillType;
+  $("bm_counselor").value = counselor || "";
+  $("bm_counselor_text").textContent = counselor || "-";
+  $("bm_date").value = date || "";
+  $("bm_date_text").textContent = date || "-";
+  $("bm_time").value = time || "";
+  $("bm_time_text").textContent = time || "-";
+  $("bm_booking_type").value = prefillType;
   handleBookingTypeChange();
-
-  if (nameInput) nameInput.value = "";
-  if (phoneInput) phoneInput.value = "";
-  if (depositInput) depositInput.value = 0;
-
-  if (modal) modal.style.display = "flex";
+  $("bm_client_name").value = "";
+  $("bm_client_phone").value = "";
+  $("bm_deposit").value = 0;
+  $("booking_modal").style.display = "flex";
 }
 
 function handleBookingTypeChange() {
-  const typeSelect = document.getElementById("bm_booking_type");
-  const bType = typeSelect ? typeSelect.value : "client_full";
-  const nameLabel = document.getElementById("bm_name_label");
-  const nameInput = document.getElementById("bm_client_name");
-  const phoneGroup = document.getElementById("bm_phone_group");
-  const depositGroup = document.getElementById("bm_deposit_group");
-
-  if (bType === "meeting") {
-    if (nameLabel) nameLabel.innerText = "موضوع جلسه / با چه کسی:";
-    if (phoneGroup) phoneGroup.style.display = "none";
-    if (depositGroup) depositGroup.style.display = "none";
-    if (nameInput) nameInput.placeholder = "مثال: بررسی پرونده با همکاران";
-  } else {
-    if (nameLabel) nameLabel.innerText = "نام و نام خانوادگی مراجع:";
-    if (phoneGroup) phoneGroup.style.display = "flex";
-    if (depositGroup) depositGroup.style.display = "flex";
-    if (nameInput) nameInput.placeholder = "تایپ نام جهت پیشنهاد خودکار...";
-  }
+  const bType = $("bm_booking_type").value || "client_full";
+  const meeting = bType === "meeting";
+  $("bm_name_label").textContent = meeting ? "موضوع جلسه / با چه کسی:" : "نام و نام خانوادگی مراجع:";
+  $("bm_phone_group").style.display = meeting ? "none" : "flex";
+  $("bm_deposit_group").style.display = meeting ? "none" : "flex";
+  $("bm_client_name").placeholder = meeting ? "مثال: بررسی پرونده با همکاران" : "تایپ نام جهت پیشنهاد خودکار...";
 }
 
-function closeBookingModal() {
-  const modal = document.getElementById("booking_modal");
-  if (modal) modal.style.display = "none";
-}
+function closeBookingModal() { $("booking_modal").style.display = "none"; }
 
-document.getElementById("quick_booking_form").addEventListener("submit", async function(e) {
+$("quick_booking_form").addEventListener("submit", async function(e) {
   e.preventDefault();
-  const btn = document.getElementById("btn_quick_book");
+  const btn = $("btn_quick_book");
+
+  const bType = $("bm_booking_type").value;
+  const slotType = bType === "meeting" ? "meeting" : bType === "client_half1" ? "half1" : bType === "client_half2" ? "half2" : "full";
+  const clientName = $("bm_client_name").value.replace(INVISIBLE, "").replace(/\s+/g, " ").trim();
+  if (!clientName) { alert("نام را وارد کنید."); return; }
+  if (!validPhoneOrEmpty($("bm_client_phone").value)) { alert("شماره همراه باید ۱۱ رقم و با ۰۹ شروع شود."); return; }
+  const deposit = bType === "meeting" ? 0 : parseAmount($("bm_deposit").value);
+  if (Number.isNaN(deposit)) { alert("مبلغ بیعانه نامعتبر است."); return; }
+
   btn.disabled = true;
-  btn.innerText = "در حال رزرو...";
-
-  const bType = document.getElementById("bm_booking_type").value;
-  let slotType = "full";
-  let appTime = document.getElementById("bm_time").value;
-
-  if (bType === "meeting") {
-    slotType = "meeting";
-  } else if (bType === "client_half1") {
-    slotType = "half1";
-  } else if (bType === "client_half2") {
-    slotType = "half2";
-  }
-
-  const rawPhone = document.getElementById("bm_client_phone").value;
-  const cleanPhone = (bType === "meeting") ? "-" : normalizePhoneNumber(rawPhone);
-
-  const payload = {
-    action: "addAppointment",
-    counselor: document.getElementById("bm_counselor").value,
-    appointmentDate: document.getElementById("bm_date").value,
-    appointmentTime: appTime,
-    clientName: document.getElementById("bm_client_name").value,
-    clientPhone: cleanPhone,
-    deposit: (bType === "meeting") ? 0 : (Number(document.getElementById("bm_deposit").value) || 0),
-    slotType: slotType,
-    status: (bType === "meeting") ? "جلسه کاری" : "رزرو شده",
-    operator: state.currentUser || "منشی"
-  };
-
+  btn.textContent = "در حال رزرو...";
   try {
-    const result = await apiPost(payload);
-    if (result.status !== "success") throw new Error(result.message || "رزرو نوبت انجام نشد");
+    const payload = {
+      action: "addAppointment",
+      counselor: $("bm_counselor").value,
+      appointmentDate: $("bm_date").value,
+      appointmentTime: $("bm_time").value,
+      clientName,
+      clientPhone: bType === "meeting" ? "-" : normalizePhoneNumber($("bm_client_phone").value),
+      deposit,
+      slotType,
+      status: bType === "meeting" ? "جلسه کاری" : "رزرو شده"
+    };
+    let res = await apiPost(payload);
+    if (res.status === "conflict") {
+      // تداخل با نوبت دیگر: منشی تصمیم می‌گیرد (مثلاً دو نفر عمداً در یک ساعت)
+      if (!confirm(`${res.message}\n\nآیا با این وجود نوبت ثبت شود؟`)) return;
+      res = await apiPost({ ...payload, force: true });
+    }
+    if (res.status !== "success") throw new ApiError(res.message || "رزرو نوبت انجام نشد", res.code || "");
     alert("نوبت با موفقیت ثبت شد.");
     closeBookingModal();
     setTimeout(fetchAppointments, 1200);
   } catch (err) {
-    alert("خطا در رزرو نوبت");
+    alert(userMsg(err, "خطا در رزرو نوبت"));
   } finally {
     btn.disabled = false;
-    btn.innerText = "ثبت قطعی در تقویم";
+    btn.textContent = "ثبت قطعی در تقویم";
   }
 });
 
 function openAppDetailsModal(appId) {
   const app = state.appointmentsList.find(a => a.id === appId);
   if (!app) return;
+  $("adm_app_id").value = app.id;
+  $("adm_client_name").textContent = app.clientName;
+  $("adm_counselor").textContent = app.counselor;
+  $("adm_datetime").textContent = `${app.appointmentDate} (ساعت ${app.appointmentTime})`;
+  $("adm_status").textContent = app.status;
+  $("adm_operator").textContent = app.operator || "ثبت سیستمی";
 
-  document.getElementById("adm_app_id").value = app.id;
-  document.getElementById("adm_client_name").innerText = app.clientName;
-  document.getElementById("adm_counselor").innerText = app.counselor;
-  document.getElementById("adm_datetime").innerText = `${app.appointmentDate} (ساعت ${app.appointmentTime})`;
-  document.getElementById("adm_status").innerText = app.status;
-  document.getElementById("adm_operator").innerText = app.operator || "ثبت سیستمی";
-
-  if (app.slotType === "meeting") {
-    document.getElementById("adm_phone_row").style.display = "none";
-    document.getElementById("adm_deposit_row").style.display = "none";
-    document.getElementById("btn_adm_to_desk").style.display = "none";
-  } else {
-    document.getElementById("adm_phone_row").style.display = "block";
-    document.getElementById("adm_deposit_row").style.display = "block";
-    document.getElementById("btn_adm_to_desk").style.display = "block";
-    document.getElementById("adm_client_phone").innerText = normalizePhoneNumber(app.clientPhone) || "ثبت نشده";
-    document.getElementById("adm_deposit").innerText = Number(app.deposit).toLocaleString('fa-IR') + " تومان";
+  const meeting = app.slotType === "meeting";
+  $("adm_phone_row").style.display = meeting ? "none" : "block";
+  $("adm_deposit_row").style.display = meeting ? "none" : "block";
+  $("btn_adm_to_desk").style.display = meeting ? "none" : "block";
+  if (!meeting) {
+    $("adm_client_phone").textContent = normalizePhoneNumber(app.clientPhone) || "ثبت نشده";
+    $("adm_deposit").textContent = nf(app.deposit) + " تومان";
   }
-
-  document.getElementById("app_details_modal").style.display = "flex";
+  $("app_details_modal").style.display = "flex";
 }
 
-function closeAppDetailsModal() {
-  document.getElementById("app_details_modal").style.display = "none";
+function closeAppDetailsModal() { $("app_details_modal").style.display = "none"; }
+
+function setPendingAppointment(p) {
+  state.pendingAppointment = p;
+  const box = $("pending_app_banner");
+  if (p) { $("pending_app_text").textContent = "این فرم از روی نوبت «" + p.label + "» پر شده؛ بعد از ثبت موفق، نوبت «برگزار شده» می‌شود."; box.style.display = "flex"; }
+  else { $("pending_app_text").textContent = ""; box.style.display = "none"; }
 }
 
 function convertModalToDesk() {
-  const appId = document.getElementById("adm_app_id").value;
+  const appId = $("adm_app_id").value;
   const app = state.appointmentsList.find(a => a.id === appId);
   if (!app) return;
 
-  document.getElementById("client_name").value = app.clientName;
-  document.getElementById("client_phone").value = normalizePhoneNumber(app.clientPhone) || "";
-  document.getElementById("counselor_select").value = app.counselor;
-  
-  if (app.slotType === "half1" || app.slotType === "half2") {
-    document.getElementById("session_type").value = "طلاق";
-    sessionTypeInput.dispatchEvent(new Event('change'));
-  }
+  $("client_name").value = app.clientName;
+  $("client_phone").value = normalizePhoneNumber(app.clientPhone) || "";
+  $("counselor_select").value = app.counselor;
 
+  if (app.slotType === "half1" || app.slotType === "half2") {
+    $("session_type").value = "طلاق";
+    sessionTypeInput.dispatchEvent(new Event("change"));
+  }
   if (app.deposit > 0) {
     depositToggle.checked = true;
     depositWrapper.style.display = "grid";
     depositAmountInput.value = app.deposit;
-    balanceLabel.innerText = "مانده مبلغ در مطب به حساب کی رفت؟";
+    balanceLabel.textContent = "مانده مبلغ در مطب به حساب کی رفت؟";
   } else {
     depositToggle.checked = false;
     depositWrapper.style.display = "none";
     depositAmountInput.value = 0;
-    balanceLabel.innerText = "تسویه کل مبلغ جلسه از طریق:";
+    balanceLabel.textContent = "تسویه کل مبلغ جلسه از طریق:";
   }
-  
-  document.getElementById("record_notes").value = `نوبت ساعت ${app.appointmentTime} - تسویه در مطب`;
+  $("record_notes").value = `نوبت ساعت ${app.appointmentTime} - تسویه در مطب`;
   updateSummaryBoxes();
   updateRemainingDisplay();
 
-  changeAppStatus(appId, "برگزار شده");
+  // نوبت فقط بعد از «ثبت موفق صندوق» برگزار‌شده می‌شود (سرور در همان درخواست انجام می‌دهد)
+  setPendingAppointment({ id: appId, label: `${app.clientName} — ${app.appointmentDate} ساعت ${app.appointmentTime}` });
   closeAppDetailsModal();
-  switchTab('desk');
+  switchTab("desk");
 }
 
 async function cancelAppointmentFromModal() {
-  const appId = document.getElementById("adm_app_id").value;
+  const appId = $("adm_app_id").value;
   if (!confirm("آیا از لغو این نوبت اطمینان دارید؟")) return;
   await changeAppStatus(appId, "کنسل شده");
   closeAppDetailsModal();
@@ -2070,356 +1976,406 @@ async function cancelAppointmentFromModal() {
 
 async function changeAppStatus(appId, newStatus) {
   try {
-    const result = await apiPost({ action: "updateAppointmentStatus", id: appId, status: newStatus });
-    if (result.status !== "success") throw new Error(result.message || "تغییر وضعیت انجام نشد");
+    await apiCall({ action: "updateAppointmentStatus", id: appId, status: newStatus }, "تغییر وضعیت انجام نشد");
     setTimeout(fetchAppointments, 1200);
   } catch (e) {
     console.error("خطا در تغییر وضعیت نوبت:", e);
+    alert(userMsg(e, "تغییر وضعیت نوبت انجام نشد."));
   }
 }
 
 function openBlockDayModal(date, counselor) {
-  document.getElementById("bdm_date").value = date;
-  document.getElementById("bdm_date_text").innerText = date;
-  document.getElementById("bdm_counselor").value = counselor;
-  document.getElementById("bdm_counselor_text").innerText = counselor;
-  document.getElementById("bdm_reason").value = "";
-  document.getElementById("block_day_modal").style.display = "flex";
+  $("bdm_date").value = date;
+  $("bdm_date_text").textContent = date;
+  $("bdm_counselor").value = counselor;
+  $("bdm_counselor_text").textContent = counselor;
+  $("bdm_reason").value = "";
+  $("block_day_modal").style.display = "flex";
 }
+function closeBlockDayModal() { $("block_day_modal").style.display = "none"; }
 
-function closeBlockDayModal() {
-  document.getElementById("block_day_modal").style.display = "none";
-}
-
-document.getElementById("block_day_form").addEventListener("submit", async function(e) {
+$("block_day_form").addEventListener("submit", async function(e) {
   e.preventDefault();
-  const btn = document.getElementById("btn_block_submit");
+  const btn = $("btn_block_submit");
   btn.disabled = true;
-  btn.innerText = "در حال بستن روز...";
-
-  const payload = {
-    action: "blockDay",
-    date: document.getElementById("bdm_date").value,
-    counselor: document.getElementById("bdm_counselor").value,
-    reason: document.getElementById("bdm_reason").value,
-    operator: state.currentUser || "منشی"
-  };
-
+  btn.textContent = "در حال بستن روز...";
   try {
-    const result = await apiPost(payload);
-    if (result.status !== "success") throw new Error(result.message || "مسدود کردن روز انجام نشد");
+    await apiCall({
+      action: "blockDay",
+      date: $("bdm_date").value,
+      counselor: $("bdm_counselor").value,
+      reason: $("bdm_reason").value
+    }, "مسدود کردن روز انجام نشد");
     alert("این روز برای مشاور با موفقیت مسدود شد.");
     closeBlockDayModal();
     setTimeout(fetchAppointments, 1200);
   } catch (err) {
-    alert("خطا در مسدود کردن روز");
+    alert(userMsg(err, "خطا در مسدود کردن روز"));
   } finally {
     btn.disabled = false;
-    btn.innerText = "مسدود کردن این روز";
+    btn.textContent = "مسدود کردن این روز";
   }
 });
 
 async function unblockDay(date, counselor) {
   if (!confirm(`آیا مطمئن هستید که می‌خواهید روز ${date} را برای مشاور بازگشایی کنید؟`)) return;
   try {
-    const result = await apiPost({ action: "unblockDay", date: date, counselor: counselor });
-    if (result.status !== "success") throw new Error(result.message || "بازگشایی روز انجام نشد");
+    await apiCall({ action: "unblockDay", date, counselor }, "بازگشایی روز انجام نشد");
     alert("روز با موفقیت بازگشایی شد.");
     setTimeout(fetchAppointments, 1200);
   } catch (err) {
-    alert("خطا در بازگشایی روز");
+    alert(userMsg(err, "خطا در بازگشایی روز"));
   }
 }
 
-const sessionTypeInput = document.getElementById("session_type");
-const partsCountInput = document.getElementById("parts_count");
-const totalAmountInput = document.getElementById("total_amount");
-const counselorSelect = document.getElementById("counselor_select");
-const depositToggle = document.getElementById("has_deposit_toggle");
-const depositWrapper = document.getElementById("deposit_fields_wrapper");
-const depositAmountInput = document.getElementById("deposit_amount");
-const balanceLabel = document.getElementById("balance_label");
-const remainingBadge = document.getElementById("remaining_badge");
+/* =========================================================
+   میز پذیرش و صندوق
+   ========================================================= */
+const sessionTypeInput = $("session_type");
+const partsCountInput = $("parts_count");
+const totalAmountInput = $("total_amount");
+const counselorSelect = $("counselor_select");
+const depositToggle = $("has_deposit_toggle");
+const depositWrapper = $("deposit_fields_wrapper");
+const depositAmountInput = $("deposit_amount");
+const balanceLabel = $("balance_label");
+const remainingBadge = $("remaining_badge");
 
 depositToggle.addEventListener("change", function() {
   if (this.checked) {
     depositWrapper.style.display = "grid";
-    balanceLabel.innerText = "مانده مبلغ در مطب به حساب کی رفت؟";
+    balanceLabel.textContent = "مانده مبلغ در مطب به حساب کی رفت؟";
   } else {
     depositWrapper.style.display = "none";
     depositAmountInput.value = 0;
-    balanceLabel.innerText = "تسویه کل مبلغ جلسه از طریق:";
+    balanceLabel.textContent = "تسویه کل مبلغ جلسه از طریق:";
   }
   updateRemainingDisplay();
   updateSummaryBoxes();
 });
-
-depositAmountInput.addEventListener("input", function() {
-  updateRemainingDisplay();
-  updateSummaryBoxes();
-});
+depositAmountInput.addEventListener("input", () => { updateRemainingDisplay(); updateSummaryBoxes(); });
 
 function updateRemainingDisplay() {
   const total = Number(totalAmountInput.value) || 0;
   const dep = depositToggle.checked ? (Number(depositAmountInput.value) || 0) : 0;
   const rem = Math.max(0, total - dep);
-
-  if (depositToggle.checked && total > 0) {
-    remainingBadge.innerText = `مانده تسویه: ${rem.toLocaleString('fa-IR')} تومان`;
-  } else {
-    remainingBadge.innerText = "";
-  }
+  remainingBadge.textContent = (depositToggle.checked && total > 0) ? `مانده تسویه: ${nf(rem)} تومان` : "";
 }
+
+const rateFor = type => (state.settings[type] || { defaultRate: 0 }).defaultRate;
 
 sessionTypeInput.addEventListener("change", function() {
   const type = this.value;
-  const partsGroup = document.getElementById("group_parts");
-  
   if (type === "آزاد") {
-    partsGroup.style.display = "none";
+    $("group_parts").style.display = "none";
     totalAmountInput.readOnly = false;
   } else {
-    partsGroup.style.display = "flex";
-    const conf = state.settings[type] || { defaultRate: 0 };
-    totalAmountInput.value = conf.defaultRate * Number(partsCountInput.value);
+    $("group_parts").style.display = "flex";
+    totalAmountInput.value = rateFor(type) * Number(partsCountInput.value);
     totalAmountInput.readOnly = true;
   }
   updateSummaryBoxes();
 });
-
 partsCountInput.addEventListener("input", function() {
   const type = sessionTypeInput.value;
-  if (type !== "آزاد") {
-    const conf = state.settings[type] || { defaultRate: 0 };
-    totalAmountInput.value = conf.defaultRate * Number(this.value);
-  }
+  if (type !== "آزاد") totalAmountInput.value = rateFor(type) * Number(this.value);
   updateSummaryBoxes();
 });
-
-totalAmountInput.addEventListener("input", function() {
-  updateSummaryBoxes();
-  updateRemainingDisplay();
-});
+totalAmountInput.addEventListener("input", () => { updateSummaryBoxes(); updateRemainingDisplay(); });
 
 function updateSummaryBoxes() {
   const total = Number(totalAmountInput.value) || 0;
   const dep = depositToggle.checked ? (Number(depositAmountInput.value) || 0) : 0;
-  const due = Math.max(0, total - dep);
-
-  document.getElementById("box_total").innerText = total.toLocaleString('fa-IR') + " تومان";
-  const remBox = document.getElementById("box_remaining_due");
-  if (remBox) {
-    remBox.innerText = due.toLocaleString('fa-IR') + " تومان";
-  }
+  $("box_total").textContent = nf(total) + " تومان";
+  const remBox = $("box_remaining_due");
+  if (remBox) remBox.textContent = nf(Math.max(0, total - dep)) + " تومان";
 }
 
-function getEffectivePercent(sType, cName) {
-  if (sType !== "آزاد" && state.settings[sType]) {
-    return state.settings[sType].percent;
-  }
-  const counselor = state.counselors.find(c => c.name === cName);
-  return counselor ? counselor.percent : 70;
-}
-
-document.getElementById("record_form").addEventListener("submit", async function(e) {
+$("record_form").addEventListener("submit", async function(e) {
   e.preventDefault();
-  const btn = document.getElementById("btn_submit");
-  btn.disabled = true;
-  btn.innerText = "در حال ثبت اطلاعات...";
+  const btn = $("btn_submit");
 
-  const total = Number(totalAmountInput.value) || 0;
-  const percent = getEffectivePercent(sessionTypeInput.value, counselorSelect.value);
-  const cShare = Math.round((total * percent) / 100);
-  const clShare = total - cShare;
+  const total = parseAmount(totalAmountInput.value);
   const hasDeposit = depositToggle.checked;
-  const depositVal = hasDeposit ? (Number(depositAmountInput.value) || 0) : 0;
-  const cleanPhone = normalizePhoneNumber(document.getElementById("client_phone").value);
+  const depositVal = hasDeposit ? parseAmount(depositAmountInput.value) : 0;
+  if (Number.isNaN(total) || Number.isNaN(depositVal)) { alert("مبلغ نامعتبر است (عدد غیرمنفی و حداکثر یک میلیارد تومان)."); return; }
+  if (depositVal > total) { alert("مبلغ بیعانه نمی‌تواند از مبلغ کل بیشتر باشد."); return; }
+  if (!counselorSelect.value) { alert("مشاور را انتخاب کنید."); return; }
+  if (!validPhoneOrEmpty($("client_phone").value)) { alert("شماره همراه باید ۱۱ رقم و با ۰۹ شروع شود."); return; }
 
-  const payload = {
-    action: "addTransaction",
-    shamsiDate: state.shamsiDate,
-    clientName: document.getElementById("client_name").value,
-    clientPhone: cleanPhone,
-    counselor: counselorSelect.value,
-    sessionType: sessionTypeInput.value,
-    parts: sessionTypeInput.value === "آزاد" ? 1 : partsCountInput.value,
-    totalAmount: total,
-    counselorPercent: percent,
-    counselorShare: cShare,
-    clinicShare: clShare,
-    deposit: depositVal,
-    depositTo: hasDeposit ? document.getElementById("deposit_to").value : "ندارد",
-    balanceTo: document.getElementById("balance_to").value,
-    notes: document.getElementById("record_notes").value,
-    operator: state.currentUser || "منشی"
-  };
-
+  btn.disabled = true;
+  btn.textContent = "در حال ثبت اطلاعات...";
   try {
-    const result = await apiPost(payload);
-    if (result.status !== "success") throw new Error(result.message || "ثبت جلسه انجام نشد");
-    alert("جلسه با موفقیت ثبت شد.");
-    document.getElementById("record_form").reset();
+    const res = await apiCall({
+      action: "addTransaction",
+      shamsiDate: currentShamsi(),
+      clientName: $("client_name").value,
+      clientPhone: normalizePhoneNumber($("client_phone").value),
+      counselor: counselorSelect.value,
+      sessionType: sessionTypeInput.value,
+      parts: sessionTypeInput.value === "آزاد" ? 1 : partsCountInput.value,
+      totalAmount: total,
+      deposit: depositVal,
+      depositTo: hasDeposit ? $("deposit_to").value : "ندارد",
+      balanceTo: $("balance_to").value,
+      notes: $("record_notes").value,
+      appointmentId: state.pendingAppointment ? state.pendingAppointment.id : undefined
+    }, "ثبت جلسه انجام نشد");
+    alert(`جلسه با موفقیت ثبت شد.\nسهم مشاور: ${nf(res.counselorShare)} تومان (${nf(res.percent)}٪)\nسهم کلینیک: ${nf(res.clinicShare)} تومان`);
+    $("record_form").reset();
+    setPendingAppointment(null);
     depositToggle.checked = false;
-    depositToggle.dispatchEvent(new Event('change'));
-    sessionTypeInput.dispatchEvent(new Event('change'));
+    depositToggle.dispatchEvent(new Event("change"));
+    sessionTypeInput.dispatchEvent(new Event("change"));
     setTimeout(fetchInitialData, 1200);
+    if (res.appointmentClosed) setTimeout(fetchAppointments, 1200);
   } catch (err) {
-    alert("خطا در ارسال اطلاعات به سرور");
+    alert(userMsg(err, "خطا در ارسال اطلاعات به سرور"));
   } finally {
     btn.disabled = false;
-    btn.innerText = "ثبت در سیستم و شیت";
+    btn.textContent = "ثبت در سیستم و شیت";
   }
 });
 
 function renderRecentTable(list) {
-  const tbody = document.getElementById("recent_table_body");
-  tbody.innerHTML = "";
-  if (!list || list.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color: var(--text-muted);">هنوز مراجعی ثبت نشده است.</td></tr>';
-    return;
-  }
+  const tbody = $("recent_table_body");
+  tbody.replaceChildren();
+  if (!list || list.length === 0) { tbody.appendChild(emptyRow(8, "هنوز مراجعی ثبت نشده است.")); return; }
   list.forEach(r => {
-    const tr = document.createElement("tr");
-    const displayDate = (r.date || "-").toString().split("T")[0];
-    tr.innerHTML = `
-      <td>${displayDate}</td>
-      <td>${r.clientName}</td>
-      <td>${r.counselor}</td>
-      <td>${r.sessionType}</td>
-      <td>${Number(r.totalAmount).toLocaleString('fa-IR')}</td>
-      <td>${Number(r.deposit).toLocaleString('fa-IR')}</td>
-      <td style="color: var(--ink-2); font-size: 0.78rem;">${r.operator || "-"}</td>
-      <td>
-        <button class="btn-edit-sm" onclick="openEditModal('${r.id}')">ویرایش</button>
-        <button class="btn-delete-c" onclick="deleteRecord('${r.id}')">حذف</button>
-      </td>
-    `;
-    tbody.appendChild(tr);
+    const actions = h("td", null,
+      h("button", { type: "button", class: "btn-edit-sm", onclick: () => openEditModal(r.id) }, "ویرایش"), " ",
+      h("button", { type: "button", class: "btn-delete-c", onclick: () => deleteRecord(r.id) }, "حذف"));
+    tbody.appendChild(h("tr", null,
+      cell(dayDisplay(r.date)),
+      cell(r.clientName),
+      cell(r.counselor),
+      cell(r.sessionType),
+      cell(nf(r.totalAmount)),
+      cell(nf(r.deposit)),
+      cell(r.operator || "-", "color: var(--ink-2); font-size: 0.78rem;"),
+      actions
+    ));
   });
 }
 
+/* =========================================================
+   تنظیمات: نرخ‌ها و مشاوران (برای منشی و ادمین)
+   ========================================================= */
 function renderSessionRatesTable() {
-  const tbody = document.getElementById("session_rates_tbody");
-  tbody.innerHTML = "";
-  const sessionTypes = ["آزاد", "سپه", "ورزش و بهزیستی", "طلاق"];
-  
-  sessionTypes.forEach(type => {
+  const tbody = $("session_rates_tbody");
+  tbody.replaceChildren();
+  RATE_TYPES.forEach(type => {
     const conf = state.settings[type] || { defaultRate: 0, percent: 70 };
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td style="font-weight: bold; color: var(--primary);">${type}</td>
-      <td>
-        <input type="number" class="table-input" id="rate_${type}" value="${conf.defaultRate}" ${type === 'آزاد' ? 'disabled placeholder="دستی وارد می‌شود"' : ''} style="width: 140px;"> تومان
-      </td>
-      <td>
-        <input type="number" min="0" max="100" class="table-input" id="pct_${type}" value="${conf.percent}" style="width: 75px; text-align: center;"> ٪
-      </td>
-      <td>
-        <button class="btn-action-sm" onclick="saveSessionRate('${type}')">ذخیره نرخ و درصد</button>
-      </td>
-    `;
-    tbody.appendChild(tr);
+    const rateInput = h("input", { type: "number", class: "table-input", min: 0, max: MAX_MONEY, value: conf.defaultRate, style: "width: 140px;" });
+    const pctInput = h("input", { type: "number", class: "table-input", min: 0, max: 100, step: "any", value: conf.percent, style: "width: 75px; text-align: center;" });
+    tbody.appendChild(h("tr", null,
+      cell(type, "font-weight: bold; color: var(--primary);"),
+      h("td", null, rateInput, " تومان"),
+      h("td", null, pctInput, " ٪"),
+      h("td", null, h("button", { type: "button", class: "btn-action-sm", onclick: () => saveSessionRate(type, rateInput, pctInput) }, "ذخیره نرخ و درصد"))
+    ));
   });
 }
 
 function renderCounselorsSettingsTable() {
-  const tbody = document.getElementById("counselor_settings_tbody");
-  tbody.innerHTML = "";
-  
+  const tbody = $("counselor_settings_tbody");
+  tbody.replaceChildren();
   state.counselors.forEach(c => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td style="font-weight: 500;">${c.name}</td>
-      <td>
-        <input type="number" min="0" max="100" class="table-input" id="pct_input_${c.name}" value="${c.percent}" style="width: 75px; text-align: center;"> ٪
-      </td>
-      <td>
-        <button class="btn-action-sm" onclick="saveCounselorPercent('${c.name}')">بروزرسانی</button>
-      </td>
-      <td>
-        <button class="btn-delete-c" onclick="removeCounselor('${c.name}')">حذف</button>
-      </td>
-    `;
-    tbody.appendChild(tr);
+    const pctInput = h("input", { type: "number", class: "table-input", min: 0, max: 100, step: "any", value: c.percent, style: "width: 75px; text-align: center;" });
+    tbody.appendChild(h("tr", null,
+      cell(c.name, "font-weight: 500;"),
+      h("td", null, pctInput, " ٪"),
+      h("td", null, h("button", { type: "button", class: "btn-action-sm", onclick: () => saveCounselorPercent(c.name, pctInput) }, "بروزرسانی")),
+      h("td", null, h("button", { type: "button", class: "btn-delete-c", onclick: () => removeCounselor(c.name) }, "حذف"))
+    ));
   });
 }
 
+const validPercent = v => { const n = Number(toEn(String(v ?? "")).trim()); return String(v ?? "").trim() !== "" && Number.isFinite(n) && n >= 0 && n <= 100 ? n : NaN; };
+
+async function saveSessionRate(type, rateInput, pctInput) {
+  const rate = parseAmount(rateInput.value);
+  const percent = validPercent(pctInput.value);
+  if (Number.isNaN(rate)) { alert("مبلغ نامعتبر است."); return; }
+  if (Number.isNaN(percent)) { alert("درصد باید عددی بین ۰ تا ۱۰۰ باشد."); return; }
+  try {
+    await apiCall({ action: "updateSessionRate", type, rate, percent }, "ذخیره نرخ انجام نشد");
+    alert(`نرخ و درصد «${type}» ذخیره شد.`);
+    fetchInitialData();
+  } catch (e) { alert(userMsg(e, "خطا در ذخیره نرخ")); }
+}
+
+async function saveCounselorPercent(name, pctInput) {
+  const percent = validPercent(pctInput.value);
+  if (Number.isNaN(percent)) { alert("درصد باید عددی بین ۰ تا ۱۰۰ باشد."); return; }
+  try {
+    await apiCall({ action: "updateCounselorPercent", name, percent }, "بروزرسانی انجام نشد");
+    alert(`درصد سهم «${name}» بروزرسانی شد.`);
+    fetchInitialData();
+  } catch (e) { alert(userMsg(e, "خطا در بروزرسانی درصد")); }
+}
+
+async function removeCounselor(name) {
+  if (!confirm(`آیا از حذف مشاور «${name}» اطمینان دارید؟`)) return;
+  try {
+    await apiCall({ action: "removeCounselor", name }, "حذف مشاور انجام نشد");
+    fetchInitialData();
+  } catch (e) { alert(userMsg(e, "خطا در حذف مشاور")); }
+}
+
+$("btn_add_counselor").addEventListener("click", async function() {
+  const name = $("new_counselor_name").value.replace(INVISIBLE, "").replace(/\s+/g, " ").trim();
+  const percent = validPercent($("new_counselor_percent").value);
+  if (!COUNSELOR_NAME_RE.test(name)) { alert("نام مشاور را فقط با حروف (فارسی یا انگلیسی) و حداقل ۲ حرف وارد کنید."); return; }
+  if (Number.isNaN(percent)) { alert("درصد باید عددی بین ۰ تا ۱۰۰ باشد."); return; }
+  const btn = this;
+  btn.disabled = true;
+  try {
+    await apiCall({ action: "addCounselor", name, percent }, "افزودن مشاور انجام نشد");
+    $("new_counselor_name").value = "";
+    $("new_counselor_percent").value = 70;
+    alert(`مشاور «${name}» اضافه شد. برای نمایش در پرتال مراجعین، برنامه‌ی حضور او را هم ذخیره کنید.`);
+    fetchInitialData();
+  } catch (e) { alert(userMsg(e, "خطا در افزودن مشاور")); }
+  finally { btn.disabled = false; }
+});
+
+/* =========================================================
+   ویرایش و حذف جلسه‌ی ثبت‌شده
+   ========================================================= */
+let editContext = null;
+
+function setEditDepositUI(on) {
+  $("edit_deposit_fields_wrapper").style.display = on ? "grid" : "none";
+  $("edit_balance_label").textContent = on ? "مانده مبلغ در مطب به حساب کی رفت؟" : "تسویه کل مبلغ از طریق:";
+  if (!on) $("edit_deposit_amount").value = 0;
+}
+function updateEditRemaining() {
+  const total = Number($("edit_total_amount").value) || 0;
+  const dep = $("edit_has_deposit_toggle").checked ? (Number($("edit_deposit_amount").value) || 0) : 0;
+  $("edit_remaining_badge").textContent = ($("edit_has_deposit_toggle").checked && total > 0) ? `مانده تسویه: ${nf(Math.max(0, total - dep))} تومان` : "";
+}
+function setEditPartsUI(type) { $("edit_group_parts").style.display = type === "آزاد" ? "none" : "flex"; }
+
+$("edit_has_deposit_toggle").addEventListener("change", function() { setEditDepositUI(this.checked); updateEditRemaining(); });
+$("edit_deposit_amount").addEventListener("input", updateEditRemaining);
+$("edit_total_amount").addEventListener("input", updateEditRemaining);
+$("edit_session_type").addEventListener("change", function() {
+  setEditPartsUI(this.value);
+  if (this.value !== "آزاد") $("edit_total_amount").value = rateFor(this.value) * (Number($("edit_parts_count").value) || 1);
+  updateEditRemaining();
+});
+$("edit_parts_count").addEventListener("input", function() {
+  const type = $("edit_session_type").value;
+  if (type !== "آزاد") $("edit_total_amount").value = rateFor(type) * (Number(this.value) || 1);
+  updateEditRemaining();
+});
+
 function openEditModal(recordId) {
-  const r = state.recentList.find(item => item.id == recordId);
+  const r = state.recentList.find(item => String(item.id) === String(recordId));
   if (!r) return;
+  editContext = { id: String(r.id) };
 
-  document.getElementById("edit_id").value = r.id;
-  document.getElementById("edit_client_name").value = r.clientName;
-  document.getElementById("edit_client_phone").value = normalizePhoneNumber(r.clientPhone) || "";
-  document.getElementById("edit_counselor_select").value = r.counselor;
-  document.getElementById("edit_session_type").value = r.sessionType;
-  document.getElementById("edit_parts_count").value = r.parts || 1;
-  document.getElementById("edit_total_amount").value = r.totalAmount;
-  document.getElementById("edit_record_notes").value = r.notes || "";
+  $("edit_id").value = r.id;
+  $("edit_client_name").value = r.clientName;
+  $("edit_client_phone").value = normalizePhoneNumber(r.clientPhone) || "";
+  $("edit_counselor_select").value = r.counselor;
+  $("edit_session_type").value = r.sessionType;
+  $("edit_parts_count").value = r.parts || 1;
+  $("edit_total_amount").value = r.totalAmount;
+  $("edit_record_notes").value = r.notes && r.notes !== "-" ? r.notes : "";
+  $("edit_deposit_to").value = ["مشاور", "کلینیک"].includes(r.depositTo) ? r.depositTo : "مشاور";
+  $("edit_balance_to").value = ["مشاور", "کلینیک"].includes(r.balanceTo) ? r.balanceTo : "کلینیک";
+  setEditPartsUI(r.sessionType);
 
-  if (Number(r.deposit) > 0) {
-    document.getElementById("edit_has_deposit_toggle").checked = true;
-    document.getElementById("edit_deposit_fields_wrapper").style.display = "grid";
-    document.getElementById("edit_deposit_amount").value = r.deposit;
-  } else {
-    document.getElementById("edit_has_deposit_toggle").checked = false;
-    document.getElementById("edit_deposit_fields_wrapper").style.display = "none";
-    document.getElementById("edit_deposit_amount").value = 0;
+  const hasDep = Number(r.deposit) > 0;
+  $("edit_has_deposit_toggle").checked = hasDep;
+  setEditDepositUI(hasDep);
+  if (hasDep) $("edit_deposit_amount").value = r.deposit;
+  updateEditRemaining();
+  $("edit_modal").style.display = "flex";
+}
+function closeEditModal() { $("edit_modal").style.display = "none"; editContext = null; }
+
+$("edit_record_form").addEventListener("submit", async function(e) {
+  e.preventDefault();
+  if (!editContext) return;
+  const btn = $("btn_edit_submit");
+
+  const counselor = $("edit_counselor_select").value;
+  const sessionType = $("edit_session_type").value;
+  const total = parseAmount($("edit_total_amount").value);
+  const hasDeposit = $("edit_has_deposit_toggle").checked;
+  const deposit = hasDeposit ? parseAmount($("edit_deposit_amount").value) : 0;
+  if (Number.isNaN(total) || Number.isNaN(deposit)) { alert("مبلغ نامعتبر است."); return; }
+  if (deposit > total) { alert("مبلغ بیعانه نمی‌تواند از مبلغ کل بیشتر باشد."); return; }
+  if (!validPhoneOrEmpty($("edit_client_phone").value)) { alert("شماره همراه باید ۱۱ رقم و با ۰۹ شروع شود."); return; }
+
+  // درصد و سهم‌ها سمت سرور حساب می‌شود؛ اگر مشاور و نوع جلسه عوض نشده باشد درصد ثبت‌شده‌ی همان روز حفظ می‌شود.
+  btn.disabled = true;
+  btn.textContent = "در حال ذخیره...";
+  try {
+    await apiCall({
+      action: "updateTransaction",
+      id: editContext.id,
+      clientName: $("edit_client_name").value,
+      clientPhone: normalizePhoneNumber($("edit_client_phone").value),
+      counselor, sessionType,
+      parts: sessionType === "آزاد" ? 1 : $("edit_parts_count").value,
+      totalAmount: total,
+      deposit,
+      depositTo: hasDeposit ? $("edit_deposit_to").value : "ندارد",
+      balanceTo: $("edit_balance_to").value,
+      notes: $("edit_record_notes").value
+    }, "ویرایش انجام نشد");
+    alert("تغییرات ذخیره شد.");
+    closeEditModal();
+    setTimeout(fetchInitialData, 1200);
+  } catch (err) {
+    alert(userMsg(err, "خطا در ذخیره تغییرات"));
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "ذخیره تغییرات در شیت";
   }
-
-  document.getElementById("edit_modal").style.display = "flex";
-}
-
-function closeEditModal() {
-  document.getElementById("edit_modal").style.display = "none";
-}
+});
 
 async function deleteRecord(id) {
   if (!confirm("آیا از حذف این جلسه اطمینان دارید؟")) return;
   try {
-    const result = await apiPost({ action: "deleteTransaction", id: id });
-    if (result.status !== "success") throw new Error(result.message || "حذف رکورد انجام نشد");
+    await apiCall({ action: "deleteTransaction", id }, "حذف رکورد انجام نشد");
     setTimeout(fetchInitialData, 1200);
-  } catch (e) {
-    alert("خطا در حذف رکورد");
-  }
+  } catch (e) { alert(userMsg(e, "خطا در حذف رکورد")); }
 }
 
+/* =========================================================
+   گزارش ماهانه و تسویه (فقط مدیر)
+   ========================================================= */
 async function loadMonthlyReport() {
-  const counselor = document.getElementById("report_counselor_select").value;
-  const year = document.getElementById("report_year").value.trim();
-  const month = document.getElementById("report_month_select").value;
+  const counselor = $("report_counselor_select").value;
+  const year = toEn($("report_year").value).trim();
+  const month = $("report_month_select").value;
+  if (!/^\d{4}$/.test(year)) { alert("سال شمسی را به‌صورت چهار رقم وارد کنید. مثلاً ۱۴۰۵"); return; }
 
-  const indicator = document.getElementById("loading-indicator");
+  const indicator = $("loading-indicator");
   indicator.style.display = "block";
-
   try {
-    const data = await apiGet("getMonthlyReport", { counselor, year, month });
-
-    if (data.status === "success") {
-      state.currentLoadedReport = data.records || [];
-      renderMonthlyReportData(data.records, counselor);
-    }
+    const data = await apiCall({ action: "getMonthlyReport", counselor, year, month }, "دریافت گزارش انجام نشد");
+    state.currentLoadedReport = data.records || [];
+    renderMonthlyReportData(state.currentLoadedReport, counselor);
   } catch (err) {
-    alert("خطا در دریافت گزارش: " + err.message);
+    if (!(err instanceof ApiError && err.code === "AUTH_REQUIRED")) alert(userMsg(err, "خطا در دریافت گزارش."));
   } finally {
     indicator.style.display = "none";
   }
 }
 
 function renderMonthlyReportData(records, counselor) {
-  const area = document.getElementById("report_results_area");
-  area.style.display = "block";
+  $("report_results_area").style.display = "block";
 
-  let totalSessions = records.length;
-  let totalTurnover = 0;
-  let counselorTotalShare = 0;
-  let counselorDirectGot = 0;
-
-  const breakdown = {};
-
-  const tbody = document.getElementById("report_table_body");
-  tbody.innerHTML = "";
+  let totalTurnover = 0, counselorTotalShare = 0, counselorDirectGot = 0;
+  const breakdown = dict();
+  const tbody = $("report_table_body");
+  tbody.replaceChildren();
 
   records.forEach(r => {
     const total = Number(r.totalAmount) || 0;
@@ -2430,264 +2386,184 @@ function renderMonthlyReportData(records, counselor) {
     totalTurnover += total;
     counselorTotalShare += cShare;
 
-    // محاسبه مبالغ دقیق واریزی به کلینیک و مشاور
     const depVal = Number(r.deposit || 0);
     const balVal = Math.max(0, total - depVal);
-    
-    let paidToClinic = 0;
-    let paidToCounselor = 0;
+    let paidToClinic = 0, paidToCounselor = 0;
+    if (depVal > 0) { if (r.depositTo === "مشاور") paidToCounselor += depVal; else paidToClinic += depVal; }
+    if (balVal > 0) { if (r.balanceTo === "مشاور") paidToCounselor += balVal; else paidToClinic += balVal; }
 
-    if (depVal > 0) {
-      if (r.depositTo === "مشاور") paidToCounselor += depVal;
-      else paidToClinic += depVal;
-    }
+    if (!breakdown[sType]) breakdown[sType] = { count: 0, totalAmount: 0, counselorShare: 0, clinicShare: 0, paidToClinic: 0, paidToCounselor: 0 };
+    const b = breakdown[sType];
+    b.count += 1; b.totalAmount += total; b.counselorShare += cShare; b.clinicShare += clShare;
+    b.paidToClinic += paidToClinic; b.paidToCounselor += paidToCounselor;
 
-    if (balVal > 0) {
-      if (r.balanceTo === "مشاور") paidToCounselor += balVal;
-      else paidToClinic += balVal;
-    }
+    let direct = 0;
+    if (depVal > 0 && r.depositTo === "مشاور") direct += depVal;
+    if (r.balanceTo === "مشاور") direct += Math.max(0, total - depVal);
+    counselorDirectGot += direct;
 
-    if (!breakdown[sType]) {
-      breakdown[sType] = {
-        count: 0,
-        totalAmount: 0,
-        counselorShare: 0,
-        clinicShare: 0,
-        paidToClinic: 0,
-        paidToCounselor: 0
-      };
-    }
-    breakdown[sType].count += 1;
-    breakdown[sType].totalAmount += total;
-    breakdown[sType].counselorShare += cShare;
-    breakdown[sType].clinicShare += clShare;
-    breakdown[sType].paidToClinic += paidToClinic;
-    breakdown[sType].paidToCounselor += paidToCounselor;
-
-    let directToCounselorThisSession = 0;
-    if (r.deposit > 0 && r.depositTo === "مشاور") directToCounselorThisSession += r.deposit;
-    if (r.balanceTo === "مشاور") directToCounselorThisSession += Math.max(0, total - (r.deposit || 0));
-    counselorDirectGot += directToCounselorThisSession;
-
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${(r.date || "-").toString().split("T")[0]}</td>
-      <td>${r.clientName}</td>
-      <td>${r.counselor}</td>
-      <td>${r.sessionType}</td>
-      <td>${total.toLocaleString('fa-IR')}</td>
-      <td style="color:var(--primary); font-weight:bold;">${cShare.toLocaleString('fa-IR')}</td>
-      <td>${(r.deposit || 0).toLocaleString('fa-IR')}</td>
-      <td>${r.depositTo || "-"}</td>
-      <td>${r.balanceTo || "کلینیک"}</td>
-      <td>${r.operator || "-"}</td>
-    `;
-    tbody.appendChild(tr);
+    tbody.appendChild(h("tr", null,
+      cell(dayDisplay(r.date)),
+      cell(r.clientName),
+      cell(r.counselor),
+      cell(r.sessionType),
+      cell(nf(total)),
+      cell(nf(cShare), "color:var(--primary); font-weight:bold;"),
+      cell(nf(depVal)),
+      cell(r.depositTo || "-"),
+      cell(r.balanceTo || "کلینیک"),
+      cell(r.operator || "-")
+    ));
   });
 
   state.currentBreakdownData = breakdown;
   renderBreakdownTable(breakdown);
 
-  document.getElementById("kpi_sessions_count").innerText = totalSessions.toLocaleString('fa-IR');
-  document.getElementById("kpi_total_turnover").innerText = totalTurnover.toLocaleString('fa-IR') + " ت";
-  document.getElementById("kpi_counselor_total_share").innerText = counselorTotalShare.toLocaleString('fa-IR') + " ت";
-  document.getElementById("kpi_counselor_direct_got").innerText = counselorDirectGot.toLocaleString('fa-IR') + " ت";
+  $("kpi_sessions_count").textContent = nf(records.length);
+  $("kpi_total_turnover").textContent = nf(totalTurnover) + " ت";
+  $("kpi_counselor_total_share").textContent = nf(counselorTotalShare) + " ت";
+  $("kpi_counselor_direct_got").textContent = nf(counselorDirectGot) + " ت";
 
   const netSettlement = counselorTotalShare - counselorDirectGot;
-  const statusBox = document.getElementById("settlement_status_box");
-  const statusLabel = document.getElementById("settlement_status_label");
-  const statusText = document.getElementById("settlement_status_text");
-  const statusAmount = document.getElementById("settlement_status_amount");
-
+  const box = $("settlement_status_box");
   if (counselor === "all") {
-    statusBox.className = "settlement-banner to-counselor";
-    statusLabel.innerText = "درآمد کلینیک:";
-    statusText.innerText = "مجموع سهم کلینیک از تمام جلسات";
-    statusAmount.innerText = (totalTurnover - counselorTotalShare).toLocaleString('fa-IR') + " تومان";
+    box.className = "settlement-banner to-counselor";
+    $("settlement_status_label").textContent = "درآمد کلینیک:";
+    $("settlement_status_text").textContent = "مجموع سهم کلینیک از تمام جلسات";
+    $("settlement_status_amount").textContent = nf(totalTurnover - counselorTotalShare) + " تومان";
   } else if (netSettlement >= 0) {
-    statusBox.className = "settlement-banner to-counselor";
-    statusLabel.innerText = "بستانکاری مشاور:";
-    statusText.innerText = `کلینیک باید این مبلغ را به "${counselor}" بپردازد`;
-    statusAmount.innerText = netSettlement.toLocaleString('fa-IR') + " تومان";
+    box.className = "settlement-banner to-counselor";
+    $("settlement_status_label").textContent = "بستانکاری مشاور:";
+    $("settlement_status_text").textContent = `کلینیک باید این مبلغ را به "${counselor}" بپردازد`;
+    $("settlement_status_amount").textContent = nf(netSettlement) + " تومان";
   } else {
-    statusBox.className = "settlement-banner to-clinic";
-    statusLabel.innerText = "بدهی مشاور:";
-    statusText.innerText = `مشاور "${counselor}" باید این مبلغ را بازگرداند`;
-    statusAmount.innerText = Math.abs(netSettlement).toLocaleString('fa-IR') + " تومان";
+    box.className = "settlement-banner to-clinic";
+    $("settlement_status_label").textContent = "بدهی مشاور:";
+    $("settlement_status_text").textContent = `مشاور "${counselor}" باید این مبلغ را بازگرداند`;
+    $("settlement_status_amount").textContent = nf(Math.abs(netSettlement)) + " تومان";
   }
 }
 
-// رندر جدول تفکیکی در پنل با دو ستون واریز به کلینیک و واریز به مشاور
 function renderBreakdownTable(breakdown) {
-  const tbody = document.getElementById("breakdown_table_body");
-  tbody.innerHTML = "";
-
+  const tbody = $("breakdown_table_body");
+  tbody.replaceChildren();
   const types = Object.keys(breakdown);
-  if (types.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted);">رکوردی برای تفکیک یافت نشد.</td></tr>`;
-    return;
-  }
-
+  if (types.length === 0) { tbody.appendChild(emptyRow(7, "رکوردی برای تفکیک یافت نشد.")); return; }
   types.forEach(type => {
     const b = breakdown[type];
-
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td style="font-weight:bold; color:var(--primary);">${type}</td>
-      <td><strong>${b.count.toLocaleString('fa-IR')}</strong> جلسه</td>
-      <td>${b.totalAmount.toLocaleString('fa-IR')} تومان</td>
-      <td style="color:var(--primary);">${b.counselorShare.toLocaleString('fa-IR')} تومان</td>
-      <td style="color:var(--success); font-weight:bold;">${b.clinicShare.toLocaleString('fa-IR')} تومان</td>
-      <td style="color:var(--brand);">${b.paidToClinic.toLocaleString('fa-IR')} تومان</td>
-      <td style="color:var(--warn);">${b.paidToCounselor.toLocaleString('fa-IR')} تومان</td>
-    `;
-    tbody.appendChild(tr);
+    tbody.appendChild(h("tr", null,
+      cell(type, "font-weight:bold; color:var(--primary);"),
+      h("td", null, h("strong", { text: nf(b.count) }), " جلسه"),
+      cell(nf(b.totalAmount) + " تومان"),
+      cell(nf(b.counselorShare) + " تومان", "color:var(--primary);"),
+      cell(nf(b.clinicShare) + " تومان", "color:var(--success); font-weight:bold;"),
+      cell(nf(b.paidToClinic) + " تومان", "color:var(--brand);"),
+      cell(nf(b.paidToCounselor) + " تومان", "color:var(--warn);")
+    ));
   });
 }
 
-// چاپ فیش رسمی تسویه مشاور بدون باکس خلاصه‌های اضافی و با محرمانه ماندن سهم کلینیک در سپه
+/* چاپ فیش تسویه: HTML از روی داده‌ها ساخته می‌شود (نه از روی DOM) و همه‌ی مقادیر escape می‌شوند.
+   خود پنجره‌ی چاپ هم CSP دارد تا حتی در صورت خطا هیچ اسکریپتی اجرا نشود. */
 function printCleanSettlementReceipt() {
   if (!state.currentLoadedReport || state.currentLoadedReport.length === 0) {
     alert("ابتدا دکمه «مشاهده و محاسبه تسویه» را بزنید تا گزارش مالی لود شود.");
     return;
   }
-
-  const counselorSel = document.getElementById("report_counselor_select");
+  const counselorSel = $("report_counselor_select");
   const counselorName = counselorSel.options[counselorSel.selectedIndex].text;
-  const year = document.getElementById("report_year").value;
-  const month = document.getElementById("report_month_select").value;
-  
-  const statusText = document.getElementById("settlement_status_text").innerText;
-  const statusAmount = document.getElementById("settlement_status_amount").innerText;
-  const tableRows = document.getElementById("report_table_body").innerHTML;
-  const includeDetails = document.getElementById("include_details_toggle").checked;
+  const year = $("report_year").value;
+  const month = $("report_month_select").value;
+  const statusText = $("settlement_status_text").textContent;
+  const statusAmount = $("settlement_status_amount").textContent;
+  const includeDetails = $("include_details_toggle").checked;
 
-  // ساخت ردیف‌های جدول تفکیک برای نسخه چاپی با رعایت عدم درج سهم کلینیک برای سپه
-  let printBreakdownRows = "";
-  for (const type in state.currentBreakdownData) {
+  let breakdownRows = "";
+  for (const type of Object.keys(state.currentBreakdownData)) {
     const b = state.currentBreakdownData[type];
-    
-    // سهم کلینیک برای سپه در فیش مشاور درج نشود (محرمانه)
-    const isSepah = type.includes("سپه");
-    const clinicShareDisplay = isSepah ? "-" : (b.clinicShare.toLocaleString('fa-IR') + " تومان");
-
-    printBreakdownRows += `
-      <tr>
-        <td><strong>${type}</strong></td>
-        <td style="text-align:center;">${b.count.toLocaleString('fa-IR')}</td>
-        <td>${b.totalAmount.toLocaleString('fa-IR')} تومان</td>
-        <td>${b.counselorShare.toLocaleString('fa-IR')} تومان</td>
-        <td>${clinicShareDisplay}</td>
-        <td>${b.paidToClinic.toLocaleString('fa-IR')} تومان</td>
-        <td>${b.paidToCounselor.toLocaleString('fa-IR')} تومان</td>
-      </tr>
-    `;
+    const isSepah = type.includes("سپه");   // سهم کلینیک برای سپه در فیش مشاور درج نمی‌شود (محرمانه)
+    breakdownRows += `<tr><td><strong>${esc(type)}</strong></td><td style="text-align:center;">${esc(nf(b.count))}</td>` +
+      `<td>${esc(nf(b.totalAmount))} تومان</td><td>${esc(nf(b.counselorShare))} تومان</td>` +
+      `<td>${isSepah ? "-" : esc(nf(b.clinicShare)) + " تومان"}</td>` +
+      `<td>${esc(nf(b.paidToClinic))} تومان</td><td>${esc(nf(b.paidToCounselor))} تومان</td></tr>`;
   }
 
-  let detailsSectionHtml = "";
+  let detailsHtml = "";
   if (includeDetails) {
-    detailsSectionHtml = `
-      <div class="section-title">ریز جلسات برگزارشده در این دوره</div>
-      <table>
-        <thead>
-          <tr>
-            <th>تاریخ</th>
-            <th>مراجع</th>
-            <th>مشاور</th>
-            <th>نوع</th>
-            <th>مبلغ کل</th>
-            <th>سهم مشاور</th>
-            <th>بیعانه</th>
-            <th>واریز بیعانه</th>
-            <th>واریز مانده</th>
-            <th>ثبت‌کننده</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${tableRows}
-        </tbody>
-      </table>
-    `;
+    const rows = state.currentLoadedReport.map(r =>
+      `<tr><td>${esc(dayDisplay(r.date))}</td><td>${esc(r.clientName)}</td><td>${esc(r.counselor)}</td><td>${esc(r.sessionType)}</td>` +
+      `<td>${esc(nf(r.totalAmount))}</td><td>${esc(nf(r.counselorShare))}</td><td>${esc(nf(r.deposit))}</td>` +
+      `<td>${esc(r.depositTo || "-")}</td><td>${esc(r.balanceTo || "کلینیک")}</td><td>${esc(r.operator || "-")}</td></tr>`).join("");
+    detailsHtml = `<div class="section-title">ریز جلسات برگزارشده در این دوره</div><table><thead><tr>` +
+      `<th>تاریخ</th><th>مراجع</th><th>مشاور</th><th>نوع</th><th>مبلغ کل</th><th>سهم مشاور</th><th>بیعانه</th><th>واریز بیعانه</th><th>واریز مانده</th><th>ثبت‌کننده</th>` +
+      `</tr></thead><tbody>${rows}</tbody></table>`;
   }
 
-  const printWindow = window.open('', '_blank', 'width=950,height=750');
-  printWindow.document.write(`
-    <!DOCTYPE html>
-    <html lang="fa" dir="rtl">
-    <head>
-      <meta charset="UTF-8">
-      <title>فیش تسویه‌حساب و صورت‌وضعیت مالی - ${counselorName}</title>
-      <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
-      <style>
-        * { box-sizing: border-box; font-family: 'Vazirmatn', sans-serif; }
-        body { padding: 30px; color: #111; direction: rtl; font-size: 13px; line-height: 1.6; }
-        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #222; padding-bottom: 12px; margin-bottom: 20px; }
-        .clinic-name { font-size: 18px; font-weight: bold; margin: 0; }
-        .sub-title { font-size: 12px; color: #555; margin-top: 4px; }
-        .meta-box { font-size: 13px; text-align: left; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; margin-bottom: 20px; }
-        th, td { border: 1px solid #bbb; padding: 8px 10px; text-align: right; }
-        th { background: #f1f5f9; }
-        .section-title { font-size: 14px; font-weight: bold; margin-top: 20px; margin-bottom: 6px; color: #1e293b; }
-        .settlement-box { margin-top: 25px; border: 1.5px solid #222; border-radius: 8px; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; background: #fafafa; font-size: 15px; }
-        .signatures { margin-top: 60px; display: flex; justify-content: space-between; padding: 0 40px; font-weight: bold; }
-      </style>
-    </head>
-    <body>
-      <div class="header">
-        <div>
-          <div class="clinic-name">کلینیک روان‌شناسی سپهر آرامش</div>
-          <div class="sub-title">صورت‌حساب و گزارش مالی رسمی خدمات مشاوره</div>
-        </div>
-        <div class="meta-box">
-          <div>طرف حساب: <strong>${counselorName}</strong></div>
-          <div>دوره مالی: <strong>${year}/${month}</strong></div>
-          <div>تاریخ صدور: <strong>${state.shamsiDate}</strong></div>
-        </div>
-      </div>
+  const doc = `<!DOCTYPE html>
+<html lang="fa" dir="rtl"><head><meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline' https://cdn.jsdelivr.net; font-src https://cdn.jsdelivr.net">
+<title>فیش تسویه‌حساب و صورت‌وضعیت مالی - ${esc(counselorName)}</title>
+<link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css">
+<style>
+  * { box-sizing: border-box; font-family: 'Vazirmatn', sans-serif; }
+  body { padding: 30px; color: #111; direction: rtl; font-size: 13px; line-height: 1.6; }
+  .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #222; padding-bottom: 12px; margin-bottom: 20px; }
+  .clinic-name { font-size: 18px; font-weight: bold; margin: 0; }
+  .sub-title { font-size: 12px; color: #555; margin-top: 4px; }
+  .meta-box { font-size: 13px; text-align: left; }
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; margin-bottom: 20px; }
+  th, td { border: 1px solid #bbb; padding: 8px 10px; text-align: right; }
+  th { background: #f1f5f9; }
+  .section-title { font-size: 14px; font-weight: bold; margin-top: 20px; margin-bottom: 6px; color: #1e293b; }
+  .settlement-box { margin-top: 25px; border: 1.5px solid #222; border-radius: 8px; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; background: #fafafa; font-size: 15px; }
+  .signatures { margin-top: 60px; display: flex; justify-content: space-between; padding: 0 40px; font-weight: bold; }
+</style></head><body>
+<div class="header"><div><div class="clinic-name">کلینیک روان‌شناسی سپهر آرامش</div><div class="sub-title">صورت‌حساب و گزارش مالی رسمی خدمات مشاوره</div></div>
+<div class="meta-box"><div>طرف حساب: <strong>${esc(counselorName)}</strong></div><div>دوره مالی: <strong>${esc(year)}/${esc(month)}</strong></div><div>تاریخ صدور: <strong>${esc(currentShamsi())}</strong></div></div></div>
+<div class="section-title">جدول تفکیکی نوع جلسات و محل واریز مبالغ</div>
+<table><thead><tr><th>نوع جلسه</th><th style="text-align:center;">تعداد جلسات</th><th>مبلغ کل</th><th>سهم مشاور</th><th>سهم کلینیک</th><th>مبلغ واریز شده به حساب کلینیک</th><th>مبلغ واریز شده به حساب مشاور</th></tr></thead><tbody>${breakdownRows}</tbody></table>
+${detailsHtml}
+<div class="settlement-box"><div><strong>وضعیت و نتیجه تسویه:</strong> ${esc(statusText)}</div><div><strong>مبلغ تسویه نهایی:</strong> <span style="font-size: 19px; font-weight: 900;">${esc(statusAmount)}</span></div></div>
+<div class="signatures"><div>امضا و تایید مدیریت کلینیک</div><div>امضا و تایید مشاور محترم</div></div>
+</body></html>`;
 
-      <div class="section-title">جدول تفکیکی نوع جلسات و محل واریز مبالغ</div>
-      <table>
-        <thead>
-          <tr>
-            <th>نوع جلسه</th>
-            <th style="text-align:center;">تعداد جلسات</th>
-            <th>مبلغ کل</th>
-            <th>سهم مشاور</th>
-            <th>سهم کلینیک</th>
-            <th>مبلغ واریز شده به حساب کلینیک</th>
-            <th>مبلغ واریز شده به حساب مشاور</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${printBreakdownRows}
-        </tbody>
-      </table>
-
-      ${detailsSectionHtml}
-
-      <div class="settlement-box">
-        <div><strong>وضعیت و نتیجه تسویه:</strong> ${statusText}</div>
-        <div><strong>مبلغ تسویه نهایی:</strong> <span style="font-size: 19px; font-weight: 900;">${statusAmount}</span></div>
-      </div>
-
-      <div class="signatures">
-        <div>امضا و تایید مدیریت کلینیک</div>
-        <div>امضا و تایید مشاور محترم</div>
-      </div>
-    </body>
-    </html>
-  `);
-
+  const printWindow = window.open("", "_blank", "width=950,height=750");
+  if (!printWindow) { alert("پنجره‌ی چاپ توسط مرورگر مسدود شد. اجازه‌ی نمایش پاپ‌آپ را بدهید."); return; }
+  printWindow.document.write(doc);
   printWindow.document.close();
   printWindow.focus();
-  setTimeout(() => {
-    printWindow.print();
-    printWindow.close();
-  }, 500);
+  setTimeout(() => { printWindow.print(); printWindow.close(); }, 500);
 }
 
+/* =========================================================
+   اتصال رویدادها (به‌جای onclick/oninput درون HTML)
+   ========================================================= */
+const ACTIONS = {
+  logout, tab: switchTab, week: a => changeWeek(Number(a)),
+  loadReport: loadMonthlyReport, printReceipt: printCleanSettlementReceipt,
+  searchHistory: searchClientHistory, clearHistory: clearHistorySearch,
+  saveSchedule: saveCounselorSchedule,
+  closeBooking: closeBookingModal, closeDetails: closeAppDetailsModal, toDesk: convertModalToDesk,
+  cancelApp: cancelAppointmentFromModal, closeBlock: closeBlockDayModal, closeEdit: closeEditModal,
+  unlinkApp: () => setPendingAppointment(null)
+};
+document.addEventListener("click", e => {
+  const t = e.target.closest("[data-act]");
+  if (!t) return;
+  const fn = ACTIONS[t.dataset.act];
+  if (fn) fn(t.dataset.arg);
+});
+
+[["client_name", onClientNameInput], ["client_phone", onClientPhoneInput],
+ ["sh_client_name", onHistoryNameInput], ["sh_client_phone", onHistoryPhoneInput],
+ ["bm_client_name", onQuickNameInput], ["bm_client_phone", onQuickPhoneInput]
+].forEach(([id, fn]) => $(id).addEventListener("input", e => fn(e.target.value)));
+$("cal_counselor_filter").addEventListener("change", renderWeeklyCalendar);
+$("schedule_counselor_select").addEventListener("change", loadCounselorScheduleUI);
+$("bm_booking_type").addEventListener("change", handleBookingTypeChange);
+
 checkAuth();
+})();
 </script>
 </body>
 </html>
